@@ -88,19 +88,12 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
       });
   };
 
-  // Collect upcoming events from next week for the preview tile
-  const nextWeekPreviewEvents = useMemo(() => {
-    const allNext: CalendarEvent[] = [];
-    for (const day of nextWeekDays) {
-      allNext.push(...getEventsForDay(day));
-    }
-    // Dedupe by id (multi-day events appear in multiple days)
-    const seen = new Set<string>();
-    return allNext.filter(e => {
-      if (seen.has(e.id)) return false;
-      seen.add(e.id);
-      return true;
-    }).slice(0, 5);
+  // Collect all events from next week grouped by day for the preview tile
+  const nextWeekByDay = useMemo(() => {
+    return nextWeekDays.map(day => ({
+      day,
+      events: getEventsForDay(day),
+    })).filter(d => d.events.length > 0);
   }, [nextWeekDays, rangeEvents]);
 
   const handleDayClick = (day: Date) => {
@@ -217,25 +210,36 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
             </div>
           </div>
 
-          {/* Preview events */}
+          {/* Preview events grouped by day */}
           <div className="flex-1 p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {nextWeekPreviewEvents.length > 0 ? (
-              nextWeekPreviewEvents.slice(0, MAX_VISIBLE_EVENTS).map(event => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  compact
-                  onClick={() => onEventClick?.(event)}
-                />
+            {nextWeekByDay.length > 0 ? (
+              nextWeekByDay.map(({ day, events: dayEvents }) => (
+                <div key={day.toISOString()}>
+                  <div className="flex items-baseline gap-1.5 mb-1.5">
+                    <span className="text-sm font-bold text-foreground">
+                      {dateHelpers.formatDate(day, 'd')}
+                    </span>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {locale === 'en'
+                        ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
+                        : dateHelpers.formatDate(day, 'EEE', locale)}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {dayEvents.map(event => (
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        compact
+                        onClick={() => onEventClick?.(event)}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground text-base">
                 {t.common.noResults}
-              </div>
-            )}
-            {nextWeekPreviewEvents.length > MAX_VISIBLE_EVENTS && (
-              <div className="w-full rounded-lg p-4 text-base font-medium text-muted-foreground bg-muted/50 text-center">
-                +{nextWeekPreviewEvents.length - MAX_VISIBLE_EVENTS} {t.calendar.more}
               </div>
             )}
           </div>
