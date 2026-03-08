@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
@@ -9,6 +9,7 @@ import { CreateEventModal } from '../components/calendar/CreateEventModal';
 import { EventDetailsModal } from '../components/calendar/EventDetailsModal';
 import { CalendarHeader } from '../components/calendar/CalendarHeader';
 import { dateHelpers } from '../utils/dateHelpers';
+import { useDateTick } from '../hooks/useDateTick';
 import type { CalendarView, CalendarEvent } from '../types/calendar.types';
 
 export const CalendarPage: React.FC = () => {
@@ -16,6 +17,10 @@ export const CalendarPage: React.FC = () => {
   const { t, locale } = useLocale();
   const [currentView, setCurrentView] = useState<CalendarView>('agenda');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+
+  // Auto-advance to the current day/week when midnight crosses
+  useDateTick(useCallback(() => setCurrentDate(new Date()), []));
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createEventDate, setCreateEventDate] = useState<Date>();
   const [createEventHour, setCreateEventHour] = useState<number>(9);
