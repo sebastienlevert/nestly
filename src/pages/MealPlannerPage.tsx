@@ -1,11 +1,12 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X, UtensilsCrossed, Link as LinkIcon, Trash2, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, UtensilsCrossed, Link as LinkIcon, Pencil } from 'lucide-react';
 import { useCalendar } from '../contexts/CalendarContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { StorageService } from '../services/storage.service';
 import { dateHelpers } from '../utils/dateHelpers';
 import type { CalendarEvent } from '../types/calendar.types';
 import { addDays } from 'date-fns';
+import { MealModal } from '../components/meals/MealModal';
 
 const MEAL_TYPES = [
   { key: 'breakfast', emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -27,27 +28,19 @@ function classifyMeal(event: CalendarEvent): MealKey | null {
   return null;
 }
 
-function getMealType(key: MealKey) {
-  return MEAL_TYPES.find(m => m.key === key)!;
-}
-
 export const MealPlannerPage: React.FC = () => {
-  const { calendars, events, createEvent, updateEvent, deleteEvent, getEventsForDateRange, ensureDateRange } = useCalendar();
+  const { calendars, events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const todayRef = useRef<HTMLDivElement>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [addingDay, setAddingDay] = useState<Date | null>(null);
-  const [selectedType, setSelectedType] = useState<MealKey>('breakfast');
-  const [mealInput, setMealInput] = useState('');
-  const [recipeLink, setRecipeLink] = useState('');
 
-  // Edit state
-  const [editingMeal, setEditingMeal] = useState<CalendarEvent | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editRecipeLink, setEditRecipeLink] = useState('');
-  const [editType, setEditType] = useState<MealKey>('breakfast');
-  const [editDay, setEditDay] = useState<Date | null>(null);
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalDate, setModalDate] = useState<Date | null>(null);
+  const [modalType, setModalType] = useState<MealKey>('breakfast');
+  const [modalEditMeal, setModalEditMeal] = useState<CalendarEvent | null>(null);
+
   const mealCalendarId = useMemo(() => {
     return StorageService.getSettings().mealCalendarId || null;
   }, []);
@@ -112,98 +105,29 @@ export const MealPlannerPage: React.FC = () => {
     }
   }, [currentDate]);
 
-  const handleAddMeal = useCallback(async () => {
-    if (!mealInput.trim() || !mealCalendar || !addingDay) return;
-
-    const type = getMealType(selectedType);
-    const start = new Date(addingDay);
-    start.setHours(type.defaultStartHour, type.defaultStartMin, 0, 0);
-    const end = new Date(addingDay);
-    end.setHours(type.defaultEndHour, type.defaultEndMin, 0, 0);
-
-    try {
-      await createEvent({
-        subject: mealInput.trim(),
-        start,
-        end,
-        calendarId: mealCalendar.id,
-        accountId: mealCalendar.accountId,
-        isReminderOn: false,
-        location: recipeLink.trim() || undefined,
-      });
-
-      setAddingDay(null);
-      setMealInput('');
-      setRecipeLink('');
-    } catch (err) {
-      console.error('Failed to add meal:', err);
-    }
-  }, [addingDay, selectedType, mealInput, recipeLink, mealCalendar, createEvent]);
-
-  const startEditing = useCallback((meal: CalendarEvent) => {
-    const mealType = classifyMeal(meal) || 'breakfast';
-    setEditingMeal(meal);
-    setEditName(meal.subject);
-    setEditRecipeLink(meal.location?.locationUri || meal.location?.displayName || '');
-    setEditType(mealType);
-    setEditDay(new Date(meal.start.dateTime));
-    setAddingDay(null);
+  const openAddMeal = useCallback((day: Date, type: MealKey = 'breakfast') => {
+    setModalDate(day);
+    setModalType(type);
+    setModalEditMeal(null);
+    setModalOpen(true);
   }, []);
 
-  const cancelEditing = useCallback(() => {
-    setEditingMeal(null);
-    setEditName('');
-    setEditRecipeLink('');
+  const openEditMeal = useCallback((meal: CalendarEvent) => {
+    setModalEditMeal(meal);
+    setModalDate(null);
+    setModalOpen(true);
   }, []);
 
-  const handleSaveEdit = useCallback(async () => {
-    if (!editingMeal || !editName.trim() || !mealCalendar || !editDay) return;
-
-    const type = getMealType(editType);
-    const newStart = new Date(editDay);
-    newStart.setHours(type.defaultStartHour, type.defaultStartMin, 0, 0);
-    const newEnd = new Date(editDay);
-    newEnd.setHours(type.defaultEndHour, type.defaultEndMin, 0, 0);
-
-    const formatLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const mo = String(d.getMonth() + 1).padStart(2, '0');
-      const da = String(d.getDate()).padStart(2, '0');
-      const h = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
-      return `${y}-${mo}-${da}T${h}:${mi}:00`;
-    };
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    try {
-      await updateEvent(editingMeal.id, {
-        subject: editName.trim(),
-        start: { dateTime: formatLocal(newStart), timeZone: tz },
-        end: { dateTime: formatLocal(newEnd), timeZone: tz },
-        location: editRecipeLink.trim() ? { displayName: editRecipeLink.trim(), locationUri: editRecipeLink.trim() } : undefined,
-      });
-      cancelEditing();
-    } catch (err) {
-      console.error('Failed to update meal:', err);
-    }
-  }, [editingMeal, editName, editRecipeLink, editType, editDay, mealCalendar, updateEvent, cancelEditing]);
-
-  const handleDeleteMeal = useCallback(async (meal: CalendarEvent) => {
-    try {
-      await deleteEvent(meal.id, meal.accountId);
-      if (editingMeal?.id === meal.id) cancelEditing();
-    } catch (err) {
-      console.error('Failed to delete meal:', err);
-    }
-  }, [deleteEvent, editingMeal, cancelEditing]);
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    setModalEditMeal(null);
+    setModalDate(null);
+  }, []);
 
   const goToPrevWeek = () => setCurrentDate(prev => addDays(dateHelpers.getWeekStart(prev), -7));
   const goToNextWeek = () => setCurrentDate(prev => addDays(dateHelpers.getWeekStart(prev), 7));
   const goToToday = () => setCurrentDate(new Date());
   const goToNextWeekNav = () => setCurrentDate(nextWeekStart);
-
-  const isCurrentlyAdding = (day: Date) =>
-    addingDay?.toDateString() === day.toDateString();
 
   // No meal calendar selected
   if (!mealCalendar) {
@@ -218,24 +142,21 @@ export const MealPlannerPage: React.FC = () => {
     );
   }
 
-  const renderMealLine = (type: typeof MEAL_TYPES[number], meals: CalendarEvent[], day: Date) => (
-    <div key={type.key} className="flex items-start gap-2 lg:gap-3 min-h-[28px] lg:min-h-[36px]">
-      <span className="text-sm lg:text-base shrink-0 mt-0.5 lg:mt-1" title={t.mealPlanner?.[type.key] || type.key}>{type.emoji}</span>
+  const renderMealLine = (type: typeof MEAL_TYPES[number], meals: CalendarEvent[]) => (
+    <div key={type.key} className="flex items-start gap-2 lg:gap-3 min-h-[36px]">
+      <span className="text-base shrink-0 mt-1" title={t.mealPlanner?.[type.key] || type.key}>{type.emoji}</span>
       <div className="flex-1 min-w-0">
         {meals.length > 0 ? (
-          <div className="space-y-0.5 lg:space-y-1">
+          <div className="space-y-1">
             {meals.map(meal => {
-              const isEditing = editingMeal?.id === meal.id;
-              if (isEditing) return renderEditForm(meal, day);
-
               const recipeUrl = meal.location?.locationUri || meal.location?.displayName;
               const hasRecipe = recipeUrl && (recipeUrl.startsWith('http://') || recipeUrl.startsWith('https://'));
               return (
                 <div
                   key={meal.id}
-                  className="group text-sm lg:text-base font-medium rounded lg:rounded-lg px-1.5 py-0.5 lg:px-3 lg:py-1.5 flex items-center gap-1 lg:gap-2 min-w-0 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all"
-                  style={{ backgroundColor: `${mealCalendar.color}20`, color: mealCalendar.color }}
-                  onClick={() => startEditing(meal)}
+                  className="group rounded-lg p-3 lg:p-4 text-base font-semibold flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-all"
+                  style={{ backgroundColor: `${mealCalendar.color}40`, color: mealCalendar.color }}
+                  onClick={() => openEditMeal(meal)}
                 >
                   <span className="truncate flex-1">{meal.subject}</span>
                   {hasRecipe && (
@@ -247,177 +168,24 @@ export const MealPlannerPage: React.FC = () => {
                       className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
                       title={recipeUrl}
                     >
-                      <LinkIcon size={14} className="w-3 h-3 lg:w-4 lg:h-4" />
+                      <LinkIcon size={14} />
                     </a>
                   )}
-                  <Pencil size={14} className="shrink-0 opacity-0 group-hover:opacity-40 transition-opacity w-3 h-3 lg:w-4 lg:h-4" />
+                  <Pencil size={14} className="shrink-0 opacity-0 group-hover:opacity-40 transition-opacity" />
                 </div>
               );
             })}
           </div>
         ) : (
-          <span className="text-xs lg:text-sm text-muted-foreground/40 italic lg:mt-1">—</span>
+          <span className="text-sm text-muted-foreground/40 italic mt-1">—</span>
         )}
       </div>
-    </div>
-  );
-
-  const renderEditForm = (meal: CalendarEvent, _day: Date) => (
-    <div key={meal.id} className="border border-primary/30 rounded-lg p-2 space-y-2 bg-background" onClick={e => e.stopPropagation()}>
-      {/* Meal type selector */}
-      <div className="flex gap-1">
-        {MEAL_TYPES.map(type => (
-          <button
-            key={type.key}
-            onClick={() => setEditType(type.key)}
-            className={`flex-1 text-xs py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors ${
-              editType === type.key
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <span>{type.emoji}</span>
-            <span className="hidden sm:inline">{t.mealPlanner?.[type.key] || type.key}</span>
-          </button>
-        ))}
-      </div>
-      {/* Name input */}
-      <input
-        type="text"
-        value={editName}
-        onChange={e => setEditName(e.target.value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') handleSaveEdit();
-          if (e.key === 'Escape') cancelEditing();
-        }}
-        className="w-full px-2 py-1.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-        autoFocus
-      />
-      {/* Recipe link */}
-      <input
-        type="url"
-        value={editRecipeLink}
-        onChange={e => setEditRecipeLink(e.target.value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') handleSaveEdit();
-          if (e.key === 'Escape') cancelEditing();
-        }}
-        placeholder={t.mealPlanner?.recipeLinkPlaceholder || 'Recipe link (optional)'}
-        className="w-full px-2 py-1.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary text-muted-foreground"
-      />
-      {/* Day reassignment */}
-      <div className="flex gap-1 flex-wrap">
-        {weekDays.map(d => {
-          const isSelected = editDay?.toDateString() === d.toDateString();
-          return (
-            <button
-              key={d.toISOString()}
-              onClick={() => setEditDay(d)}
-              className={`text-xs px-2 py-1 rounded-lg transition-colors ${
-                isSelected
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              {dateHelpers.formatDate(d, 'EEE', locale).slice(0, 3)}
-            </button>
-          );
-        })}
-      </div>
-      {/* Actions */}
-      <div className="flex gap-1 justify-between">
-        <button
-          onClick={() => handleDeleteMeal(meal)}
-          className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-          title={t.mealPlanner?.delete || 'Delete'}
-        >
-          <Trash2 size={16} />
-        </button>
-        <div className="flex gap-1">
-          <button
-            onClick={cancelEditing}
-            className="px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted rounded-lg transition-colors"
-          >
-            {t.common?.cancel || 'Cancel'}
-          </button>
-          <button
-            onClick={handleSaveEdit}
-            disabled={!editName.trim()}
-            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg disabled:opacity-50"
-          >
-            {t.mealPlanner?.save || 'Save'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAddForm = () => (
-    <div className="border-t border-border mt-2 pt-2 space-y-2" onClick={e => e.stopPropagation()}>
-      {/* Meal type selector */}
-      <div className="flex gap-1">
-        {MEAL_TYPES.map(type => (
-          <button
-            key={type.key}
-            onClick={() => setSelectedType(type.key)}
-            className={`flex-1 text-xs py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors ${
-              selectedType === type.key
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <span>{type.emoji}</span>
-            <span className="hidden sm:inline">{t.mealPlanner?.[type.key] || type.key}</span>
-          </button>
-        ))}
-      </div>
-      {/* Input */}
-      <div className="flex gap-1">
-        <input
-          type="text"
-          value={mealInput}
-          onChange={e => setMealInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') handleAddMeal();
-            if (e.key === 'Escape') { setAddingDay(null); setMealInput(''); setRecipeLink(''); }
-          }}
-          placeholder={t.mealPlanner?.placeholder || "What's cooking?"}
-          className="flex-1 min-w-0 px-2 py-1.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-          autoFocus
-        />
-        <button
-          onClick={handleAddMeal}
-          disabled={!mealInput.trim()}
-          className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg disabled:opacity-50 shrink-0"
-        >
-          {t.mealPlanner?.add || 'Add'}
-        </button>
-        <button
-          onClick={() => { setAddingDay(null); setMealInput(''); setRecipeLink(''); }}
-          className="p-1.5 text-muted-foreground hover:text-foreground shrink-0"
-        >
-          <X size={16} />
-        </button>
-      </div>
-      {/* Recipe link */}
-      <input
-        type="url"
-        value={recipeLink}
-        onChange={e => setRecipeLink(e.target.value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') handleAddMeal();
-          if (e.key === 'Escape') { setAddingDay(null); setMealInput(''); setRecipeLink(''); }
-        }}
-        placeholder={t.mealPlanner?.recipeLinkPlaceholder || 'Recipe link (optional)'}
-        className="w-full px-2 py-1.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary text-muted-foreground"
-      />
     </div>
   );
 
   const renderDayCell = (day: Date, isMobile = false) => {
     const isToday = dateHelpers.isToday(day);
     const meals = getMealsForDay(day);
-    const adding = isCurrentlyAdding(day);
 
     return (
       <div
@@ -448,20 +216,17 @@ export const MealPlannerPage: React.FC = () => {
               </span>
             )}
           </div>
-          {!adding && (
-            <button
-              onClick={() => { setAddingDay(day); setMealInput(''); setSelectedType('breakfast'); }}
-              className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Plus size={24} />
-            </button>
-          )}
+          <button
+            onClick={() => openAddMeal(day)}
+            className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Plus size={24} />
+          </button>
         </div>
 
         {/* Meals content */}
         <div className={`p-3 lg:p-4 space-y-1.5 lg:space-y-2.5 ${isMobile ? '' : 'flex-1'}`}>
-          {MEAL_TYPES.map(type => renderMealLine(type, meals[type.key], day))}
-          {adding && renderAddForm()}
+          {MEAL_TYPES.map(type => renderMealLine(type, meals[type.key]))}
         </div>
       </div>
     );
@@ -494,29 +259,29 @@ export const MealPlannerPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-1 p-4 space-y-3 lg:space-y-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {nextWeekByDay.length > 0 ? (
             nextWeekByDay.map(({ day, meals }) => (
               <div key={day.toISOString()}>
-                <div className="flex items-baseline gap-1.5 mb-1.5">
-                  <span className="text-sm font-bold text-foreground">
+                <div className="flex items-baseline gap-1.5 mb-1.5 lg:mb-2">
+                  <span className="text-sm lg:text-base font-bold text-foreground">
                     {dateHelpers.formatDate(day, 'd')}
                   </span>
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-sm lg:text-base font-medium text-muted-foreground">
                     {locale === 'en'
                       ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                       : dateHelpers.formatDate(day, 'EEE', locale)}
                   </span>
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-0.5 lg:space-y-1">
                   {MEAL_TYPES.map(type => {
                     const typeMeals = meals[type.key];
                     if (typeMeals.length === 0) return null;
                     return typeMeals.map(meal => (
                       <div
                         key={meal.id}
-                        className="text-sm rounded px-1.5 py-0.5 truncate"
-                        style={{ backgroundColor: `${mealCalendar?.color || '#6366f1'}20`, color: mealCalendar?.color || '#6366f1' }}
+                        className="text-base font-semibold rounded-lg p-3 lg:p-4 truncate"
+                        style={{ backgroundColor: `${mealCalendar?.color || '#6366f1'}40`, color: mealCalendar?.color || '#6366f1' }}
                       >
                         {type.emoji} {meal.subject}
                       </div>
@@ -561,11 +326,6 @@ export const MealPlannerPage: React.FC = () => {
           </h2>
 
           <div className="flex-1 min-w-0" />
-
-          <span className="text-sm text-muted-foreground px-2 py-0.5 bg-muted rounded-full">
-            {mealCalendar.emoji && <span className="mr-1">{mealCalendar.emoji}</span>}
-            {mealCalendar.name}
-          </span>
         </div>
       </div>
 
@@ -587,6 +347,18 @@ export const MealPlannerPage: React.FC = () => {
           {renderNextWeekTile()}
         </div>
       </div>
+
+      {/* Meal Modal */}
+      {mealCalendar && (
+        <MealModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          mealCalendar={mealCalendar}
+          initialDate={modalDate || undefined}
+          initialType={modalType}
+          editMeal={modalEditMeal}
+        />
+      )}
     </div>
   );
 };
