@@ -10,6 +10,7 @@ import { AdventureProvider } from './contexts/AdventureContext';
 import { LoveBoardProvider } from './contexts/LoveBoardContext';
 import { MemoryProvider } from './contexts/MemoryContext';
 import { FunNightProvider } from './contexts/FunNightContext';
+import { ScoreboardProvider } from './contexts/ScoreboardContext';
 import { LocaleProvider } from './contexts/LocaleContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { MainLayout } from './components/layout/MainLayout';
@@ -48,6 +49,7 @@ function App() {
                       <LoveBoardProvider>
                         <MemoryProvider>
                           <FunNightProvider>
+                            <ScoreboardProvider>
                             <Routes>
                               <Route path="/" element={<MainLayout />}>
                                 <Route index element={<Navigate to="/calendar" replace />} />
@@ -62,6 +64,7 @@ function App() {
                                 <Route path="settings" element={<SettingsPage />} />
                               </Route>
                             </Routes>
+                            </ScoreboardProvider>
                           </FunNightProvider>
                         </MemoryProvider>
                       </LoveBoardProvider>

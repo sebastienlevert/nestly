@@ -38,12 +38,8 @@ export const PhotoProvider: React.FC<PhotoProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Load photos when folder is selected
-  useEffect(() => {
-    if (selectedFolderId && accounts.length > 0) {
-      loadPhotos();
-    }
-  }, [selectedFolderId, accounts]);
+  // Photos are loaded on-demand when the user navigates to the Photos page
+  // via loadPhotos() — no eager loading here
 
   const setSelectedFolder = (folderId: string, folderName: string) => {
     setSelectedFolderId(folderId);

@@ -179,7 +179,7 @@ export class StorageService {
     return this.set(appConfig.storage.keys.memoryCache, cache);
   }
 
-  // Fun Night
+  // Fun Night & Scoreboard
   static getBoardGames() {
     return this.get(appConfig.storage.keys.boardGames, []);
   }
@@ -194,5 +194,13 @@ export class StorageService {
 
   static setFunNightHistory(history: any[]) {
     return this.set(appConfig.storage.keys.funNightHistory, history);
+  }
+
+  static getGameScores() {
+    return this.get(appConfig.storage.keys.gameScores, { currentSession: null, pastSessions: [] });
+  }
+
+  static setGameScores(scores: any) {
+    return this.set(appConfig.storage.keys.gameScores, scores);
   }
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Camera, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
 import { format, subDays, addDays } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,8 +12,15 @@ import { MemoryTimeline } from '../components/memories/MemoryTimeline';
 export const MemoriesPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
-  const { todayMemories, isLoading, selectedDate, setSelectedDate } = useMemory();
+  const { todayMemories, isLoading, selectedDate, setSelectedDate, loadMemoriesForDate } = useMemory();
   const { selectedFolderId } = usePhoto();
+
+  // Load memories on-demand when page is visited
+  useEffect(() => {
+    if (isAuthenticated && selectedFolderId && !todayMemories && !isLoading) {
+      loadMemoriesForDate(selectedDate);
+    }
+  }, [isAuthenticated, selectedFolderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasPhotos = (todayMemories?.photos.length ?? 0) > 0;
 

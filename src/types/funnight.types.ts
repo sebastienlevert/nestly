@@ -53,3 +53,48 @@ export interface FunNightContextType extends FunNightState {
   completeFunNight: (id: string, rating: number, notes: string) => void;
   spinWheel: () => Promise<BoardGame | null>;
 }
+
+// ─── Scoreboard Types ───────────────────────────────────────────────────────
+
+export type ScoringMode = 'highest' | 'lowest';
+
+export interface ScorePlayer {
+  id: string;
+  name: string;
+  color: string;
+  score: number;
+}
+
+export interface ScoreEntry {
+  playerId: string;
+  value: number;
+  round: number;
+  timestamp: number;
+}
+
+export interface ScoreSession {
+  id: string;
+  gameId: string;
+  gameName: string;
+  scoringMode: ScoringMode;
+  players: ScorePlayer[];
+  entries: ScoreEntry[];
+  round: number;
+  phase: 'setup' | 'playing' | 'finished';
+  createdAt: string;
+  finishedAt?: string;
+}
+
+export interface ScoreboardState {
+  currentSession: ScoreSession | null;
+  pastSessions: ScoreSession[];
+}
+
+export interface ScoreboardContextType extends ScoreboardState {
+  startSession: (gameId: string, gameName: string, scoringMode: ScoringMode, players: ScorePlayer[]) => void;
+  addScoreEntry: (playerId: string, value: number) => void;
+  nextRound: () => void;
+  finishSession: () => void;
+  clearSession: () => void;
+  deleteSession: (sessionId: string) => void;
+}

@@ -18,6 +18,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
   const { events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
+  const todayRef = useRef<HTMLDivElement>(null);
 
   // Always snap to the week start (Monday)
   const weekStart = useMemo(() => dateHelpers.getWeekStart(currentDate), [currentDate]);
@@ -101,7 +102,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
     }
   };
 
-  // Auto-scroll each day cell to show the next upcoming event
+  // Auto-scroll each day cell to show the next upcoming event (desktop grid)
   const scrollToNextEvents = useCallback(() => {
     if (!gridRef.current) return;
     const containers = gridRef.current.querySelectorAll<HTMLElement>('[data-day-events]');
@@ -124,11 +125,18 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
     };
   }, [rangeEvents, currentDate, scrollToNextEvents]);
 
-  // Top row: Mon–Thu, Bottom row: Fri–Sun + next week preview
+  // Auto-scroll to today on mobile
+  useEffect(() => {
+    if (todayRef.current) {
+      todayRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentDate]);
+
+  // Top row: Mon–Thu, Bottom row: Fri–Sun + next week preview (desktop layout)
   const topRow = weekDays.slice(0, 4);
   const bottomRow = weekDays.slice(4, 7);
 
-  const renderDayCell = (day: Date) => {
+  const renderDayCell = (day: Date, isMobile = false) => {
     const isToday = dateHelpers.isToday(day);
     const dayEvents = getEventsForDay(day);
     const now = new Date();
@@ -141,9 +149,10 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
     return (
       <div
         key={day.toISOString()}
+        ref={isToday ? todayRef : undefined}
         className={`flex flex-col border border-border rounded-xl overflow-hidden ${
           isToday ? 'ring-2 ring-primary bg-secondary/50' : 'bg-card'
-        }`}
+        } ${isMobile ? '' : ''}`}
       >
         {/* Day header */}
         <div
@@ -160,6 +169,11 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
                 ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                 : dateHelpers.formatDate(day, 'EEE', locale)}
             </span>
+            {isMobile && (
+              <span className={`text-sm ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
+                {dateHelpers.formatDate(day, 'MMM', locale)}
+              </span>
+            )}
           </div>
           <button
             onClick={() => handleDayClick(day)}
@@ -169,11 +183,16 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
           </button>
         </div>
 
-        {/* Events — scrollable, auto-scrolls to next upcoming */}
+        {/* Events */}
         <div
           data-day-events
-          className="flex-1 p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={`p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+            isMobile ? '' : 'flex-1'
+          }`}
         >
+          {dayEvents.length === 0 && isMobile && (
+            <p className="text-sm text-muted-foreground text-center py-2">{t.common.noResults}</p>
+          )}
           {dayEvents.map((event, index) => {
             const eventEnd = new Date(event.end.dateTime);
             const isPast = eventEnd < now;
@@ -197,73 +216,83 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
     );
   };
 
-  return (
-    <div ref={gridRef} className="flex flex-col h-full bg-background p-4 gap-4">
-      {/* Top row: Mon–Thu (4 cells) */}
-      <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
-        {topRow.map(day => renderDayCell(day))}
-      </div>
-
-      {/* Bottom row: Fri–Sun (3 cells) + Next week preview (1 cell) */}
-      <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
-        {bottomRow.map(day => renderDayCell(day))}
-
-        {/* Next week preview tile */}
-        <div
-          className="flex flex-col border border-border rounded-xl overflow-hidden bg-card cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
-          onClick={handleGoToNextWeek}
-        >
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-foreground">
-                {nextWeekHeader.days}
-              </span>
-              <span className="text-base font-medium text-muted-foreground">
-                {nextWeekHeader.month}
-              </span>
-            </div>
-            <div className="w-11 h-11 rounded-full flex items-center justify-center text-muted-foreground">
-              <ChevronRight size={24} />
-            </div>
-          </div>
-
-          {/* Preview events grouped by day */}
-          <div className="flex-1 p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {nextWeekByDay.length > 0 ? (
-              nextWeekByDay.map(({ day, events: dayEvents }) => (
-                <div key={day.toISOString()}>
-                  <div className="flex items-baseline gap-1.5 mb-1.5">
-                    <span className="text-sm font-bold text-foreground">
-                      {dateHelpers.formatDate(day, 'd')}
-                    </span>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {locale === 'en'
-                        ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
-                        : dateHelpers.formatDate(day, 'EEE', locale)}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {dayEvents.map(event => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        compact
-                        onClick={() => onEventClick?.(event)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-base">
-                {t.common.noResults}
-              </div>
-            )}
-          </div>
+  const renderNextWeekTile = () => (
+    <div
+      className="flex flex-col border border-border rounded-xl overflow-hidden bg-card cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+      onClick={handleGoToNextWeek}
+    >
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xl font-bold text-foreground">
+            {nextWeekHeader.days}
+          </span>
+          <span className="text-base font-medium text-muted-foreground">
+            {nextWeekHeader.month}
+          </span>
+        </div>
+        <div className="w-11 h-11 rounded-full flex items-center justify-center text-muted-foreground">
+          <ChevronRight size={24} />
         </div>
       </div>
 
+      {/* Preview events grouped by day */}
+      <div className="flex-1 p-4 space-y-3 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {nextWeekByDay.length > 0 ? (
+          nextWeekByDay.map(({ day, events: dayEvents }) => (
+            <div key={day.toISOString()}>
+              <div className="flex items-baseline gap-1.5 mb-1.5">
+                <span className="text-sm font-bold text-foreground">
+                  {dateHelpers.formatDate(day, 'd')}
+                </span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {locale === 'en'
+                    ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
+                    : dateHelpers.formatDate(day, 'EEE', locale)}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {dayEvents.map(event => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    compact
+                    onClick={() => onEventClick?.(event)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground text-base">
+            {t.common.noResults}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div ref={gridRef} className="flex flex-col h-full bg-background">
+      {/* Mobile: single column scrollable list */}
+      <div className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
+        {weekDays.map(day => renderDayCell(day, true))}
+        {renderNextWeekTile()}
+      </div>
+
+      {/* Desktop: 4-column grid */}
+      <div className="hidden lg:flex flex-col h-full p-4 gap-4">
+        {/* Top row: Mon–Thu */}
+        <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
+          {topRow.map(day => renderDayCell(day))}
+        </div>
+
+        {/* Bottom row: Fri–Sun + Next week preview */}
+        <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
+          {bottomRow.map(day => renderDayCell(day))}
+          {renderNextWeekTile()}
+        </div>
+      </div>
     </div>
   );
 };

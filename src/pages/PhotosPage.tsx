@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
+import { usePhoto } from '../contexts/PhotoContext';
 import { LoginButton } from '../components/auth/LoginButton';
 import { PhotoSlideshow } from '../components/photos/PhotoSlideshow';
 
@@ -10,6 +11,14 @@ export const PhotosPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
+  const { selectedFolderId, photos, loadPhotos } = usePhoto();
+
+  // Load photos on-demand when page is visited
+  useEffect(() => {
+    if (isAuthenticated && selectedFolderId && photos.length === 0) {
+      loadPhotos();
+    }
+  }, [isAuthenticated, selectedFolderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isAuthenticated) {
     return (

@@ -209,7 +209,14 @@ export class GraphService {
 
   async getFolderChildrenWithLocation(folderId: string, accessToken: string) {
     return this.get(
-      `/me/drive/items/${folderId}/children?$select=id,name,file,folder,location,photo,size&$expand=thumbnails`,
+      `/me/drive/items/${folderId}/children?$select=id,name,file,folder,location,photo,size,starred&$expand=thumbnails`,
+      accessToken
+    );
+  }
+
+  async getFolderChildrenWithMetadata(folderId: string, accessToken: string) {
+    return this.get(
+      `/me/drive/items/${folderId}/children?$select=id,name,file,folder,photo,size,createdDateTime,starred&$expand=thumbnails`,
       accessToken
     );
   }
@@ -243,6 +250,37 @@ export class GraphService {
     return this.post('/$batch', accessToken, {
       requests,
     });
+  }
+
+  // Search for photos from specific dates using Microsoft Search API (KQL)
+  async searchPhotosForDate(accessToken: string, month: number, day: number, yearsBack: number = 15): Promise<any> {
+    const currentYear = new Date().getFullYear();
+    const paddedMonth = String(month).padStart(2, '0');
+    const paddedDay = String(day).padStart(2, '0');
+
+    const dateClauses = [];
+    for (let i = 1; i <= yearsBack; i++) {
+      dateClauses.push(`created:${currentYear - i}-${paddedMonth}-${paddedDay}`);
+    }
+
+    const queryString = `(${dateClauses.join(' OR ')}) (filetype:jpg OR filetype:png OR filetype:heic OR filetype:jpeg OR filetype:webp)`;
+
+    return this.post('/search/query', accessToken, {
+      requests: [{
+        entityTypes: ['driveItem'],
+        query: { queryString },
+        from: 0,
+        size: 200,
+      }]
+    });
+  }
+
+  // Fallback: search drive for images (works with personal accounts)
+  async searchDriveImages(accessToken: string, query: string, top: number = 200) {
+    return this.get(
+      `/me/drive/root/search(q='${encodeURIComponent(query)}')?$select=id,name,file,photo,createdDateTime&$expand=thumbnails&$top=${top}`,
+      accessToken
+    );
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { openaiService } from '../services/openai.service';
 import type { BoardGame, FunNightPlan, FunNightContextType } from '../types/funnight.types';
 import { StorageService } from '../services/storage.service';
@@ -24,6 +24,7 @@ export const FunNightProvider: React.FC<FunNightProviderProps> = ({ children }) 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initializedRef = useRef(false);
 
   // Load data from storage on mount
   useEffect(() => {
@@ -31,17 +32,30 @@ export const FunNightProvider: React.FC<FunNightProviderProps> = ({ children }) 
     const storedHistory = StorageService.getFunNightHistory();
     setGames(storedGames);
     setHistory(storedHistory);
+    initializedRef.current = true;
+  }, []);
+
+  // Re-read from localStorage when cloud sync restores data
+  useEffect(() => {
+    const handleCloudRestore = () => {
+      setGames(StorageService.getBoardGames());
+      setHistory(StorageService.getFunNightHistory());
+    };
+    window.addEventListener('cloud-sync-loaded', handleCloudRestore);
+    return () => window.removeEventListener('cloud-sync-loaded', handleCloudRestore);
   }, []);
 
   const notifyChange = () => window.dispatchEvent(new CustomEvent('planner-data-changed'));
 
   // Save to storage whenever data changes
   useEffect(() => {
+    if (!initializedRef.current) return;
     StorageService.setBoardGames(games);
     notifyChange();
   }, [games]);
 
   useEffect(() => {
+    if (!initializedRef.current) return;
     StorageService.setFunNightHistory(history);
     notifyChange();
   }, [history]);

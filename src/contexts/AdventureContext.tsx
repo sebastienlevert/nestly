@@ -43,6 +43,7 @@ export const AdventureProvider: React.FC<AdventureProviderProps> = ({ children }
   const [error, setError] = useState<string | null>(null);
   const loadedTripsRef = useRef<Set<string>>(new Set());
   const tripsRef = useRef<Trip[]>(trips);
+  const initializedRef = useRef(false);
   tripsRef.current = trips;
 
   useEffect(() => {
@@ -52,13 +53,25 @@ export const AdventureProvider: React.FC<AdventureProviderProps> = ({ children }
     setPins(storedPins);
     setTrips(storedTrips);
     setDreamDestinations(storedDestinations);
+    initializedRef.current = true;
+  }, []);
+
+  // Re-read from localStorage when cloud sync restores data
+  useEffect(() => {
+    const handleCloudRestore = () => {
+      setPins(StorageService.getAdventurePins());
+      setTrips(StorageService.getAdventureTrips());
+      setDreamDestinations(StorageService.getDreamDestinations());
+    };
+    window.addEventListener('cloud-sync-loaded', handleCloudRestore);
+    return () => window.removeEventListener('cloud-sync-loaded', handleCloudRestore);
   }, []);
 
   const notifyChange = () => window.dispatchEvent(new CustomEvent('planner-data-changed'));
 
-  useEffect(() => { StorageService.setAdventurePins(pins); notifyChange(); }, [pins]);
-  useEffect(() => { StorageService.setAdventureTrips(trips); notifyChange(); }, [trips]);
-  useEffect(() => { StorageService.setDreamDestinations(dreamDestinations); notifyChange(); }, [dreamDestinations]);
+  useEffect(() => { if (!initializedRef.current) return; StorageService.setAdventurePins(pins); notifyChange(); }, [pins]);
+  useEffect(() => { if (!initializedRef.current) return; StorageService.setAdventureTrips(trips); notifyChange(); }, [trips]);
+  useEffect(() => { if (!initializedRef.current) return; StorageService.setDreamDestinations(dreamDestinations); notifyChange(); }, [dreamDestinations]);
 
   const generateId = (prefix: string): string => {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -206,12 +219,8 @@ export const AdventureProvider: React.FC<AdventureProviderProps> = ({ children }
     }
   }, [trips, accounts, getAccessToken]);
 
-  // Auto-load trip photos when authenticated and trips exist
-  useEffect(() => {
-    if (accounts.length > 0 && trips.length > 0) {
-      loadAllTripPhotos();
-    }
-  }, [accounts.length, trips.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Trip photos are loaded on-demand when the user navigates to Adventures page
+  // via loadAllTripPhotos() — no eager loading here
 
   const value: AdventureContextType = {
     pins,

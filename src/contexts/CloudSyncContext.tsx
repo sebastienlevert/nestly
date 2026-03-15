@@ -131,17 +131,21 @@ export const CloudSyncProvider: React.FC<CloudSyncProviderProps> = ({ children }
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    let timer: ReturnType<typeof setTimeout>;
+
     const handleStorageChange = () => {
-      // Debounce saves — wait 2 seconds after last change
-      const timer = setTimeout(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
         saveToCloud();
       }, 2000);
-      return () => clearTimeout(timer);
     };
 
     // Listen for custom storage-changed events from contexts
     window.addEventListener('planner-data-changed', handleStorageChange);
-    return () => window.removeEventListener('planner-data-changed', handleStorageChange);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('planner-data-changed', handleStorageChange);
+    };
   }, [isAuthenticated, saveToCloud]);
 
   const value: CloudSyncContextType = {

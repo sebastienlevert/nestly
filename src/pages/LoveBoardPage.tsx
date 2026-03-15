@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useLocale } from '../contexts/LocaleContext';
+import { useLoveBoard } from '../contexts/LoveBoardContext';
 import { DailySparkCard } from '../components/love-board/DailySparkCard';
 import { NoteWall } from '../components/love-board/NoteWall';
 import { GratitudeJar } from '../components/love-board/GratitudeJar';
 
 export const LoveBoardPage: React.FC = () => {
   const { t } = useLocale();
+  const { currentSpark, generateDailySpark } = useLoveBoard();
+
+  // Generate daily spark on-demand when page is visited (if not already cached)
+  useEffect(() => {
+    if (!currentSpark) {
+      generateDailySpark();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Dice5, Sparkles } from 'lucide-react';
+import { Dice5, Sparkles, Trophy } from 'lucide-react';
 import { useFunNight } from '../contexts/FunNightContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { SpinWheel } from '../components/fun-night/SpinWheel';
 import { FunNightPlanCard } from '../components/fun-night/FunNightPlanCard';
 import { GameLibrary } from '../components/fun-night/GameLibrary';
 import { FunNightHistory } from '../components/fun-night/FunNightHistory';
+import { Scoreboard } from '../components/scoreboard/Scoreboard';
 
-type Tab = 'library' | 'history';
+type Tab = 'library' | 'history' | 'scoreboard';
 
 export const FunNightPage: React.FC = () => {
   const { currentPlan, isGenerating, generateFunNight, games, error } = useFunNight();
@@ -79,9 +80,21 @@ export const FunNightPage: React.FC = () => {
         >
           {t.funNight.history}
         </button>
+        <button
+          onClick={() => setActiveTab('scoreboard')}
+          className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px flex items-center gap-1.5 ${
+            activeTab === 'scoreboard'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+          style={{ minHeight: 44 }}
+        >
+          <Trophy size={14} />
+          {t.scoreboard.title}
+        </button>
       </div>
 
-      {activeTab === 'library' ? <GameLibrary /> : <FunNightHistory />}
+      {activeTab === 'library' ? <GameLibrary /> : activeTab === 'history' ? <FunNightHistory /> : <Scoreboard />}
     </div>
   );
 };

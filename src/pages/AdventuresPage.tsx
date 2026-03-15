@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { MapPin, Compass, Plane } from 'lucide-react';
 import { useAdventure } from '../contexts/AdventureContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { AdventureMap } from '../components/adventures/AdventureMap';
 import { PinEditor } from '../components/adventures/PinEditor';
@@ -9,14 +10,24 @@ import { TripManager } from '../components/adventures/TripManager';
 import type { TravelPin, Trip } from '../types/adventure.types';
 
 export const AdventuresPage: React.FC = () => {
-  const { pins, trips, dreamDestinations, addPin, updatePin, loadTripPhotos } = useAdventure();
+  const { pins, trips, dreamDestinations, addPin, updatePin, loadTripPhotos, loadAllTripPhotos } = useAdventure();
+  const { isAuthenticated } = useAuth();
   const { t } = useLocale();
+  const photosLoadedRef = useRef(false);
 
   const [pinEditorOpen, setPinEditorOpen] = useState(false);
   const [selectedLat, setSelectedLat] = useState<number | undefined>();
   const [selectedLng, setSelectedLng] = useState<number | undefined>();
   const [editingPin, setEditingPin] = useState<TravelPin | undefined>();
   const [focusTripId, setFocusTripId] = useState<string | undefined>();
+
+  // Load trip photos on-demand when page is visited
+  useEffect(() => {
+    if (isAuthenticated && trips.length > 0 && !photosLoadedRef.current) {
+      photosLoadedRef.current = true;
+      loadAllTripPhotos();
+    }
+  }, [isAuthenticated, trips.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddPin = useCallback((lat: number, lng: number) => {
     setEditingPin(undefined);

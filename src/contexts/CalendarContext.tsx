@@ -90,24 +90,34 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       setCalendars(allCalendars);
 
       // If first sync and no calendars previously selected, select all calendars by default
-      // After initial setup, respect user's selections and don't auto-add calendars
       if (selectedCalendars.length === 0 && calendars.length === 0) {
         setSelectedCalendars(allCalendars.map(cal => cal.id));
       }
 
-      // Fetch events - at minimum 3 months, but extend if user has navigated further
+      // Phase 1: Fetch current week first for fast initial render
       const now = new Date();
-      const defaultStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const defaultEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0); // last day of next month
-      const existingRange = fetchedRangeRef.current;
-      const rangeStart = existingRange
-        ? new Date(Math.min(defaultStart.getTime(), existingRange.start.getTime()))
-        : defaultStart;
-      const rangeEnd = existingRange
-        ? new Date(Math.max(defaultEnd.getTime(), existingRange.end.getTime()))
-        : defaultEnd;
-      await fetchEventsForDateRange(rangeStart, rangeEnd, allCalendars, true);
-      fetchedRangeRef.current = { start: rangeStart, end: rangeEnd };
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+      const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7);
+
+      await fetchEventsForDateRange(weekStart, weekEnd, allCalendars, true);
+      fetchedRangeRef.current = { start: weekStart, end: weekEnd };
+      setIsSyncing(false);
+
+      // Phase 2: Expand to full 3-month range in background (fetch only missing ranges)
+      const fullStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const fullEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+
+      // Fetch before the week (prev month → week start)
+      if (fullStart < weekStart) {
+        await fetchEventsForDateRange(fullStart, new Date(weekStart.getTime() - 1), allCalendars, false);
+      }
+      // Fetch after the week (week end → next month end)
+      if (fullEnd > weekEnd) {
+        await fetchEventsForDateRange(weekEnd, fullEnd, allCalendars, false);
+      }
+      fetchedRangeRef.current = { start: fullStart, end: fullEnd };
 
       setLastSyncTime(Date.now());
       StorageService.setCalendarCache({ calendars: allCalendars, events, timestamp: Date.now() });

@@ -58,6 +58,7 @@ export const appConfig = {
       memoryCache: 'planner_memory_cache',
       boardGames: 'planner_board_games',
       funNightHistory: 'planner_fun_night_history',
+      gameScores: 'planner_game_scores',
     },
   },
 

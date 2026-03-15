@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { openaiService } from '../services/openai.service';
 import type { LoveNote, GratitudeEntry, DailySpark, LoveBoardContextType } from '../types/loveboard.types';
 import { StorageService } from '../services/storage.service';
@@ -31,6 +31,7 @@ export const LoveBoardProvider: React.FC<LoveBoardProviderProps> = ({ children }
   const [currentSpark, setCurrentSpark] = useState<DailySpark | null>(null);
   const [isGeneratingSpark, setIsGeneratingSpark] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initializedRef = useRef(false);
 
   // Load data from storage on mount
   useEffect(() => {
@@ -40,28 +41,40 @@ export const LoveBoardProvider: React.FC<LoveBoardProviderProps> = ({ children }
     setNotes(storedNotes);
     setGratitudeEntries(storedGratitude);
 
+    // Only restore today's cached spark — don't generate a new one eagerly
     if (storedSpark && storedSpark.generatedAt === getTodayDateString()) {
       setCurrentSpark(storedSpark);
-    } else {
-      // Auto-generate a new spark for today
-      generateNewSpark();
     }
+    initializedRef.current = true;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-read from localStorage when cloud sync restores data
+  useEffect(() => {
+    const handleCloudRestore = () => {
+      setNotes(StorageService.getLoveNotes());
+      setGratitudeEntries(StorageService.getGratitudeEntries());
+    };
+    window.addEventListener('cloud-sync-loaded', handleCloudRestore);
+    return () => window.removeEventListener('cloud-sync-loaded', handleCloudRestore);
+  }, []);
 
   const notifyChange = () => window.dispatchEvent(new CustomEvent('planner-data-changed'));
 
   // Save to storage whenever data changes
   useEffect(() => {
+    if (!initializedRef.current) return;
     StorageService.setLoveNotes(notes);
     notifyChange();
   }, [notes]);
 
   useEffect(() => {
+    if (!initializedRef.current) return;
     StorageService.setGratitudeEntries(gratitudeEntries);
     notifyChange();
   }, [gratitudeEntries]);
 
   useEffect(() => {
+    if (!initializedRef.current) return;
     if (currentSpark) {
       StorageService.setDailySpark(currentSpark);
       notifyChange();
