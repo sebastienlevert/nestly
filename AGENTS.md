@@ -271,8 +271,9 @@ e2e/
 
 **Example Test Pattern:**
 ```typescript
+// IMPORTANT: This app uses HashRouter — all URLs must use /#/ prefix
 test('Feature X works correctly', async ({ page }) => {
-  await page.goto('/feature');
+  await page.goto('/#/feature');
   await page.waitForLoadState('networkidle');
 
   // Verify UI elements
@@ -291,8 +292,17 @@ test('Feature X works correctly', async ({ page }) => {
 
 **Running Tests:**
 ```bash
-# Run all tests
-npm test
+# Run all tests (uses Firefox — chromium needs system deps)
+npx playwright test --project=firefox
+
+# Run a specific test file
+npx playwright test e2e/family-hub.spec.ts --project=firefox
+
+# Run tests matching a pattern
+npx playwright test --project=firefox --grep "Adventures"
+
+# Run with single worker for debugging
+npx playwright test --project=firefox --workers=1
 
 # Run in UI mode (recommended for development)
 npm run test:ui
@@ -303,6 +313,32 @@ npm run test:headed
 # Debug specific test
 npm run test:debug
 ```
+
+**⚠️ CRITICAL: Always Run Playwright Tests After Building Features**
+
+After implementing or modifying **any** UI feature, you MUST run the Playwright test suite via CLI before considering the work complete:
+
+```bash
+# Run the full test suite
+npx playwright test --project=firefox --workers=1
+
+# Or run specific test files
+npx playwright test e2e/family-hub.spec.ts --project=firefox
+npx playwright test e2e/ui-validation.spec.ts --project=firefox
+```
+
+**Why CLI and not just visual verification:**
+- Automated tests catch regressions you might miss visually
+- Touch target validation is done programmatically (44x44px minimum)
+- Console error detection catches hidden runtime issues
+- Navigation tests verify all routes are accessible
+- Tests run against real browser behavior, not just screenshots
+
+**Test files:**
+- `e2e/ui-validation.spec.ts` — Core UI validation (all pages, touch targets, responsive, console errors)
+- `e2e/family-hub.spec.ts` — Family Hub features (Adventures, Love Board, Memories, Fun Night)
+
+**HashRouter gotcha:** All `page.goto()` URLs MUST use `/#/` prefix (e.g., `/#/adventures`, not `/adventures`). Using bare paths will cause the server to return the HTML file as a download instead of routing to the correct page.
 
 **When to Update Tests:**
 - ✅ After adding new UI components
@@ -1387,6 +1423,7 @@ VITE_AZURE_OPENAI_DEPLOYMENT=your_deployment_name_here
 2. **ALWAYS run `npm run build` before committing.** This runs `tsc -b && vite build` and catches TypeScript errors that `tsc --noEmit` may miss. Do not commit if the build fails.
 3. **ALWAYS stop the dev server before building, then restart it after.** Stop the running `npm run dev` process, run `npm run build`, then start `npm run dev` again. This ensures a clean build and a fresh dev server.
 4. **ALWAYS clear the Vite cache before starting the dev server.** Run `rm -rf node_modules/.vite` before `npm run dev` to avoid stale HMR cache errors (e.g., missing exports).
+5. **ALWAYS ensure the dev server is running and accessible after completing any task.** After building and testing, verify the dev server is up by checking `curl -s -o /dev/null -w "%{http_code}" http://localhost:5173` returns 200. If it's not running, start it as a **detached background process** using `bash` with `mode="async"` and `detach: true` so it persists beyond the session. Clear the Vite cache first: `rm -rf node_modules/.vite && npm run dev`. The user expects to use the app immediately after a task is done.
 
 ### Workflow for Implementing UI Features
 

@@ -128,7 +128,8 @@ export default {
   		animation: {
   			'fade-in': 'fadeIn 0.3s ease-in-out',
   			'slide-in': 'slideIn 0.3s ease-out',
-  			'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+  			'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+			'bounce-in': 'bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
   		},
   		keyframes: {
   			fadeIn: {
@@ -155,6 +156,24 @@ export default {
   				},
   				'50%': {
   					opacity: '0.8'
+  				}
+  			},
+  			bounceIn: {
+  				'0%': {
+  					transform: 'scale(0.3)',
+  					opacity: '0'
+  				},
+  				'50%': {
+  					transform: 'scale(1.05)',
+  					opacity: '0.8'
+  				},
+  				'70%': {
+  					transform: 'scale(0.9)',
+  					opacity: '0.9'
+  				},
+  				'100%': {
+  					transform: 'scale(1)',
+  					opacity: '1'
   				}
   			}
   		}

@@ -31,13 +31,17 @@ export const MealProvider: React.FC<MealProviderProps> = ({ children }) => {
     setRecipes(storedRecipes);
   }, []);
 
+  const notifyChange = () => window.dispatchEvent(new CustomEvent('planner-data-changed'));
+
   // Save to storage whenever data changes
   useEffect(() => {
     StorageService.setFridgeInventory(fridgeItems);
+    notifyChange();
   }, [fridgeItems]);
 
   useEffect(() => {
     StorageService.setSavedRecipes(recipes);
+    notifyChange();
   }, [recipes]);
 
   const addFridgeItem = (item: Omit<FridgeItem, 'id' | 'addedDate'>) => {

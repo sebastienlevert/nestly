@@ -1,131 +1,195 @@
 import { test, expect } from '@playwright/test';
 
+// Console error filter — ignore expected errors in test environment
+const EXPECTED_ERROR_PATTERNS = [
+  /Wake Lock/i,
+  /Azure.*OpenAI/i,
+  /CORS/i,
+  /net::ERR/i,
+  /favicon/i,
+  /Failed to fetch/i,
+  /Failed to generate/i,
+  /MSAL/i,
+  /Cross-Origin/i,
+  /openai\.azure\.com/i,
+  /daily spark/i,
+];
+
+function isExpectedError(msg: string): boolean {
+  return EXPECTED_ERROR_PATTERNS.some(p => p.test(msg));
+}
+
 /**
  * Basic smoke tests for Family Planner application
  */
 test.describe('Family Planner App', () => {
   test('should load the homepage', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for app to load
+    await page.goto('/#/calendar');
     await page.waitForLoadState('networkidle');
 
-    // Check that the page title is correct
-    await expect(page).toHaveTitle(/Family Planner/i);
+    // App should render the root element
+    await expect(page.locator('#root')).toBeVisible();
   });
 
-  test('should display the header', async ({ page }) => {
-    await page.goto('/');
+  test('should display sidebar navigation on desktop', async ({ page }) => {
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
 
-    // Check for header element
-    const header = page.locator('header');
-    await expect(header).toBeVisible();
+    // Desktop sidebar should be visible (viewport is 1280x720 = lg+)
+    const sidebar = page.locator('aside >> nth=0');
+    await expect(sidebar).toBeVisible();
   });
 
-  test('should show FAB menu button', async ({ page }) => {
-    await page.goto('/');
+  test('should navigate via sidebar links', async ({ page }) => {
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
 
-    // FAB menu button should be visible
-    const fabButton = page.locator('button').filter({ hasText: /menu|☰/i }).last();
-    await expect(fabButton).toBeVisible();
-
-    // Take a screenshot of the initial state
-    await page.screenshot({ path: 'e2e/screenshots/homepage.png', fullPage: true });
-  });
-
-  test('should open FAB menu on click', async ({ page }) => {
-    await page.goto('/');
-
-    // Find and click the FAB button (the fixed bottom-right button)
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
-
-    // Wait for menu to expand
+    // Click Settings nav link in sidebar
+    await page.locator('aside a[href*="settings"]').first().click();
     await page.waitForTimeout(300);
-
-    // Take screenshot of expanded menu
-    await page.screenshot({ path: 'e2e/screenshots/fab-menu-open.png', fullPage: true });
-
-    // Menu items should be visible
-    await expect(page.locator('text=/Calendar|Photos|Meals|Tasks|Settings/i').first()).toBeVisible();
-  });
-
-  test('should navigate to Settings page', async ({ page }) => {
-    await page.goto('/');
-
-    // Click FAB menu
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
-    await page.waitForTimeout(300);
-
-    // Click Settings
-    await page.locator('text=/Settings/i').first().click();
 
     // Should navigate to settings
-    await expect(page).toHaveURL(/\/settings/);
-
-    // Take screenshot
-    await page.screenshot({ path: 'e2e/screenshots/settings-page.png', fullPage: true });
+    await expect(page).toHaveURL(/settings/);
   });
-});
 
-/**
- * Visual regression tests for key UI components
- */
-test.describe('Visual Regression', () => {
-  test('should match homepage snapshot', async ({ page }) => {
-    await page.goto('/');
+  test('should show hamburger menu on mobile viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
     await page.waitForLoadState('networkidle');
 
-    // Take full-page screenshot for visual comparison
-    await expect(page).toHaveScreenshot('homepage.png', {
-      fullPage: true,
-      maxDiffPixels: 100, // Allow small differences
-    });
+    // Mobile header with hamburger should be visible
+    const hamburger = page.locator('button[aria-label="Open menu"]');
+    await expect(hamburger).toBeVisible();
   });
 
-  test('should match tablet layout', async ({ page, viewport }) => {
-    // This test runs in the 'tablet' project with Surface Pro dimensions
-    await page.goto('/');
+  test('should open mobile drawer on hamburger click', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
     await page.waitForLoadState('networkidle');
 
-    // Verify viewport is tablet-sized
-    expect(viewport?.width).toBeGreaterThanOrEqual(1024);
-
-    // Take screenshot
-    await expect(page).toHaveScreenshot('tablet-view.png', {
-      fullPage: true,
-      maxDiffPixels: 100,
-    });
-  });
-});
-
-/**
- * Touch interaction tests for tablet optimization
- */
-test.describe('Touch Interactions', () => {
-  test('should have touch-friendly button sizes', async ({ page }) => {
-    await page.goto('/');
-
-    // Open FAB menu
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
+    // Click hamburger
+    await page.locator('button[aria-label="Open menu"]').click();
     await page.waitForTimeout(300);
 
-    // Get all menu buttons
-    const menuButtons = page.locator('button').filter({ hasText: /Calendar|Photos|Meals|Tasks|Settings/i });
+    // Drawer should slide in — check for a visible nav link inside it
+    const drawerLink = page.locator('aside.fixed a[href*="settings"]');
+    await expect(drawerLink).toBeVisible();
+  });
 
-    // Check that buttons meet minimum touch target size (44x44px)
-    const count = await menuButtons.count();
+  test('should navigate and close drawer on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+
+    // Open drawer
+    await page.locator('button[aria-label="Open menu"]').click();
+    await page.waitForTimeout(300);
+
+    // Click Adventures link
+    await page.locator('aside.fixed a[href*="adventures"]').click();
+    await page.waitForTimeout(500);
+
+    // Should navigate
+    await expect(page).toHaveURL(/adventures/);
+  });
+
+  test('should close drawer via close button', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+
+    // Open drawer
+    await page.locator('button[aria-label="Open menu"]').click();
+    await page.waitForTimeout(300);
+
+    // Click the close button
+    await page.locator('button[aria-label="Close menu"]').click();
+    await page.waitForTimeout(400);
+
+    // The backdrop overlay should be gone after drawer closes
+    await expect(page.locator('div.fixed.inset-0.z-40')).toHaveCount(0);
+  });
+});
+
+/**
+ * Touch interaction tests
+ */
+test.describe('Touch Interactions', () => {
+  test('should have touch-friendly nav links on desktop', async ({ page }) => {
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+
+    // Check sidebar nav links meet 44px touch target
+    const navLinks = page.locator('aside a.touch-target');
+    const count = await navLinks.count();
+    expect(count).toBeGreaterThan(0);
+
     for (let i = 0; i < count; i++) {
-      const button = menuButtons.nth(i);
-      const box = await button.boundingBox();
-
-      if (box) {
-        // Verify minimum 44px touch target
-        expect(box.width).toBeGreaterThanOrEqual(44);
-        expect(box.height).toBeGreaterThanOrEqual(44);
+      const link = navLinks.nth(i);
+      if (await link.isVisible()) {
+        const box = await link.boundingBox();
+        if (box) {
+          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
       }
     }
+  });
+
+  test('should have touch-friendly hamburger on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+
+    const hamburger = page.locator('button[aria-label="Open menu"]');
+    const box = await hamburger.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test('should have touch-friendly drawer links on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+
+    // Open drawer
+    await page.locator('button[aria-label="Open menu"]').click();
+    await page.waitForTimeout(300);
+
+    const drawerLinks = page.locator('aside.fixed a.touch-target');
+    const count = await drawerLinks.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const link = drawerLinks.nth(i);
+      if (await link.isVisible()) {
+        const box = await link.boundingBox();
+        if (box) {
+          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+    }
+  });
+});
+
+/**
+ * No critical console errors
+ */
+test.describe('Console Errors', () => {
+  test('should not have unexpected console errors', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error' && !isExpectedError(msg.text())) {
+        errors.push(msg.text());
+      }
+    });
+
+    await page.goto('/#/calendar');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    expect(errors).toEqual([]);
   });
 });

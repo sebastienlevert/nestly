@@ -94,6 +94,44 @@ export class GraphService {
     await this.request(endpoint, accessToken, { method: 'DELETE' });
   }
 
+  async put<T>(endpoint: string, accessToken: string, body: any): Promise<T> {
+    return this.request<T>(endpoint, accessToken, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  // OneDrive file operations (read/write JSON by path)
+  async getFileByPath<T>(path: string, accessToken: string): Promise<T> {
+    // Download file content from OneDrive by path
+    const url = `${this.baseUrl}/me/drive/root:${path}:/content`;
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('FILE_NOT_FOUND');
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  async putFileByPath<T>(path: string, accessToken: string, content: any): Promise<T> {
+    // Upload/overwrite file content on OneDrive by path
+    const url = `${this.baseUrl}/me/drive/root:${path}:/content`;
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(content),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
   // User operations
   async getMe(accessToken: string) {
     return this.get('/me', accessToken);
@@ -167,6 +205,13 @@ export class GraphService {
 
   async getFolderChildren(folderId: string, accessToken: string) {
     return this.get(`/me/drive/items/${folderId}/children`, accessToken);
+  }
+
+  async getFolderChildrenWithLocation(folderId: string, accessToken: string) {
+    return this.get(
+      `/me/drive/items/${folderId}/children?$select=id,name,file,folder,location,photo,size&$expand=thumbnails`,
+      accessToken
+    );
   }
 
   async getDriveItemsByPath(path: string, accessToken: string) {

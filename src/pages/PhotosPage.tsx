@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Image } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { LoginButton } from '../components/auth/LoginButton';
 import { PhotoSlideshow } from '../components/photos/PhotoSlideshow';
-import { FolderPicker } from '../components/photos/FolderPicker';
 
 export const PhotosPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
-  const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
+  const navigate = useNavigate();
 
   if (!isAuthenticated) {
     return (
@@ -30,12 +30,7 @@ export const PhotosPage: React.FC = () => {
 
   return (
     <div className="h-full">
-      <PhotoSlideshow onSelectFolder={() => setIsFolderPickerOpen(true)} />
-
-      <FolderPicker
-        isOpen={isFolderPickerOpen}
-        onClose={() => setIsFolderPickerOpen(false)}
-      />
+      <PhotoSlideshow onSelectFolder={() => navigate('/settings?tab=photos')} />
     </div>
   );
 };

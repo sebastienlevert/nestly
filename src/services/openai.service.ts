@@ -1,5 +1,6 @@
 import { appConfig } from '../config/app.config';
 import type { Recipe } from '../types/meal.types';
+import type { TripSuggestion } from '../types/adventure.types';
 
 export class OpenAIService {
   private endpoint: string;
@@ -104,6 +105,195 @@ Format your response as valid JSON array with this structure:
     } catch (error) {
       console.error('Failed to generate recipes:', error);
       throw error;
+    }
+  }
+
+  async generateTripSuggestions(kidAge: number, interests: string[]): Promise<TripSuggestion[]> {
+    if (!this.endpoint || !this.apiKey || !this.deployment) {
+      throw new Error('Azure OpenAI is not configured. Please check your environment variables.');
+    }
+
+    const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.apiVersion}`;
+
+    const prompt = `You are a family travel advisor. Suggest 3 amazing family-friendly travel destinations for a family with a ${kidAge}-year-old child. The family enjoys: ${interests.join(', ')}. For each destination, provide the name, a vivid description of why it's special, why it's great specifically for this family, the best time of year to visit, latitude and longitude coordinates, and 3-4 fun activities for kids. Format as JSON array: [{ destination, description, whyGreatForFamily, bestTimeToVisit, kidsActivities: string[], latitude: number, longitude: number }]`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a family travel advisor that suggests amazing destinations.',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          temperature: 0.8,
+          max_tokens: 2500,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('No response from Azure OpenAI');
+      }
+
+      const suggestionsData = this.parseJsonArrayFromResponse(content);
+
+      return suggestionsData.map(
+        (suggestion: any): TripSuggestion => ({
+          id: this.generateId(),
+          destination: suggestion.destination,
+          description: suggestion.description,
+          whyGreatForFamily: suggestion.whyGreatForFamily,
+          bestTimeToVisit: suggestion.bestTimeToVisit,
+          kidsActivities: suggestion.kidsActivities,
+          latitude: suggestion.latitude,
+          longitude: suggestion.longitude,
+          createdAt: new Date().toISOString(),
+        })
+      );
+    } catch (error) {
+      console.error('Failed to generate trip suggestions:', error);
+      throw error;
+    }
+  }
+
+  async generateDailySpark(kidAge: number, interests: string[]): Promise<{ type: string; content: string }> {
+    if (!this.endpoint || !this.apiKey || !this.deployment) {
+      throw new Error('Azure OpenAI is not configured. Please check your environment variables.');
+    }
+
+    const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.apiVersion}`;
+
+    const prompt = `You are a loving family connection coach. Generate a single family conversation starter or fun activity for a family with a ${kidAge}-year-old child who enjoys: ${interests.join(', ')}. Return JSON: { "type": "conversation_starter" or "activity", "content": "the suggestion" }`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a loving family connection coach that creates meaningful moments.',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          temperature: 0.9,
+          max_tokens: 500,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('No response from Azure OpenAI');
+      }
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      return JSON.parse(content);
+    } catch (error) {
+      console.error('Failed to generate daily spark:', error);
+      throw error;
+    }
+  }
+
+  async generateFunNightPlan(gameNames: string[], kidAge: number): Promise<any> {
+    if (!this.endpoint || !this.apiKey || !this.deployment) {
+      throw new Error('Azure OpenAI is not configured. Please check your environment variables.');
+    }
+
+    const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.apiVersion}`;
+
+    const prompt = `You are a fun family night planner. The family has a ${kidAge}-year-old child and owns these board games: ${gameNames.join(', ')}. Pick the best game for tonight, suggest a matching dinner recipe that's fun to make together, and recommend a family activity or movie to end the evening. Return JSON: { "game": { "name": "game name", "reason": "why this game tonight" }, "dinner": { "name": "recipe name", "description": "brief description", "ingredients": ["..."], "instructions": ["..."] }, "activity": { "type": "movie" or "activity", "name": "suggestion name", "description": "why it's perfect" } }`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a fun family night planner that creates memorable evenings.',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          temperature: 0.8,
+          max_tokens: 2000,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('No response from Azure OpenAI');
+      }
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      return JSON.parse(content);
+    } catch (error) {
+      console.error('Failed to generate fun night plan:', error);
+      throw error;
+    }
+  }
+
+  private parseJsonArrayFromResponse(content: string): any[] {
+    try {
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+
+      return JSON.parse(content);
+    } catch (error) {
+      console.error('Failed to parse JSON array:', error);
+      throw new Error('Failed to parse AI response. Please try again.');
     }
   }
 

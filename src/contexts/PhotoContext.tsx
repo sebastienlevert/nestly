@@ -50,6 +50,7 @@ export const PhotoProvider: React.FC<PhotoProviderProps> = ({ children }) => {
     setSelectedFolderName(folderName);
     setCurrentPhotoIndex(0);
     StorageService.setPhotoFolder({ id: folderId, name: folderName });
+    window.dispatchEvent(new CustomEvent('planner-data-changed'));
   };
 
   const loadPhotos = async () => {

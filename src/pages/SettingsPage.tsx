@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Settings as SettingsIcon, Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Settings as SettingsIcon, Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, Image as ImageIcon, FolderOpen } from 'lucide-react';
 import { AccountManager } from '../components/auth/AccountManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../contexts/CalendarContext';
 import { useTask } from '../contexts/TaskContext';
+import { usePhoto } from '../contexts/PhotoContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { StorageService } from '../services/storage.service';
 import { localeNames, type Locale } from '../locales';
 import { themes, type ThemeName } from '../config/themes';
+import { FolderPicker } from '../components/photos/FolderPicker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,21 +20,27 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 
-type SettingsTab = 'accounts' | 'calendars' | 'todos' | 'general';
+type SettingsTab = 'accounts' | 'calendars' | 'todos' | 'photos' | 'general';
 
 export const SettingsPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const { reloadAccounts, accounts } = useAuth();
   const { calendars, selectedCalendars, toggleCalendar, setCalendarColor } = useCalendar();
   const { lists: todoLists, selectedLists: selectedTodoLists, toggleList, listSettings, setListSettings } = useTask();
+  const { selectedFolderName } = usePhoto();
   const { locale, setLocale, t } = useLocale();
   const { themeName, setTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('accounts');
+  const tabParam = searchParams.get('tab');
+  const validTabs = ['accounts', 'calendars', 'todos', 'photos', 'general'];
+  const initialTab = (tabParam && validTabs.includes(tabParam) ? tabParam : 'accounts') as SettingsTab;
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
   const [calendarName, setCalendarName] = useState('');
   const [selectedLocale, setSelectedLocale] = useState<Locale>(locale);
   const [selectedTheme, setSelectedTheme] = useState<ThemeName>(themeName);
   const [isSaved, setIsSaved] = useState(false);
   const [selectedAccountFilter, setSelectedAccountFilter] = useState<string>('all');
   const [colorPickerCalendarId, setColorPickerCalendarId] = useState<string | null>(null);
+  const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
 
   const COLOR_PALETTE = [
     '#3b82f6', '#2563eb', '#1d4ed8', // Blues
@@ -84,13 +93,14 @@ export const SettingsPage: React.FC = () => {
     { id: 'accounts' as SettingsTab, label: t.tabs.accounts, icon: Users },
     { id: 'calendars' as SettingsTab, label: t.tabs.calendars, icon: CalendarIcon },
     { id: 'todos' as SettingsTab, label: t.tabs.todos, icon: CheckSquare },
+    { id: 'photos' as SettingsTab, label: t.tabs.photos, icon: ImageIcon },
     { id: 'general' as SettingsTab, label: t.tabs.general, icon: Sliders },
   ];
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-6 border-b bg-background">
+      <div className="p-4 sm:p-6 border-b bg-background">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-foreground flex items-center gap-3">
@@ -112,9 +122,9 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Content with Tabs */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-4 sm:p-6">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SettingsTab)} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -298,6 +308,54 @@ export const SettingsPage: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Photos Tab */}
+          <TabsContent value="photos" className="space-y-6 mt-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{t.photos.settingsTitle}</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {t.photos.settingsDescription}
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t.photos.currentFolder}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedFolderName ? (
+                  <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg border border-border">
+                    <FolderOpen size={24} className="text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{selectedFolderName}</p>
+                      <p className="text-xs text-muted-foreground">{t.photos.oneDrive}</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsFolderPickerOpen(true)}
+                    >
+                      {t.photos.changeFolder}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <ImageIcon size={48} className="mx-auto text-muted-foreground mb-3" />
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {t.photos.noFolderConfigured}
+                    </p>
+                    <Button onClick={() => setIsFolderPickerOpen(true)}>
+                      {t.photos.selectFolder}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <FolderPicker
+              isOpen={isFolderPickerOpen}
+              onClose={() => setIsFolderPickerOpen(false)}
+            />
           </TabsContent>
 
           {/* General Tab */}

@@ -119,4 +119,80 @@ export class StorageService {
   static setSettings(settings: AppSettings) {
     return this.set(appConfig.storage.keys.settings, settings);
   }
+
+  // Adventure Map
+  static getAdventurePins() {
+    return this.get(appConfig.storage.keys.adventurePins, []);
+  }
+
+  static setAdventurePins(pins: any[]) {
+    return this.set(appConfig.storage.keys.adventurePins, pins);
+  }
+
+  static getAdventureTrips() {
+    return this.get(appConfig.storage.keys.adventureTrips, []);
+  }
+
+  static setAdventureTrips(trips: any[]) {
+    return this.set(appConfig.storage.keys.adventureTrips, trips);
+  }
+
+  static getDreamDestinations() {
+    return this.get(appConfig.storage.keys.dreamDestinations, []);
+  }
+
+  static setDreamDestinations(destinations: any[]) {
+    return this.set(appConfig.storage.keys.dreamDestinations, destinations);
+  }
+
+  // Love Board
+  static getLoveNotes() {
+    return this.get(appConfig.storage.keys.loveNotes, []);
+  }
+
+  static setLoveNotes(notes: any[]) {
+    return this.set(appConfig.storage.keys.loveNotes, notes);
+  }
+
+  static getGratitudeEntries() {
+    return this.get(appConfig.storage.keys.gratitudeEntries, []);
+  }
+
+  static setGratitudeEntries(entries: any[]) {
+    return this.set(appConfig.storage.keys.gratitudeEntries, entries);
+  }
+
+  static getDailySpark() {
+    return this.get<any | null>(appConfig.storage.keys.dailySpark, null);
+  }
+
+  static setDailySpark(spark: any) {
+    return this.set(appConfig.storage.keys.dailySpark, spark);
+  }
+
+  // Memories
+  static getMemoryCache() {
+    return this.get<any>(appConfig.storage.keys.memoryCache, {});
+  }
+
+  static setMemoryCache(cache: any) {
+    return this.set(appConfig.storage.keys.memoryCache, cache);
+  }
+
+  // Fun Night
+  static getBoardGames() {
+    return this.get(appConfig.storage.keys.boardGames, []);
+  }
+
+  static setBoardGames(games: any[]) {
+    return this.set(appConfig.storage.keys.boardGames, games);
+  }
+
+  static getFunNightHistory() {
+    return this.get(appConfig.storage.keys.funNightHistory, []);
+  }
+
+  static setFunNightHistory(history: any[]) {
+    return this.set(appConfig.storage.keys.funNightHistory, history);
+  }
 }

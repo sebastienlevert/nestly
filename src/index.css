@@ -264,3 +264,8 @@
   opacity: 0;
   transition: opacity 300ms ease-out;
 }
+
+/* Keep Leaflet map below dialogs/modals */
+.leaflet-container {
+  z-index: 0;
+}
