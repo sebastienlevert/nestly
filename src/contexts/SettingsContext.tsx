@@ -1,0 +1,102 @@
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useAuth } from './AuthContext';
+import { StorageService } from '../services/storage.service';
+import { oneDriveSettingsService } from '../services/onedrive-settings.service';
+import type { AppSettings } from '../types/settings.types';
+
+interface SettingsContextType {
+  settings: AppSettings;
+  updateSettings: (updates: Partial<AppSettings>) => void;
+  saveSettings: () => Promise<void>;
+  isSyncing: boolean;
+  lastSyncTime: number | null;
+}
+
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (!context) throw new Error('useSettings must be used within a SettingsProvider');
+  return context;
+};
+
+export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { accounts, getAccessToken } = useAuth();
+  const [settings, setSettings] = useState<AppSettings>(() => StorageService.getSettings());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
+  const initialSyncDone = useRef(false);
+
+  // Get a token for the first account (settings are per-user, use primary account)
+  const getToken = useCallback(async (): Promise<string | null> => {
+    if (accounts.length === 0) return null;
+    try {
+      return await getAccessToken(accounts[0].homeAccountId);
+    } catch {
+      return null;
+    }
+  }, [accounts, getAccessToken]);
+
+  // Load: IndexedDB cache first → OneDrive in background
+  useEffect(() => {
+    if (accounts.length === 0 || initialSyncDone.current) return;
+    initialSyncDone.current = true;
+
+    (async () => {
+      // 1. Load from IndexedDB cache (instant)
+      const cached = await oneDriveSettingsService.getCached();
+      if (cached) {
+        const merged = { ...settings, ...cached };
+        setSettings(merged);
+        StorageService.setSettings(merged);
+      }
+
+      // 2. Sync from OneDrive in background
+      setIsSyncing(true);
+      const token = await getToken();
+      if (token) {
+        const remote = await oneDriveSettingsService.read(token);
+        if (remote) {
+          const merged = { ...settings, ...remote };
+          setSettings(merged);
+          StorageService.setSettings(merged);
+        } else if (!cached) {
+          // No remote settings yet — push current local settings to OneDrive
+          await oneDriveSettingsService.write(token, settings);
+        }
+        setLastSyncTime(Date.now());
+      }
+      setIsSyncing(false);
+    })();
+  }, [accounts, getToken]);
+
+  // Update settings locally (does NOT save to OneDrive yet)
+  const updateSettings = useCallback((updates: Partial<AppSettings>) => {
+    setSettings(prev => {
+      const updated = { ...prev, ...updates };
+      StorageService.setSettings(updated);
+      return updated;
+    });
+  }, []);
+
+  // Save settings to both localStorage and OneDrive
+  const saveSettings = useCallback(async () => {
+    // Always persist locally first
+    StorageService.setSettings(settings);
+
+    // Then push to OneDrive
+    const token = await getToken();
+    if (token) {
+      setIsSyncing(true);
+      await oneDriveSettingsService.write(token, settings);
+      setLastSyncTime(Date.now());
+      setIsSyncing(false);
+    }
+  }, [settings, getToken]);
+
+  return (
+    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, isSyncing, lastSyncTime }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};

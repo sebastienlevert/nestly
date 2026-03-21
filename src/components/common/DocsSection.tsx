@@ -66,7 +66,7 @@ const docs: DocSection[] = [
                 <li><code>User.Read</code> — Read user profile</li>
                 <li><code>Calendars.ReadWrite</code> — Read &amp; write calendars</li>
                 <li><code>Calendars.ReadWrite.Shared</code> — Access shared calendars</li>
-                <li><code>Files.Read</code> — Read OneDrive files</li>
+                <li><code>Files.ReadWrite</code> — Read &amp; write OneDrive files (settings sync)</li>
                 <li><code>Tasks.ReadWrite</code> — Read &amp; write tasks</li>
                 <li><code>offline_access</code> — Maintain access to data</li>
               </ul>

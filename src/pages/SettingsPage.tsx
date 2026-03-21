@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check } from 'lucide-react';
+import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check, Loader2, Cloud } from 'lucide-react';
 import { AccountManager } from '../components/auth/AccountManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../contexts/CalendarContext';
 import { useTask } from '../contexts/TaskContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { StorageService } from '../services/storage.service';
+import { useSettings } from '../contexts/SettingsContext';
 import { localeNames, type Locale } from '../locales';
 import { themes, type ThemeName } from '../config/themes';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export const SettingsPage: React.FC = () => {
   const { lists: todoLists, selectedLists: selectedTodoLists, toggleList, listSettings, setListSettings } = useTask();
   const { locale, setLocale, t } = useLocale();
   const { themeName, setTheme } = useTheme();
+  const { settings: appSettings, updateSettings, saveSettings: saveToCloud, isSyncing: isCloudSyncing } = useSettings();
   const [activeTab, setActiveTab] = useState<SettingsTab>('accounts');
   const [calendarName, setCalendarName] = useState('');
   const [selectedLocale, setSelectedLocale] = useState<Locale>(locale);
@@ -88,27 +89,34 @@ export const SettingsPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Reload accounts when settings page mounts to pick up any new accounts from auth callback
     reloadAccounts();
 
-    // Load settings
-    const settings = StorageService.getSettings();
-    setCalendarName(settings.calendarName || t.settings.appName);
-    setSelectedLocale(settings.locale || 'en');
-    setSelectedTheme(settings.theme || themeName);
-    setMealCalendarId(settings.mealCalendarId || '');
-    setWeatherLocation(settings.weatherLocation || '');
-  }, [t]);
+    // Load from context settings (already synced from OneDrive/cache)
+    setCalendarName(appSettings.calendarName || t.settings.appName);
+    setSelectedLocale(appSettings.locale || 'en');
+    setSelectedTheme(appSettings.theme || themeName);
+    setMealCalendarId(appSettings.mealCalendarId || '');
+    setWeatherLocation(appSettings.weatherLocation || '');
+  }, [t, appSettings]);
 
-  const handleSaveSettings = () => {
-    const settings = StorageService.getSettings();
-    StorageService.setSettings({ ...settings, calendarName, locale: selectedLocale, theme: selectedTheme, mealCalendarId: mealCalendarId || undefined, weatherLocation: weatherLocation || undefined });
+  const handleSaveSettings = async () => {
+    const updated = {
+      ...appSettings,
+      calendarName,
+      locale: selectedLocale,
+      theme: selectedTheme,
+      mealCalendarId: mealCalendarId || undefined,
+      weatherLocation: weatherLocation || undefined,
+    };
+    updateSettings(updated);
     setLocale(selectedLocale);
     setTheme(selectedTheme);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
 
-    // Dispatch event to notify CalendarHeader of the change
+    // Save to OneDrive
+    await saveToCloud();
+
     window.dispatchEvent(new CustomEvent('settings-updated'));
   };
 
@@ -172,9 +180,18 @@ export const SettingsPage: React.FC = () => {
           {/* Spacer */}
           <div className="flex-1 min-w-0" />
 
+          {/* Cloud sync status */}
+          {isCloudSyncing && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Loader2 size={16} className="animate-spin" />
+              <Cloud size={16} />
+            </div>
+          )}
+
           {/* Save button */}
           <Button
             onClick={handleSaveSettings}
+            disabled={isCloudSyncing}
             className={`flex items-center gap-2 ${
               isSaved ? 'bg-green-600 hover:bg-green-700' : ''
             }`}

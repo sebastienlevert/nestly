@@ -6,6 +6,7 @@ import { PhotoProvider } from './contexts/PhotoContext';
 import { TaskProvider } from './contexts/TaskContext';
 import { LocaleProvider } from './contexts/LocaleContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { CalendarPage } from './pages/CalendarPage';
 import { PhotosPage } from './pages/PhotosPage';
@@ -69,15 +70,17 @@ function App() {
       <ThemeProvider>
         <LocaleProvider>
           <AuthProvider>
-            <CalendarProvider>
-              <MealProvider>
-                <PhotoProvider>
-                  <TaskProvider>
-                    <AppRoutes />
-                  </TaskProvider>
-                </PhotoProvider>
-              </MealProvider>
-            </CalendarProvider>
+            <SettingsProvider>
+              <CalendarProvider>
+                <MealProvider>
+                  <PhotoProvider>
+                    <TaskProvider>
+                      <AppRoutes />
+                    </TaskProvider>
+                  </PhotoProvider>
+                </MealProvider>
+              </CalendarProvider>
+            </SettingsProvider>
           </AuthProvider>
         </LocaleProvider>
       </ThemeProvider>

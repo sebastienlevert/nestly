@@ -7,7 +7,7 @@ export const appConfig = {
       'User.Read',
       'Calendars.ReadWrite',
       'Calendars.ReadWrite.Shared',
-      'Files.Read',
+      'Files.ReadWrite',
       'Tasks.ReadWrite',
       'offline_access',
     ],
