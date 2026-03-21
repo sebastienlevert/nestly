@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { addMonths, subMonths } from 'date-fns';
 import { dateHelpers } from '../../utils/dateHelpers';
@@ -19,6 +19,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({ currentDate, onDateChang
   const { locale, t } = useLocale();
   const [viewMonth, setViewMonth] = useState(currentDate);
   const [open, setOpen] = useState(false);
+
+  // Keep viewMonth in sync when currentDate changes (e.g. midnight rollover) and popover is closed
+  useEffect(() => {
+    if (!open) setViewMonth(currentDate);
+  }, [currentDate, open]);
 
   const weeks = dateHelpers.getMonthCalendarGrid(viewMonth);
   const viewMonthNum = viewMonth.getMonth();
