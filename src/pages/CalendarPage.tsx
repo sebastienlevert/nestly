@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import { addWeeks, addMonths } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useHeaderControls } from '../contexts/HeaderControlsContext';
@@ -11,6 +12,7 @@ import { EventDetailsModal } from '../components/calendar/EventDetailsModal';
 import { ViewSwitcher } from '../components/calendar/ViewSwitcher';
 import { DatePicker } from '../components/calendar/DatePicker';
 import { useDateTick } from '../hooks/useDateTick';
+import { useSwipe } from '../hooks/useSwipe';
 import type { CalendarView, CalendarEvent } from '../types/calendar.types';
 
 export const CalendarPage: React.FC = () => {
@@ -21,6 +23,16 @@ export const CalendarPage: React.FC = () => {
 
   // Auto-advance to the current day/week when midnight crosses
   useDateTick(useCallback(() => setCurrentDate(new Date()), []));
+
+  // Swipe: left → forward, right → backward
+  const swipeHandlers = useSwipe(
+    useCallback(() => {
+      setCurrentDate(d => currentView === 'agenda' ? addWeeks(d, 1) : addMonths(d, 1));
+    }, [currentView]),
+    useCallback(() => {
+      setCurrentDate(d => currentView === 'agenda' ? addWeeks(d, -1) : addMonths(d, -1));
+    }, [currentView]),
+  );
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createEventDate, setCreateEventDate] = useState<Date>();
@@ -66,7 +78,7 @@ export const CalendarPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative" {...swipeHandlers}>
         {currentView === 'agenda' && (
           <AgendaView
             currentDate={currentDate}
