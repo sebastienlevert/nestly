@@ -30,12 +30,26 @@ function formatTime(iso: string): string {
 
 /** Mini SVG sparkline for hourly temperature */
 const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = React.useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const w = entries[0]?.contentRect.width ?? 0;
+      if (w > 0) setWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   if (points.length < 2) return null;
 
-  const PAD_LEFT = 4;
-  const PAD_RIGHT = 4;
-  const W = 200;
+  const PAD_LEFT = 8;
+  const PAD_RIGHT = 8;
   const H = 80;
+  const W = width || 200;
   const PAD_TOP = 14;
   const PAD_BOT = 16;
 
@@ -59,36 +73,40 @@ const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
   const minIdx = temps.lastIndexOf(minT);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-20">
-      <defs>
-        <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
-        </linearGradient>
-      </defs>
-      <path d={areaD} fill="url(#tempGrad)" className="text-primary" />
-      <path d={pathD} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary" />
-      {/* Max label */}
-      <text x={x(maxIdx)} y={y(maxT) - 4} textAnchor="middle" className="fill-foreground" style={{ fontSize: '8px', fontWeight: 600 }}>
-        {maxT}°
-      </text>
-      {/* Min label (only if different position) */}
-      {Math.abs(maxIdx - minIdx) > 2 && (
-        <text x={x(minIdx)} y={y(minT) + 11} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '7px' }}>
-          {minT}°
-        </text>
-      )}
-      {/* Time markers */}
-      {[0, 6, 12, 18].map(h => {
-        const idx = points.findIndex(p => p.hour === h);
-        if (idx < 0) return null;
-        return (
-          <text key={h} x={x(idx)} y={H - 3} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '6px' }}>
-            {h}h
+    <div ref={containerRef} className="w-full">
+      {width > 0 && (
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block">
+          <defs>
+            <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={areaD} fill="url(#tempGrad)" className="text-primary" />
+          <path d={pathD} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary" />
+          {/* Max label */}
+          <text x={x(maxIdx)} y={y(maxT) - 4} textAnchor="middle" className="fill-foreground" style={{ fontSize: '10px', fontWeight: 600 }}>
+            {maxT}°
           </text>
-        );
-      })}
-    </svg>
+          {/* Min label (only if different position) */}
+          {Math.abs(maxIdx - minIdx) > 2 && (
+            <text x={x(minIdx)} y={y(minT) + 12} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '9px' }}>
+              {minT}°
+            </text>
+          )}
+          {/* Time markers */}
+          {[0, 6, 12, 18].map(h => {
+            const idx = points.findIndex(p => p.hour === h);
+            if (idx < 0) return null;
+            return (
+              <text key={h} x={x(idx)} y={H - 3} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '9px' }}>
+                {h}h
+              </text>
+            );
+          })}
+        </svg>
+      )}
+    </div>
   );
 };
 
