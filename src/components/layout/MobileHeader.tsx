@@ -66,6 +66,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
             <Menu size={20} />
           </button>
 
+          {/* Mobile: page title */}
+          <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
+
+          {/* Desktop: logo + title */}
           <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0 h-full">
             {!sidebarCollapsed && (
               <>
