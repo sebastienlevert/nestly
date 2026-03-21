@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
 
   // Desktop nav link styles — icons stay in fixed position, label appears on expand
   const desktopNavClass = (isActive: boolean) =>
-    `flex items-center rounded-lg transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
+    `flex items-center rounded-xl transition-all duration-200 h-12 overflow-hidden whitespace-nowrap ${
       isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
     }`;
 
