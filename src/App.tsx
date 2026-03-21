@@ -50,6 +50,8 @@ function AppRoutes() {
           <Route path="tasks" element={<TasksPage />} />
           <Route path="meals" element={<MealPlannerPage />} />
           <Route path="docs" element={<DocsPage />} />
+          <Route path="docs/:sectionId" element={<DocsPage />} />
+          <Route path="docs/:sectionId/:articleId" element={<DocsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       ) : (

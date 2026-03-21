@@ -26,7 +26,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
   const photos = useProfilePhotos();
   const location = useLocation();
 
-  const currentKey = routeTitles[location.pathname] || 'calendar';
+  const currentKey = routeTitles[location.pathname]
+    || (location.pathname.startsWith('/docs') ? 'docs' : 'calendar');
   const pageTitle = t.nav[currentKey as keyof typeof t.nav] || t.header.title;
 
   return (

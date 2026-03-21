@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   BookOpen,
@@ -391,15 +392,32 @@ function ArticleContent({ body, query }: { body: string; query: string }) {
 }
 
 // ─── Main DocsSection component ─────────────────────────────────────
-export const DocsSection: React.FC = () => {
+interface DocsSectionProps {
+  initialSection?: string;
+  initialArticle?: string;
+}
+
+export const DocsSection: React.FC<DocsSectionProps> = ({ initialSection, initialArticle }) => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['getting-started']));
-  const [selectedArticle, setSelectedArticle] = useState<string>('prerequisites');
+
+  // Resolve initial article from URL params
+  const resolvedSection = initialSection && docs.find(s => s.id === initialSection) ? initialSection : 'getting-started';
+  const resolvedArticle = initialArticle && docs.find(s => s.id === resolvedSection)?.content.find(a => a.id === initialArticle)
+    ? initialArticle
+    : docs.find(s => s.id === resolvedSection)!.content[0].id;
+
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set([resolvedSection]));
   const searchInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const searchResults = useMemo(() => searchDocs(query), [query]);
   const isSearching = query.trim().length > 0;
+
+  // Expand the active section when URL changes
+  useEffect(() => {
+    setExpandedSections(prev => new Set(prev).add(resolvedSection));
+  }, [resolvedSection]);
 
   // Keyboard shortcut: Ctrl+K or / to focus search
   useEffect(() => {
@@ -427,21 +445,20 @@ export const DocsSection: React.FC = () => {
   };
 
   const selectArticle = (sectionId: string, articleId: string) => {
-    setSelectedArticle(articleId);
+    navigate(`/docs/${sectionId}/${articleId}`);
     setExpandedSections((prev) => new Set(prev).add(sectionId));
     setQuery('');
-    // Scroll content to top on mobile
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Find current article for the main pane
   const currentArticle = useMemo(() => {
     for (const section of docs) {
-      const article = section.content.find((a) => a.id === selectedArticle);
+      const article = section.content.find((a) => a.id === resolvedArticle);
       if (article) return { section, article };
     }
     return { section: docs[0], article: docs[0].content[0] };
-  }, [selectedArticle]);
+  }, [resolvedArticle]);
 
   return (
     <section id="docs" className="max-w-6xl mx-auto px-6 py-20">
@@ -531,7 +548,7 @@ export const DocsSection: React.FC = () => {
                         key={article.id}
                         onClick={() => selectArticle(section.id, article.id)}
                         className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition-colors ${
-                          selectedArticle === article.id
+                          resolvedArticle === article.id
                             ? 'text-primary font-medium bg-primary/10'
                             : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                         }`}
