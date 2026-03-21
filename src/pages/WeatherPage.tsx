@@ -32,17 +32,19 @@ function formatTime(iso: string): string {
 const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
   if (points.length < 2) return null;
 
+  const PAD_LEFT = 12;
+  const PAD_RIGHT = 12;
   const W = 200;
-  const H = 48;
-  const PAD_TOP = 12;
-  const PAD_BOT = 14;
+  const H = 80;
+  const PAD_TOP = 14;
+  const PAD_BOT = 16;
 
   const temps = points.map(p => p.temperature);
   const minT = Math.min(...temps);
   const maxT = Math.max(...temps);
   const range = maxT - minT || 1;
 
-  const x = (i: number) => (i / (points.length - 1)) * W;
+  const x = (i: number) => PAD_LEFT + (i / (points.length - 1)) * (W - PAD_LEFT - PAD_RIGHT);
   const y = (t: number) => PAD_TOP + (1 - (t - minT) / range) * (H - PAD_TOP - PAD_BOT);
 
   const pathD = points.map((p, i) =>
@@ -50,14 +52,14 @@ const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
   ).join(' ');
 
   // Fill area under curve
-  const areaD = `${pathD} L${W},${H} L0,${H} Z`;
+  const areaD = `${pathD} L${x(points.length - 1).toFixed(1)},${H} L${x(0).toFixed(1)},${H} Z`;
 
   // Find min/max point positions for labels
   const maxIdx = temps.indexOf(maxT);
   const minIdx = temps.lastIndexOf(minT);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-12" preserveAspectRatio="none">
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20">
       <defs>
         <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
@@ -67,12 +69,12 @@ const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
       <path d={areaD} fill="url(#tempGrad)" className="text-primary" />
       <path d={pathD} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary" />
       {/* Max label */}
-      <text x={x(maxIdx)} y={y(maxT) - 3} textAnchor="middle" className="fill-foreground" style={{ fontSize: '8px', fontWeight: 600 }}>
+      <text x={x(maxIdx)} y={y(maxT) - 4} textAnchor="middle" className="fill-foreground" style={{ fontSize: '8px', fontWeight: 600 }}>
         {maxT}°
       </text>
       {/* Min label (only if different position) */}
       {Math.abs(maxIdx - minIdx) > 2 && (
-        <text x={x(minIdx)} y={y(minT) + 10} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '7px' }}>
+        <text x={x(minIdx)} y={y(minT) + 11} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '7px' }}>
           {minT}°
         </text>
       )}
@@ -81,7 +83,7 @@ const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
         const idx = points.findIndex(p => p.hour === h);
         if (idx < 0) return null;
         return (
-          <text key={h} x={x(idx)} y={H - 2} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '6px' }}>
+          <text key={h} x={x(idx)} y={H - 3} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: '6px' }}>
             {h}h
           </text>
         );
