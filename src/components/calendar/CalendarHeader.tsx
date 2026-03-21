@@ -1,14 +1,12 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
-import { ViewSwitcher } from './ViewSwitcher';
 import type { CalendarView } from '../../types/calendar.types';
 import { dateHelpers } from '../../utils/dateHelpers';
 import { Button } from '@/components/ui/button';
 
 interface CalendarHeaderProps {
   currentView: CalendarView;
-  onViewChange: (view: CalendarView) => void;
   currentDate: Date;
   onDateChange: (date: Date) => void;
   monthYearDisplay: string;
@@ -16,7 +14,6 @@ interface CalendarHeaderProps {
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentView,
-  onViewChange,
   currentDate,
   onDateChange,
   monthYearDisplay
@@ -51,9 +48,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     <div className="bg-card border-b border-border">
       {/* Single Row: All Header Components */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
-        {/* View Switcher */}
-        <ViewSwitcher currentView={currentView} onViewChange={onViewChange} />
-
         {/* Navigation Controls */}
         <div className="flex items-center gap-1 sm:gap-2">
           <Button variant="ghost" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={handlePrevious} aria-label="Previous">

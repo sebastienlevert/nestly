@@ -2,12 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
+import { useHeaderControls } from '../contexts/HeaderControlsContext';
 import { LoginButton } from '../components/auth/LoginButton';
 import { AgendaView } from '../components/calendar/AgendaView';
 import { MonthView } from '../components/calendar/MonthView';
 import { CreateEventModal } from '../components/calendar/CreateEventModal';
 import { EventDetailsModal } from '../components/calendar/EventDetailsModal';
 import { CalendarHeader } from '../components/calendar/CalendarHeader';
+import { ViewSwitcher } from '../components/calendar/ViewSwitcher';
 import { dateHelpers } from '../utils/dateHelpers';
 import { useDateTick } from '../hooks/useDateTick';
 import type { CalendarView, CalendarEvent } from '../types/calendar.types';
@@ -26,6 +28,11 @@ export const CalendarPage: React.FC = () => {
   const [createEventHour, setCreateEventHour] = useState<number>(9);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  // Inject view switcher into global header
+  useHeaderControls(
+    <ViewSwitcher currentView={currentView} onViewChange={setCurrentView} />
+  );
 
   if (!isAuthenticated) {
     return (
@@ -87,7 +94,6 @@ export const CalendarPage: React.FC = () => {
     <div className="flex flex-col h-full">
       <CalendarHeader
         currentView={currentView}
-        onViewChange={setCurrentView}
         currentDate={currentDate}
         onDateChange={setCurrentDate}
         monthYearDisplay={getMonthYearDisplay()}
