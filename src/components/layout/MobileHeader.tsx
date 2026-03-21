@@ -63,18 +63,15 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           </div>
         </div>
 
-        {/* Center: module controls */}
-        {headerControls && (
-          <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 justify-end lg:justify-center">
-            {headerControls}
-          </div>
-        )}
+        {/* Spacer */}
+        <div className="flex-1" />
 
-        {!headerControls && <div className="flex-1" />}
+        {/* Right: module controls + user avatars */}
+        <div className="flex items-center gap-2 shrink-0">
+          {headerControls}
 
-        {/* Right: user avatars with sync badge */}
-        {isAuthenticated && accounts.length > 0 && (
-          <div className="relative flex items-center gap-1.5 shrink-0 ml-2">
+          {isAuthenticated && accounts.length > 0 && (
+            <div className="relative flex items-center gap-1.5 ml-1">
             {accounts.map((account) => (
               <UserAvatar
                 key={account.homeAccountId}
@@ -94,7 +91,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
               </div>
             ) : null}
           </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
