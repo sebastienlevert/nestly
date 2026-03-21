@@ -17,6 +17,17 @@ import { LandingPage } from './pages/LandingPage';
 import { useAutoReload } from './hooks/useAutoReload';
 import { useAuth } from './contexts/AuthContext';
 
+function AuthGate() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
+
+  // Logged in at "/" → redirect to calendar
+  return <Navigate to="/calendar" replace />;
+}
+
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -31,14 +42,9 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </>
-      ) : (
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/calendar" replace />} />
+      <Route path="/" element={<AuthGate />} />
+      {isAuthenticated ? (
+        <Route element={<MainLayout />}>
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="photos" element={<PhotosPage />} />
           <Route path="tasks" element={<TasksPage />} />
@@ -46,6 +52,8 @@ function AppRoutes() {
           <Route path="docs" element={<DocsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
+      ) : (
+        <Route path="*" element={<Navigate to="/" replace />} />
       )}
     </Routes>
   );
