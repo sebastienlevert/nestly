@@ -7,19 +7,13 @@ import type { TodoTask } from '../../types/task.types';
 import { dateHelpers } from '../../utils/dateHelpers';
 import { TaskDetailDialog } from './TaskDetailDialog';
 
-interface TaskListProps {
-  showCompleted?: boolean;
-}
-
-export const TaskList: React.FC<TaskListProps> = ({ showCompleted = false }) => {
+export const TaskList: React.FC = () => {
   const { tasks, lists, toggleTaskComplete, deleteTask, listSettings } = useTask();
   const { accounts } = useAuth();
   const { locale, t } = useLocale();
   const [selectedTask, setSelectedTask] = useState<TodoTask | null>(null);
 
-  const filteredTasks = tasks.filter(task =>
-    showCompleted ? task.status === 'completed' : task.status !== 'completed'
-  );
+  const filteredTasks = tasks.filter(task => task.status !== 'completed');
 
   // Group tasks by list
   const groupedTasks = filteredTasks.reduce((acc, task) => {
@@ -54,7 +48,7 @@ export const TaskList: React.FC<TaskListProps> = ({ showCompleted = false }) => 
     return (
       <div className="text-center py-12 text-muted-foreground">
         <CheckCircle2 size={48} className="mx-auto mb-3 text-muted-foreground" />
-        <p>{showCompleted ? t.tasks.noCompletedTasks : t.tasks.noActiveTasks}</p>
+        <p>{t.tasks.noActiveTasks}</p>
       </div>
     );
   }

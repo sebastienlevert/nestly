@@ -12,7 +12,6 @@ export const TasksPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
   const { isSyncing, syncTasks, lastSyncTime, isLoading } = useTask();
-  const [showCompleted, setShowCompleted] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Trigger first sync when page is opened
@@ -44,24 +43,6 @@ export const TasksPage: React.FC = () => {
       {/* Header — same style as calendar */}
       <div className="bg-card border-b border-border">
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
-          {/* Filter Tabs */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            <Button
-              onClick={() => setShowCompleted(false)}
-              variant={!showCompleted ? 'default' : 'secondary'}
-              className="h-10 sm:h-11 text-sm sm:text-base"
-            >
-              {t.tasks.active}
-            </Button>
-            <Button
-              onClick={() => setShowCompleted(true)}
-              variant={showCompleted ? 'default' : 'secondary'}
-              className="h-10 sm:h-11 text-sm sm:text-base"
-            >
-              {t.tasks.completed}
-            </Button>
-          </div>
-
           {/* Spacer */}
           <div className="flex-1 min-w-0" />
 
@@ -90,7 +71,7 @@ export const TasksPage: React.FC = () => {
 
       {/* Task List */}
       <div className="flex-1 overflow-auto p-3 sm:p-4 w-full">
-        <TaskList showCompleted={showCompleted} />
+        <TaskList />
       </div>
 
       {/* Create Task Modal */}
