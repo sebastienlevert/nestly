@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Check, CheckSquare, Loader2, Plus } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Check, CheckSquare, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useTask } from '../contexts/TaskContext';
 import { LoginButton } from '../components/auth/LoginButton';
 import { TaskList } from '../components/tasks/TaskList';
-import { CreateTaskModal } from '../components/tasks/CreateTaskModal';
-import { Button } from '@/components/ui/button';
 
 export const TasksPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
   const { isSyncing, syncTasks, lastSyncTime, isLoading } = useTask();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Trigger first sync when page is opened
   useEffect(() => {
@@ -46,14 +43,6 @@ export const TasksPage: React.FC = () => {
           {/* Spacer */}
           <div className="flex-1 min-w-0" />
 
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus size={20} />
-            {t.actions.newTask}
-          </Button>
-
           {/* Sync status */}
           <div className="flex items-center">
             {(isSyncing || isLoading) ? (
@@ -73,12 +62,6 @@ export const TasksPage: React.FC = () => {
       <div className="flex-1 overflow-auto p-3 sm:p-4 w-full">
         <TaskList />
       </div>
-
-      {/* Create Task Modal */}
-      <CreateTaskModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
     </div>
   );
 };

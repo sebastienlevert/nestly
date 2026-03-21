@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Trash2, Calendar as CalendarIcon, AlertCircle, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Circle, Trash2, Calendar as CalendarIcon, AlertCircle, ChevronRight, Plus } from 'lucide-react';
 import { useTask } from '../../contexts/TaskContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import type { TodoTask } from '../../types/task.types';
@@ -7,9 +7,11 @@ import { dateHelpers } from '../../utils/dateHelpers';
 import { TaskDetailDialog } from './TaskDetailDialog';
 
 export const TaskList: React.FC = () => {
-  const { tasks, lists, toggleTaskComplete, deleteTask, listSettings } = useTask();
+  const { tasks, lists, toggleTaskComplete, deleteTask, listSettings, createTask } = useTask();
   const { locale, t } = useLocale();
   const [selectedTask, setSelectedTask] = useState<TodoTask | null>(null);
+  const [addingToListId, setAddingToListId] = useState<string | null>(null);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const filteredTasks = tasks.filter(task => task.status !== 'completed');
 
@@ -42,6 +44,20 @@ export const TaskList: React.FC = () => {
     }
   };
 
+  const handleQuickAdd = async (listId: string) => {
+    const title = newTaskTitle.trim();
+    if (!title) return;
+    const list = lists.find(l => l.id === listId);
+    if (!list) return;
+    try {
+      await createTask({ title, listId, accountId: list.accountId });
+      setNewTaskTitle('');
+      setAddingToListId(null);
+    } catch {
+      // Error handled in context
+    }
+  };
+
   if (filteredTasks.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -61,11 +77,43 @@ export const TaskList: React.FC = () => {
 
           return (
             <div key={listId} className="border border-border rounded-xl overflow-hidden bg-card">
-              <h3 className="text-base font-semibold text-foreground px-4 py-3 bg-muted/30 border-b border-border">
-                {list?.displayName || t.events.unknown}
-              </h3>
+              <div className="flex items-center px-4 py-3 bg-muted/30 border-b border-border">
+                <h3 className="text-base font-semibold text-foreground flex-1">
+                  {list?.displayName || t.events.unknown}
+                </h3>
+                {allowEdit && (
+                  <button
+                    onClick={() => {
+                      setAddingToListId(addingToListId === listId ? null : listId);
+                      setNewTaskTitle('');
+                    }}
+                    className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label={t.actions.newTask}
+                  >
+                    <Plus size={18} />
+                  </button>
+                )}
+              </div>
 
               <div className="divide-y divide-border">
+                {addingToListId === listId && (
+                  <div className="flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 bg-muted/20">
+                    <Circle size={24} className="text-muted-foreground/40 flex-shrink-0" />
+                    <input
+                      type="text"
+                      autoFocus
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleQuickAdd(listId);
+                        if (e.key === 'Escape') { setAddingToListId(null); setNewTaskTitle(''); }
+                      }}
+                      onBlur={() => { if (!newTaskTitle.trim()) { setAddingToListId(null); setNewTaskTitle(''); } }}
+                      placeholder={t.actions.newTask + '...'}
+                      className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-none text-sm font-medium"
+                    />
+                  </div>
+                )}
                 {listTasks.map(task => (
                   <div
                     key={task.id}
