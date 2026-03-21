@@ -5,7 +5,7 @@ import { useLocale } from '../../contexts/LocaleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfilePhotos } from '../../hooks/useProfilePhotos';
 import { UserAvatar } from '../common/UserAvatar';
-import nestlyIcon from '/nestly-icon.svg';
+import { NestlyLogo } from '../common/NestlyLogo';
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
@@ -43,7 +43,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           </button>
 
           <div className="flex items-center gap-2.5 ml-3 lg:ml-0 min-w-0">
-            <img src={nestlyIcon} alt="Nestly" className="w-8 h-8 rounded-lg shrink-0" />
+            <NestlyLogo size={32} className="rounded-lg shrink-0" />
             <div className="flex items-baseline gap-2 min-w-0">
               <span className="font-display font-bold text-foreground text-base">Nestly</span>
               <span className="text-sm text-muted-foreground truncate">{pageTitle}</span>
