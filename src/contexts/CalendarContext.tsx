@@ -124,10 +124,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       // Cache calendars
       const accountKey = accounts.map(a => a.homeAccountId).sort().join(',');
       cacheService.set(`calendars:${accountKey}`, allCalendars);
-      // After initial setup, respect user's selections and don't auto-add calendars
-      if (selectedCalendars.length === 0 && calendars.length === 0) {
-        setSelectedCalendars(allCalendars.map(cal => cal.id));
-      }
+
+      // Select all calendars if none are currently selected
+      setSelectedCalendars(prev => {
+        if (prev.length === 0) return allCalendars.map(cal => cal.id);
+        return prev;
+      });
 
       // Fetch events - just this week + next week for fast initial load
       const now = new Date();
@@ -147,9 +149,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       fetchedRangeRef.current = { start: rangeStart, end: rangeEnd };
 
       setLastSyncTime(Date.now());
-      // Cache events
-      cacheService.set(`events:${accountKey}`, events);
-      StorageService.setCalendarCache({ calendars: allCalendars, events, timestamp: Date.now() });
+      // Cache fresh events (read from state updater to get latest)
+      setEvents(currentEvents => {
+        cacheService.set(`events:${accountKey}`, currentEvents);
+        StorageService.setCalendarCache({ calendars: allCalendars, events: currentEvents, timestamp: Date.now() });
+        return currentEvents;
+      });
     } catch (err) {
       console.error('Calendar sync failed:', err);
       setError('Failed to sync calendars. Please try again.');
@@ -157,7 +162,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       setIsSyncing(false);
       setIsLoading(false);
     }
-  }, [accounts, getAccessToken, selectedCalendars.length, calendars.length]);
+  }, [accounts, getAccessToken]);
 
   // Fetch events for a specific date range
   const fetchEventsForDateRange = async (
