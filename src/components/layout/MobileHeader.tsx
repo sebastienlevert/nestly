@@ -48,7 +48,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
     <header className="bg-card border-b border-border sticky top-0 z-30">
       <div className="flex items-center h-14 px-2 lg:px-0 gap-2">
         {/* Left: hamburger + logo + title */}
-        <div className="flex items-center min-w-0 shrink-0">
+        <div className="flex items-center min-w-0 shrink-0 h-full">
           {/* Mobile: open drawer */}
           <button
             onClick={onMenuToggle}
@@ -66,7 +66,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
             <Menu size={20} />
           </button>
 
-          <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0">
+          <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0 h-full">
             {!sidebarCollapsed && (
               <>
                 <NestlyLogo size={32} className="rounded-lg shrink-0" />
