@@ -200,15 +200,23 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
   }, [accounts]);
 
   // Lightweight refresh: re-fetch only the currently viewed date range and update if changed
+  // Uses refs for calendars/accounts to avoid identity changes that would reset the interval
+  const calendarsRef = useRef<Calendar[]>([]);
+  calendarsRef.current = calendars;
+  const accountsRef = useRef(accounts);
+  accountsRef.current = accounts;
+
   const refreshCurrentView = useCallback(async () => {
     const range = fetchedRangeRef.current;
-    if (!range || accounts.length === 0 || calendars.length === 0) return;
+    const cals = calendarsRef.current;
+    const accts = accountsRef.current;
+    if (!range || accts.length === 0 || cals.length === 0) return;
 
     try {
       setIsSyncing(true);
 
       const results = await parallelLimit(
-        calendars.map((calendar) => async () => {
+        cals.map((calendar) => async () => {
           const accessToken = await getAccessToken(calendar.accountId);
           return calendarService.getEvents(
             calendar.id,
@@ -222,7 +230,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       );
       const freshEvents = results.flat();
 
-      // Build a set of IDs in the current range for comparison
       setEvents(prev => {
         const inRange = prev.filter(e => {
           const s = new Date(e.start.dateTime);
@@ -235,20 +242,19 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
           return !(s <= range.end && en >= range.start);
         });
 
-        // Quick change detection: compare sorted IDs + key fields
+        // Change detection: compare count + sorted fingerprints
         const fingerprint = (evts: CalendarEvent[]) =>
-          evts.map(e => `${e.id}|${e.subject}|${e.start.dateTime}|${e.end.dateTime}`).sort().join('\n');
+          evts.map(e => `${e.id}|${e.subject}|${e.start.dateTime}|${e.end.dateTime}|${e.isAllDay}|${e.isCancelled}|${e.location?.displayName || ''}`).sort().join('\n');
 
         if (fingerprint(inRange) === fingerprint(freshEvents)) {
-          // No changes — skip update
-          return prev;
+          return prev; // No changes
         }
 
-        // Merge: replace in-range events with fresh data, keep out-of-range events
+        // Replace in-range events with fresh data, keep out-of-range
         const merged = [...outsideRange, ...freshEvents];
 
         // Update cache
-        const accountKey = accounts.map(a => a.homeAccountId).sort().join(',');
+        const accountKey = accts.map(a => a.homeAccountId).sort().join(',');
         cacheService.set(`events:${accountKey}`, merged);
 
         return merged;
@@ -260,9 +266,9 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
     } finally {
       setIsSyncing(false);
     }
-  }, [accounts, calendars, getAccessToken]);
+  }, [getAccessToken]); // stable dep only — reads calendars/accounts from refs
 
-  // Sync from API — full sync on mount, lightweight refresh on interval
+  // Full sync on mount, lightweight refresh every 5 min
   useEffect(() => {
     if (accounts.length === 0) return;
 
