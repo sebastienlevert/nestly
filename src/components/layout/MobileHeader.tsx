@@ -71,14 +71,12 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
           <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
 
           {/* Desktop: logo + title */}
-          <div className="hidden lg:flex items-center gap-3 lg:ml-0 min-w-0 h-full">
-            {!sidebarCollapsed && (
-              <>
-                <NestlyLogo size={40} className="rounded-lg shrink-0" />
-                <span className="font-display font-bold text-foreground text-xl">Nestly</span>
-              </>
-            )}
-            <span className="text-lg text-muted-foreground truncate">{pageTitle}</span>
+          <div className="hidden lg:flex items-center min-w-0 h-full">
+            <div className={`flex items-center gap-3 overflow-hidden transition-all duration-200 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+              <NestlyLogo size={40} className="rounded-lg shrink-0" />
+              <span className="font-display font-bold text-foreground text-xl whitespace-nowrap">Nestly</span>
+            </div>
+            <span className={`text-lg text-muted-foreground truncate transition-all duration-200 ${sidebarCollapsed ? 'ml-0' : 'ml-3'}`}>{pageTitle}</span>
           </div>
         </div>
 
