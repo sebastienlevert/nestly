@@ -28,7 +28,7 @@ export const MainLayout: React.FC = () => {
   return (
     <HeaderControlsProvider>
       <div className="flex flex-col h-screen bg-background overflow-hidden">
-        <MobileHeader onMenuToggle={toggleSidebar} onSidebarCollapse={toggleCollapse} />
+        <MobileHeader onMenuToggle={toggleSidebar} onSidebarCollapse={toggleCollapse} sidebarCollapsed={sidebarCollapsed} />
 
         <div className="flex flex-1 overflow-hidden">
           <Sidebar

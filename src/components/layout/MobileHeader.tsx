@@ -14,6 +14,7 @@ import { NestlyLogo } from '../common/NestlyLogo';
 interface MobileHeaderProps {
   onMenuToggle: () => void;
   onSidebarCollapse?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
 const routeTitles: Record<string, string> = {
@@ -26,7 +27,7 @@ const routeTitles: Record<string, string> = {
   '/settings': 'settings',
 };
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSidebarCollapse }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useLocale();
   const { accounts, isAuthenticated } = useAuth();
   const { isSyncing: calSyncing, isLoading: calLoading, lastSyncTime: calLastSync } = useCalendar();
@@ -65,13 +66,15 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
             <Menu size={20} />
           </button>
 
-          <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0">
-            <NestlyLogo size={32} className="rounded-lg shrink-0" />
-            <div className="flex items-baseline gap-2 min-w-0">
-              <span className="font-display font-bold text-foreground text-base">Nestly</span>
-              <span className="text-sm text-muted-foreground truncate">{pageTitle}</span>
+          {!sidebarCollapsed && (
+            <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0">
+              <NestlyLogo size={32} className="rounded-lg shrink-0" />
+              <div className="flex items-baseline gap-2 min-w-0">
+                <span className="font-display font-bold text-foreground text-base">Nestly</span>
+                <span className="text-sm text-muted-foreground truncate">{pageTitle}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Spacer */}
