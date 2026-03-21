@@ -7,6 +7,7 @@ import { dateHelpers } from '../utils/dateHelpers';
 import type { CalendarEvent } from '../types/calendar.types';
 import { addDays } from 'date-fns';
 import { MealModal } from '../components/meals/MealModal';
+import { Button } from '@/components/ui/button';
 
 const MEAL_TYPES = [
   { key: 'breakfast', emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -142,6 +143,8 @@ export const MealPlannerPage: React.FC = () => {
     );
   }
 
+  const now = new Date();
+
   const renderMealLine = (type: typeof MEAL_TYPES[number], meals: CalendarEvent[]) => (
     <div key={type.key} className="flex items-start gap-2 lg:gap-3 min-h-[36px]">
       <span className="text-base shrink-0 mt-1" title={t.mealPlanner?.[type.key] || type.key}>{type.emoji}</span>
@@ -151,10 +154,13 @@ export const MealPlannerPage: React.FC = () => {
             {meals.map(meal => {
               const recipeUrl = meal.location?.locationUri || meal.location?.displayName;
               const hasRecipe = recipeUrl && (recipeUrl.startsWith('http://') || recipeUrl.startsWith('https://'));
+              const isPast = new Date(meal.end.dateTime) < now;
               return (
                 <div
                   key={meal.id}
-                  className="group rounded-lg p-3 lg:p-4 text-base font-semibold flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-all"
+                  className={`group rounded-lg p-3 lg:p-4 text-base font-semibold flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-all ${
+                    isPast ? 'opacity-40' : ''
+                  }`}
                   style={{ backgroundColor: `${mealCalendar.color}40`, color: mealCalendar.color }}
                   onClick={() => openEditMeal(meal)}
                 >
@@ -185,6 +191,7 @@ export const MealPlannerPage: React.FC = () => {
 
   const renderDayCell = (day: Date, isMobile = false) => {
     const isToday = dateHelpers.isToday(day);
+    const isPastDay = day < new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const meals = getMealsForDay(day);
 
     return (
@@ -192,7 +199,7 @@ export const MealPlannerPage: React.FC = () => {
         key={day.toISOString()}
         ref={isToday ? todayRef : undefined}
         className={`flex flex-col border border-border rounded-xl overflow-hidden ${
-          isToday ? 'ring-2 ring-primary bg-secondary/50' : 'bg-card'
+          isToday ? 'ring-2 ring-primary bg-secondary/50' : isPastDay ? 'bg-card opacity-60' : 'bg-card'
         }`}
       >
         {/* Day header */}
@@ -306,15 +313,15 @@ export const MealPlannerPage: React.FC = () => {
       <div className="bg-card border-b border-border">
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
           <div className="flex items-center gap-1 sm:gap-2">
-            <button onClick={goToPrevWeek} className="h-10 w-10 sm:h-11 sm:w-11 rounded-lg flex items-center justify-center hover:bg-muted touch-target">
+            <Button variant="ghost" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={goToPrevWeek} aria-label="Previous week">
               <ChevronLeft size={22} />
-            </button>
-            <button onClick={goToToday} className="h-10 px-3 sm:h-11 sm:px-5 text-sm sm:text-base font-medium rounded-lg hover:bg-muted">
+            </Button>
+            <Button variant="secondary" className="h-10 px-3 sm:h-11 sm:px-5 text-sm sm:text-base" onClick={goToToday}>
               {t.mealPlanner?.today || 'Today'}
-            </button>
-            <button onClick={goToNextWeek} className="h-10 w-10 sm:h-11 sm:w-11 rounded-lg flex items-center justify-center hover:bg-muted touch-target">
+            </Button>
+            <Button variant="ghost" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={goToNextWeek} aria-label="Next week">
               <ChevronRight size={22} />
-            </button>
+            </Button>
           </div>
 
           <h2 className="text-base sm:text-lg font-semibold text-foreground">
