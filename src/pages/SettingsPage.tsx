@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Settings as SettingsIcon, Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders } from 'lucide-react';
+import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check } from 'lucide-react';
 import { AccountManager } from '../components/auth/AccountManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../contexts/CalendarContext';
@@ -14,8 +14,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type SettingsTab = 'accounts' | 'calendars' | 'todos' | 'general';
 
@@ -130,16 +135,44 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-6 border-b bg-background">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground flex items-center gap-3">
-              <SettingsIcon size={28} />
-              {t.settings.title}
-            </h2>
-            <p className="text-muted-foreground">{t.settings.subtitle}</p>
-          </div>
+      {/* Header — same layout as calendar */}
+      <div className="bg-card border-b border-border">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
+          {/* Section dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2 min-w-[160px] h-10 sm:h-11">
+                {(() => { const tab = tabs.find(t => t.id === activeTab); const Icon = tab!.icon; return <Icon size={18} />; })()}
+                <span className="text-sm sm:text-base font-medium">{tabs.find(t => t.id === activeTab)?.label}</span>
+                <ChevronDown size={18} className="text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <DropdownMenuItem
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="flex items-center justify-between cursor-pointer py-3 text-base"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon size={16} />
+                      {tab.label}
+                    </span>
+                    {activeTab === tab.id && (
+                      <Check size={16} className="text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Spacer */}
+          <div className="flex-1 min-w-0" />
+
+          {/* Save button */}
           <Button
             onClick={handleSaveSettings}
             className={`flex items-center gap-2 ${
@@ -152,22 +185,10 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Content with Tabs */}
-      <div className="flex-1 overflow-auto p-6">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SettingsTab)} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
-                  <Icon size={18} />
-                  {tab.label}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-          {/* Accounts Tab */}
-          <TabsContent value="accounts" className="space-y-6 mt-6">
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-3 sm:p-6">
+        {activeTab === 'accounts' && (
+          <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-foreground">{t.auth.microsoftAccounts}</h3>
               <p className="text-sm text-muted-foreground mb-4">
@@ -175,10 +196,11 @@ export const SettingsPage: React.FC = () => {
               </p>
             </div>
             <AccountManager />
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Calendars Tab */}
-          <TabsContent value="calendars" className="space-y-6 mt-6">
+        {activeTab === 'calendars' && (
+          <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-foreground">{t.settings.calendarSync}</h3>
               <p className="text-sm text-muted-foreground mb-4">
@@ -379,8 +401,11 @@ export const SettingsPage: React.FC = () => {
                 </p>
               </CardContent>
             </Card>
-          </TabsContent>
-          <TabsContent value="todos" className="space-y-6 mt-6">
+          </div>
+        )}
+
+        {activeTab === 'todos' && (
+          <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-foreground">{t.todos.title}</h3>
               <p className="text-sm text-muted-foreground mb-4">
@@ -438,10 +463,11 @@ export const SettingsPage: React.FC = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* General Tab */}
-          <TabsContent value="general" className="space-y-6 mt-6">
+        {activeTab === 'general' && (
+          <div className="space-y-6">
             {/* App Settings */}
             <Card>
               <CardHeader>
@@ -535,8 +561,8 @@ export const SettingsPage: React.FC = () => {
                 </p>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );
