@@ -199,18 +199,81 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
     return () => { cancelled = true; };
   }, [accounts]);
 
-  // Sync from API — runs independently after mount and on interval
+  // Lightweight refresh: re-fetch only the currently viewed date range and update if changed
+  const refreshCurrentView = useCallback(async () => {
+    const range = fetchedRangeRef.current;
+    if (!range || accounts.length === 0 || calendars.length === 0) return;
+
+    try {
+      setIsSyncing(true);
+
+      const results = await parallelLimit(
+        calendars.map((calendar) => async () => {
+          const accessToken = await getAccessToken(calendar.accountId);
+          return calendarService.getEvents(
+            calendar.id,
+            accessToken,
+            calendar.accountId,
+            range.start,
+            range.end
+          );
+        }),
+        MAX_CONCURRENT
+      );
+      const freshEvents = results.flat();
+
+      // Build a set of IDs in the current range for comparison
+      setEvents(prev => {
+        const inRange = prev.filter(e => {
+          const s = new Date(e.start.dateTime);
+          const en = new Date(e.end.dateTime);
+          return s <= range.end && en >= range.start;
+        });
+        const outsideRange = prev.filter(e => {
+          const s = new Date(e.start.dateTime);
+          const en = new Date(e.end.dateTime);
+          return !(s <= range.end && en >= range.start);
+        });
+
+        // Quick change detection: compare sorted IDs + key fields
+        const fingerprint = (evts: CalendarEvent[]) =>
+          evts.map(e => `${e.id}|${e.subject}|${e.start.dateTime}|${e.end.dateTime}`).sort().join('\n');
+
+        if (fingerprint(inRange) === fingerprint(freshEvents)) {
+          // No changes — skip update
+          return prev;
+        }
+
+        // Merge: replace in-range events with fresh data, keep out-of-range events
+        const merged = [...outsideRange, ...freshEvents];
+
+        // Update cache
+        const accountKey = accounts.map(a => a.homeAccountId).sort().join(',');
+        cacheService.set(`events:${accountKey}`, merged);
+
+        return merged;
+      });
+
+      setLastSyncTime(Date.now());
+    } catch (err) {
+      console.error('Calendar refresh failed:', err);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [accounts, calendars, getAccessToken]);
+
+  // Sync from API — full sync on mount, lightweight refresh on interval
   useEffect(() => {
     if (accounts.length === 0) return;
 
     syncCalendars();
 
-    const syncInterval = setInterval(() => {
-      syncCalendars();
+    const intervalId = setInterval(() => {
+      refreshCurrentView();
     }, appConfig.calendar.syncInterval);
 
-    return () => clearInterval(syncInterval);
-  }, [accounts, syncCalendars]);
+    return () => clearInterval(intervalId);
+  }, [accounts, syncCalendars, refreshCurrentView]);
 
   // Ensure events are loaded for a given date range, fetching if needed
   const ensureDateRange = useCallback((start: Date, end: Date) => {

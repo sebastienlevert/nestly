@@ -30,7 +30,7 @@ export const appConfig = {
 
   // App Settings
   calendar: {
-    syncInterval: parseInt(import.meta.env.VITE_CALENDAR_SYNC_INTERVAL || '1800000', 10), // 30 minutes
+    syncInterval: parseInt(import.meta.env.VITE_CALENDAR_SYNC_INTERVAL || '300000', 10), // 5 minutes
     defaultView: 'week' as const,
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   },
