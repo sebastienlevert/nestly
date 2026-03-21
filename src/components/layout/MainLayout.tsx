@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { MobileHeader } from './MobileHeader';
 import { useWakeLock } from '../../hooks/useWakeLock';
+import { HeaderControlsProvider } from '../../contexts/HeaderControlsContext';
 
 export const MainLayout: React.FC = () => {
   useWakeLock();
@@ -12,21 +13,20 @@ export const MainLayout: React.FC = () => {
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
-      {/* Mobile header with hamburger — hidden on lg+ */}
-      <MobileHeader onMenuToggle={toggleSidebar} />
+    <HeaderControlsProvider>
+      <div className="flex flex-col h-screen bg-background overflow-hidden">
+        <MobileHeader onMenuToggle={toggleSidebar} />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar: desktop = always visible, mobile = slide-out drawer */}
-        <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto">
-          <div className="max-w-full h-full">
-            <Outlet />
-          </div>
-        </main>
+          <main className="flex-1 overflow-auto">
+            <div className="max-w-full h-full">
+              <Outlet />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </HeaderControlsProvider>
   );
 };

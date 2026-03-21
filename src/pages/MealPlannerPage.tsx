@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { Check, ChevronLeft, ChevronRight, Plus, UtensilsCrossed, Link as LinkIcon, Loader2, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, UtensilsCrossed, Link as LinkIcon, Pencil } from 'lucide-react';
 import { useCalendar } from '../contexts/CalendarContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { StorageService } from '../services/storage.service';
@@ -30,7 +30,7 @@ function classifyMeal(event: CalendarEvent): MealKey | null {
 }
 
 export const MealPlannerPage: React.FC = () => {
-  const { calendars, events, getEventsForDateRange, ensureDateRange, isSyncing, isLoading, lastSyncTime } = useCalendar();
+  const { calendars, events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const todayRef = useRef<HTMLDivElement>(null);
 
@@ -329,21 +329,6 @@ export const MealPlannerPage: React.FC = () => {
               ? dateHelpers.formatDate(weekStart, 'MMMM yyyy', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(weekStart, 'MMMM yyyy', locale).slice(1)
               : dateHelpers.formatDate(weekStart, 'MMMM yyyy', locale)}
           </h2>
-
-          <div className="flex-1 min-w-0" />
-
-          {/* Sync status */}
-          <div className="flex items-center">
-            {(isSyncing || isLoading) ? (
-              <div className="w-9 h-9 flex items-center justify-center">
-                <Loader2 size={18} className="text-primary animate-spin" />
-              </div>
-            ) : lastSyncTime ? (
-              <div className="w-9 h-9 flex items-center justify-center text-green-500">
-                <Check size={18} strokeWidth={3} />
-              </div>
-            ) : null}
-          </div>
         </div>
       </div>
 

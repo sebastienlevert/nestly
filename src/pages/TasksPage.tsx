@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Check, CheckSquare, Loader2 } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useTask } from '../contexts/TaskContext';
@@ -9,7 +9,7 @@ import { TaskList } from '../components/tasks/TaskList';
 export const TasksPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLocale();
-  const { isSyncing, syncTasks, lastSyncTime, isLoading } = useTask();
+  const { syncTasks, lastSyncTime } = useTask();
 
   // Trigger first sync when page is opened
   useEffect(() => {
@@ -37,27 +37,6 @@ export const TasksPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header — same style as calendar */}
-      <div className="bg-card border-b border-border">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
-          {/* Spacer */}
-          <div className="flex-1 min-w-0" />
-
-          {/* Sync status */}
-          <div className="flex items-center">
-            {(isSyncing || isLoading) ? (
-              <div className="w-9 h-9 flex items-center justify-center">
-                <Loader2 size={18} className="text-primary animate-spin" />
-              </div>
-            ) : lastSyncTime ? (
-              <div className="w-9 h-9 flex items-center justify-center text-green-500">
-                <Check size={18} strokeWidth={3} />
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
       {/* Task List */}
       <div className="flex-1 overflow-auto p-3 sm:p-4 w-full">
         <TaskList />

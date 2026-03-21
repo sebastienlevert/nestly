@@ -1,6 +1,5 @@
 import React from 'react';
-import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { useCalendar } from '../../contexts/CalendarContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
 import { ViewSwitcher } from './ViewSwitcher';
 import type { CalendarView } from '../../types/calendar.types';
@@ -22,7 +21,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onDateChange,
   monthYearDisplay
 }) => {
-  const { isSyncing, isLoading, lastSyncTime } = useCalendar();
   const { t } = useLocale();
 
   const handlePrevious= () => {
@@ -73,22 +71,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <h2 className="text-base sm:text-lg font-semibold text-foreground">
           {monthYearDisplay}
         </h2>
-
-        {/* Spacer */}
-        <div className="flex-1 min-w-0" />
-
-        {/* Sync status */}
-        <div className="flex items-center">
-          {(isSyncing || isLoading) ? (
-            <div className="w-9 h-9 flex items-center justify-center">
-              <Loader2 size={18} className="text-primary animate-spin" />
-            </div>
-          ) : lastSyncTime ? (
-            <div className="w-9 h-9 flex items-center justify-center text-green-500">
-              <Check size={18} strokeWidth={3} />
-            </div>
-          ) : null}
-        </div>
       </div>
     </div>
   );

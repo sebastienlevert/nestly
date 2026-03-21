@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check, Loader2, Cloud } from 'lucide-react';
+import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check } from 'lucide-react';
 import { AccountManager } from '../components/auth/AccountManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../contexts/CalendarContext';
@@ -182,14 +182,6 @@ export const SettingsPage: React.FC = () => {
 
           {/* Spacer */}
           <div className="flex-1 min-w-0" />
-
-          {/* Cloud sync status */}
-          {isCloudSyncing && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Loader2 size={16} className="animate-spin" />
-              <Cloud size={16} />
-            </div>
-          )}
 
           {/* Save button */}
           <Button
