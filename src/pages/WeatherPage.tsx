@@ -120,6 +120,9 @@ export const WeatherPage: React.FC = () => {
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+  const conditionLabel = (key: string) =>
+    t.weather?.conditions?.[key as keyof typeof t.weather.conditions] ?? key;
+
   const topRow = days.slice(0, 4);
   const bottomRow = days.slice(4, 8);
 
@@ -172,7 +175,7 @@ export const WeatherPage: React.FC = () => {
             )}
           </div>
           {info && (
-            <span className="text-3xl leading-none" title={info.label}>
+            <span className="text-3xl leading-none" title={conditionLabel(info.key)}>
               {info.icon}
             </span>
           )}
@@ -183,7 +186,7 @@ export const WeatherPage: React.FC = () => {
           {forecast && info ? (
             <>
               {/* Condition */}
-              <p className="text-sm font-semibold text-foreground">{info.label}</p>
+              <p className="text-sm font-semibold text-foreground">{conditionLabel(info.key)}</p>
 
               {/* Temperature with feels-like */}
               <div className="flex items-center gap-2">
@@ -195,7 +198,7 @@ export const WeatherPage: React.FC = () => {
               </div>
               {forecast.apparentTemperatureMax != null && (
                 <p className="text-xs text-muted-foreground -mt-1 ml-[23px]">
-                  Feels {forecast.apparentTemperatureMax}° / {forecast.apparentTemperatureMin}°
+                  {t.weather?.feels ?? 'Feels'} {forecast.apparentTemperatureMax}° / {forecast.apparentTemperatureMin}°
                 </p>
               )}
 
@@ -239,7 +242,7 @@ export const WeatherPage: React.FC = () => {
                   <span className="text-sm text-foreground">
                     {forecast.windSpeedMax} km/h {windCompass(forecast.windDirection ?? 0)}
                     {(forecast.windGustsMax ?? 0) > (forecast.windSpeedMax ?? 0) && (
-                      <span className="text-muted-foreground"> · gusts {forecast.windGustsMax}</span>
+                      <span className="text-muted-foreground"> · {t.weather?.gusts ?? 'gusts'} {forecast.windGustsMax}</span>
                     )}
                   </span>
                 </div>

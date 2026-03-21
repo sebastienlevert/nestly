@@ -183,7 +183,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
             {weather && (
               <span
                 className="flex items-center gap-1 text-sm text-muted-foreground select-none"
-                title={`${weather.label} — ${weather.high}°/${weather.low}°`}
+                title={`${t.weather?.conditions?.[weather.key as keyof typeof t.weather.conditions] ?? weather.key} — ${weather.high}°/${weather.low}°`}
               >
                 <span className="text-lg leading-none">{weather.icon}</span>
                 <span className="text-xs font-medium">{weather.high}°</span>

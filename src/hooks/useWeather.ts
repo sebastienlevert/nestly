@@ -46,7 +46,7 @@ export function useWeather() {
     return () => window.removeEventListener('settings-updated', handleSettingsUpdate);
   }, [loadWeather]);
 
-  const getWeatherForDate = (date: Date): { icon: string; label: string; high: number; low: number } | null => {
+  const getWeatherForDate = (date: Date): { icon: string; key: string; high: number; low: number } | null => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const forecast = forecasts.find((f) => f.date === dateStr);
     if (!forecast) return null;

@@ -37,40 +37,40 @@ const CACHE_KEY = `nestly_weather_cache_v${CACHE_VERSION}`;
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
 const DEFAULT_COORDS = { latitude: 45.50, longitude: -73.57 }; // Montreal
 
-// WMO Weather interpretation codes → emoji + label
-const weatherCodeMap: Record<number, { icon: string; label: string }> = {
-  0: { icon: '☀️', label: 'Clear sky' },
-  1: { icon: '🌤️', label: 'Mainly clear' },
-  2: { icon: '⛅', label: 'Partly cloudy' },
-  3: { icon: '☁️', label: 'Overcast' },
-  45: { icon: '🌫️', label: 'Fog' },
-  48: { icon: '🌫️', label: 'Depositing rime fog' },
-  51: { icon: '🌦️', label: 'Light drizzle' },
-  53: { icon: '🌦️', label: 'Moderate drizzle' },
-  55: { icon: '🌧️', label: 'Dense drizzle' },
-  56: { icon: '🌧️', label: 'Freezing drizzle' },
-  57: { icon: '🌧️', label: 'Heavy freezing drizzle' },
-  61: { icon: '🌧️', label: 'Slight rain' },
-  63: { icon: '🌧️', label: 'Moderate rain' },
-  65: { icon: '🌧️', label: 'Heavy rain' },
-  66: { icon: '🌧️', label: 'Freezing rain' },
-  67: { icon: '🌧️', label: 'Heavy freezing rain' },
-  71: { icon: '🌨️', label: 'Slight snow' },
-  73: { icon: '🌨️', label: 'Moderate snow' },
-  75: { icon: '❄️', label: 'Heavy snow' },
-  77: { icon: '🌨️', label: 'Snow grains' },
-  80: { icon: '🌦️', label: 'Slight showers' },
-  81: { icon: '🌧️', label: 'Moderate showers' },
-  82: { icon: '🌧️', label: 'Violent showers' },
-  85: { icon: '🌨️', label: 'Slight snow showers' },
-  86: { icon: '❄️', label: 'Heavy snow showers' },
-  95: { icon: '⛈️', label: 'Thunderstorm' },
-  96: { icon: '⛈️', label: 'Thunderstorm with hail' },
-  99: { icon: '⛈️', label: 'Thunderstorm with heavy hail' },
+// WMO Weather interpretation codes → emoji + translation key
+const weatherCodeMap: Record<number, { icon: string; key: string }> = {
+  0: { icon: '☀️', key: 'clearSky' },
+  1: { icon: '🌤️', key: 'mainlyClear' },
+  2: { icon: '⛅', key: 'partlyCloudy' },
+  3: { icon: '☁️', key: 'overcast' },
+  45: { icon: '🌫️', key: 'fog' },
+  48: { icon: '🌫️', key: 'rimeFog' },
+  51: { icon: '🌦️', key: 'lightDrizzle' },
+  53: { icon: '🌦️', key: 'moderateDrizzle' },
+  55: { icon: '🌧️', key: 'denseDrizzle' },
+  56: { icon: '🌧️', key: 'freezingDrizzle' },
+  57: { icon: '🌧️', key: 'heavyFreezingDrizzle' },
+  61: { icon: '🌧️', key: 'slightRain' },
+  63: { icon: '🌧️', key: 'moderateRain' },
+  65: { icon: '🌧️', key: 'heavyRain' },
+  66: { icon: '🌧️', key: 'freezingRain' },
+  67: { icon: '🌧️', key: 'heavyFreezingRain' },
+  71: { icon: '🌨️', key: 'slightSnow' },
+  73: { icon: '🌨️', key: 'moderateSnow' },
+  75: { icon: '❄️', key: 'heavySnow' },
+  77: { icon: '🌨️', key: 'snowGrains' },
+  80: { icon: '🌦️', key: 'slightShowers' },
+  81: { icon: '🌧️', key: 'moderateShowers' },
+  82: { icon: '🌧️', key: 'violentShowers' },
+  85: { icon: '🌨️', key: 'slightSnowShowers' },
+  86: { icon: '❄️', key: 'heavySnowShowers' },
+  95: { icon: '⛈️', key: 'thunderstorm' },
+  96: { icon: '⛈️', key: 'thunderstormHail' },
+  99: { icon: '⛈️', key: 'thunderstormHeavyHail' },
 };
 
-export function getWeatherInfo(code: number): { icon: string; label: string } {
-  return weatherCodeMap[code] ?? { icon: '❓', label: 'Unknown' };
+export function getWeatherInfo(code: number): { icon: string; key: string } {
+  return weatherCodeMap[code] ?? { icon: '❓', key: 'unknown' };
 }
 
 function getCache(locationKey: string): WeatherCache | null {
