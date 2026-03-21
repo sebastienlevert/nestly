@@ -66,9 +66,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
 
   // Desktop nav link styles — always horizontal, overflow hidden clips labels when collapsed
   const desktopNavClass = (isActive: boolean) =>
-    `flex items-center rounded-lg transition-all duration-200 gap-3 px-3 h-10 overflow-hidden whitespace-nowrap ${
-      isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
-    }`;
+    `flex items-center rounded-lg transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
+      collapsed ? 'justify-center px-0' : 'gap-3 px-3'
+    } ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'}`;
 
   // Mobile nav link styles
   const mobileNavClass = (isActive: boolean) =>
