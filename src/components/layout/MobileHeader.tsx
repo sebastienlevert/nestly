@@ -47,7 +47,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-30">
-      <div className="flex items-center h-14 lg:h-16 px-2 lg:px-0 gap-2">
+      <div className="flex items-center h-14 lg:h-[72px] px-2 lg:px-0 gap-2 lg:gap-3">
         {/* Left: hamburger + logo + title */}
         <div className="flex items-center min-w-0 shrink-0 h-full">
           {/* Mobile: open drawer */}
@@ -61,24 +61,24 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
           {/* Desktop: toggle sidebar collapse — matches sidebar w-14 so icon aligns with nav icons */}
           <button
             onClick={onSidebarCollapse}
-            className="hidden lg:flex w-14 h-12 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors"
+            className="hidden lg:flex w-14 h-14 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors"
             aria-label="Toggle sidebar"
           >
-            <Menu size={22} />
+            <Menu size={24} />
           </button>
 
           {/* Mobile: page title */}
           <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
 
           {/* Desktop: logo + title */}
-          <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0 h-full">
+          <div className="hidden lg:flex items-center gap-3 lg:ml-0 min-w-0 h-full">
             {!sidebarCollapsed && (
               <>
-                <NestlyLogo size={36} className="rounded-lg shrink-0" />
-                <span className="font-display font-bold text-foreground text-lg">Nestly</span>
+                <NestlyLogo size={40} className="rounded-lg shrink-0" />
+                <span className="font-display font-bold text-foreground text-xl">Nestly</span>
               </>
             )}
-            <span className="text-base text-muted-foreground truncate">{pageTitle}</span>
+            <span className="text-lg text-muted-foreground truncate">{pageTitle}</span>
           </div>
         </div>
 
@@ -86,27 +86,27 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
         <div className="flex-1" />
 
         {/* Right: module controls + user avatars */}
-        <div className="flex items-center gap-2 shrink-0 pr-2 lg:pr-4">
+        <div className="flex items-center gap-3 shrink-0 pr-2 lg:pr-5">
           {headerControls}
 
           {isAuthenticated && accounts.length > 0 && (
-            <div className="relative flex items-center gap-1.5 ml-1">
+            <div className="relative flex items-center gap-2 ml-1">
               {accounts.map((account) => (
                 <UserAvatar
                   key={account.homeAccountId}
                   name={account.name || account.username}
                   photoUrl={photos[account.homeAccountId]}
-                  size="sm"
+                  size="md"
                 />
               ))}
               {/* Sync badge */}
               {anySyncing ? (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-card flex items-center justify-center">
-                  <Loader2 size={8} className="text-primary animate-spin" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-card flex items-center justify-center">
+                  <Loader2 size={9} className="text-primary animate-spin" />
                 </div>
               ) : anySynced ? (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 flex items-center justify-center">
-                  <Check size={7} className="text-white" strokeWidth={3} />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 flex items-center justify-center">
+                  <Check size={8} className="text-white" strokeWidth={3} />
                 </div>
               ) : null}
             </div>

@@ -28,10 +28,11 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView, onViewC
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="h-9 w-9 lg:w-auto lg:px-3 lg:gap-2">
-          <CurrentIcon size={18} />
-          <span className="hidden lg:inline text-sm font-medium">{t.views[current.labelKey]}</span>
-          <ChevronDown size={14} className="hidden lg:inline text-muted-foreground" />
+        <Button variant="outline" size="icon" className="h-9 w-9 lg:h-11 lg:w-auto lg:px-4 lg:gap-2">
+          <CurrentIcon size={18} className="lg:hidden" />
+          <CurrentIcon size={20} className="hidden lg:block" />
+          <span className="hidden lg:inline text-base font-medium">{t.views[current.labelKey]}</span>
+          <ChevronDown size={16} className="hidden lg:inline text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">

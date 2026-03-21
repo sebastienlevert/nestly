@@ -60,8 +60,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({ currentDate, onDateChang
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="h-9 px-2.5 gap-1.5 text-sm font-medium">
-          <Calendar size={16} />
+        <Button variant="outline" className="h-9 lg:h-11 px-2.5 lg:px-4 gap-1.5 lg:gap-2 text-sm lg:text-base font-medium">
+          <Calendar size={16} className="lg:hidden" />
+          <Calendar size={20} className="hidden lg:block" />
           <span>{triggerLabel}</span>
         </Button>
       </PopoverTrigger>
