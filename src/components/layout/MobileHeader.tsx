@@ -82,12 +82,12 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
               ))}
               {/* Sync badge */}
               {anySyncing ? (
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-card flex items-center justify-center">
-                  <Loader2 size={11} className="text-primary animate-spin" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-card flex items-center justify-center">
+                  <Loader2 size={8} className="text-primary animate-spin" />
                 </div>
               ) : anySynced ? (
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                  <Check size={10} className="text-white" strokeWidth={3} />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 flex items-center justify-center">
+                  <Check size={7} className="text-white" strokeWidth={3} />
                 </div>
               ) : null}
             </div>
