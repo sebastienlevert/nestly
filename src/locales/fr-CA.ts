@@ -6,6 +6,7 @@ export const frCA: TranslationKeys = {
     calendar: 'Calendrier',
     todos: 'Tâches',
     mealPlanner: 'Repas',
+    weather: 'Météo',
     settings: 'Paramètres',
     docs: 'Docs',
   },
@@ -140,6 +141,12 @@ export const frCA: TranslationKeys = {
     weatherLocationHelp: 'Nom de la ville pour les prévisions météo du calendrier (ex: Montréal, Paris, Lyon)',
     weatherLocationPlaceholder: 'ex: Montréal',
     weatherLocationDetect: 'Utiliser ma position',
+  },
+
+  // Weather
+  weather: {
+    noData: 'Aucune donnée météo',
+    configureLocation: 'Définissez votre emplacement dans les paramètres pour voir les prévisions météo.',
   },
 
   // Auth

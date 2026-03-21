@@ -4,6 +4,7 @@ export const en = {
     calendar: 'Calendar',
     todos: 'To Dos',
     mealPlanner: 'Meals',
+    weather: 'Weather',
     settings: 'Settings',
     docs: 'Docs',
   },
@@ -138,6 +139,12 @@ export const en = {
     weatherLocationHelp: 'City name for weather forecasts shown in the calendar (e.g., Montreal, New York, London)',
     weatherLocationPlaceholder: 'e.g., Montreal',
     weatherLocationDetect: 'Use my location',
+  },
+
+  // Weather
+  weather: {
+    noData: 'No weather data',
+    configureLocation: 'Set your location in Settings to see weather forecasts.',
   },
 
   // Auth

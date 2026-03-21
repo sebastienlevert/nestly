@@ -13,6 +13,7 @@ import { PhotosPage } from './pages/PhotosPage';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { MealPlannerPage } from './pages/MealPlannerPage';
+import { WeatherPage } from './pages/WeatherPage';
 import { DocsPage } from './pages/DocsPage';
 import { LandingPage } from './pages/LandingPage';
 import { useAutoReload } from './hooks/useAutoReload';
@@ -50,6 +51,7 @@ function AppRoutes() {
           <Route path="photos" element={<PhotosPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="meals" element={<MealPlannerPage />} />
+          <Route path="weather" element={<WeatherPage />} />
           <Route path="docs" element={<DocsPage />} />
           <Route path="docs/:sectionId" element={<DocsPage />} />
           <Route path="docs/:sectionId/:articleId" element={<DocsPage />} />
