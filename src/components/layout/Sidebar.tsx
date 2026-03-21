@@ -71,10 +71,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
   const bottomItems = navItems.filter(item => item.section === 'bottom');
 
   // Desktop nav link styles — icons stay in fixed position, label appears on expand
-  const desktopNavClass = (isActive: boolean, isCollapsed: boolean) =>
-    `flex items-center rounded-xl transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
-      isCollapsed ? 'mx-2' : ''
-    } ${
+  const desktopNavClass = (isActive: boolean) =>
+    `flex items-center rounded-xl transition-all duration-200 h-12 overflow-hidden whitespace-nowrap ${
       isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
     }`;
 
@@ -90,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
         key={item.to}
         to={item.to}
         title={collapsed ? t.nav[item.labelKey as keyof typeof t.nav] : undefined}
-        className={({ isActive }) => desktopNavClass(isActive, collapsed)}
+        className={({ isActive }) => desktopNavClass(isActive)}
       >
         {/* Fixed-width icon column — matches collapsed sidebar width so icon never moves */}
         <span className="w-14 shrink-0 flex items-center justify-center">{item.icon}</span>
