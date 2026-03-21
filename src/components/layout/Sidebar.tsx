@@ -70,11 +70,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
   const topItems = navItems.filter(item => item.section === 'top');
   const bottomItems = navItems.filter(item => item.section === 'bottom');
 
-  // Desktop nav link styles — always horizontal, overflow hidden clips labels when collapsed
+  // Desktop nav link styles — icons stay in fixed position, label appears on expand
   const desktopNavClass = (isActive: boolean) =>
     `flex items-center rounded-lg transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
-      collapsed ? 'w-10 justify-center mx-auto' : 'gap-3 px-3'
-    } ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'}`;
+      isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+    }`;
 
   // Mobile nav link styles
   const mobileNavClass = (isActive: boolean) =>
@@ -90,8 +90,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
         title={collapsed ? t.nav[item.labelKey as keyof typeof t.nav] : undefined}
         className={({ isActive }) => desktopNavClass(isActive)}
       >
-        <span className="shrink-0">{item.icon}</span>
-        <span className={`text-sm font-medium truncate transition-opacity duration-200 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Fixed-width icon column — matches collapsed sidebar width so icon never moves */}
+        <span className="w-14 shrink-0 flex items-center justify-center">{item.icon}</span>
+        <span className={`text-sm font-medium truncate transition-opacity duration-200 pr-3 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
           {t.nav[item.labelKey as keyof typeof t.nav]}
         </span>
       </NavLink>
@@ -117,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
       {/* Desktop sidebar — always visible on lg+ */}
       <aside
         className={`hidden lg:flex flex-col bg-card border-r border-border shrink-0 overflow-hidden transition-all duration-200 ${
-          collapsed ? 'w-14 px-2' : 'w-48 px-3'
+          collapsed ? 'w-14' : 'w-48'
         } py-3`}
       >
         <nav className="flex flex-col flex-1">
