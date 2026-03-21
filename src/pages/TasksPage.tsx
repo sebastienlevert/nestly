@@ -40,54 +40,58 @@ export const TasksPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col">
+      {/* Header — same style as calendar */}
+      <div className="bg-card border-b border-border">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3">
           {/* Filter Tabs */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               onClick={() => setShowCompleted(false)}
               variant={!showCompleted ? 'default' : 'secondary'}
-              className="touch-optimized"
+              className="h-10 sm:h-11 text-sm sm:text-base"
             >
               {t.tasks.active}
             </Button>
             <Button
               onClick={() => setShowCompleted(true)}
               variant={showCompleted ? 'default' : 'secondary'}
-              className="touch-optimized"
+              className="h-10 sm:h-11 text-sm sm:text-base"
             >
               {t.tasks.completed}
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Sync status — same as calendar */}
-            <div className="flex items-center">
-              {(isSyncing || isLoading) ? (
-                <div className="w-9 h-9 flex items-center justify-center">
-                  <Loader2 size={18} className="text-primary animate-spin" />
-                </div>
-              ) : lastSyncTime ? (
-                <div className="w-9 h-9 flex items-center justify-center text-green-500">
-                  <Check size={18} strokeWidth={3} />
-                </div>
-              ) : null}
-            </div>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus size={20} />
-              {t.actions.newTask}
-            </Button>
+          {/* Spacer */}
+          <div className="flex-1 min-w-0" />
+
+          {/* Sync status */}
+          <div className="flex items-center">
+            {(isSyncing || isLoading) ? (
+              <div className="w-9 h-9 flex items-center justify-center">
+                <Loader2 size={18} className="text-primary animate-spin" />
+              </div>
+            ) : lastSyncTime ? (
+              <div className="w-9 h-9 flex items-center justify-center text-green-500">
+                <Check size={18} strokeWidth={3} />
+              </div>
+            ) : null}
           </div>
+
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus size={20} />
+            {t.actions.newTask}
+          </Button>
         </div>
       </div>
 
       {/* Task List */}
-      <TaskList showCompleted={showCompleted} />
+      <div className="flex-1 overflow-auto p-4 sm:p-6 max-w-5xl mx-auto w-full">
+        <TaskList showCompleted={showCompleted} />
+      </div>
 
       {/* Create Task Modal */}
       <CreateTaskModal
