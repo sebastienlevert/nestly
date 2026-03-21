@@ -207,11 +207,11 @@ export const WeekView: React.FC<WeekViewProps> = ({ currentDate, onCreateEvent, 
                 isToday ? 'flex-[2] bg-secondary' : 'flex-1'
               } ${index > 0 ? 'border-l border-border' : ''}`}
             >
-              <div className="text-sm font-medium text-muted-foreground">
+              <div className="text-base font-medium text-muted-foreground">
                 {dateHelpers.formatDate(day, 'EEE', locale)}
               </div>
               <div
-                className={`text-xl font-semibold mt-1 ${
+                className={`text-2xl font-semibold mt-1 ${
                   isToday ? 'text-foreground' : 'text-foreground'
                 }`}
               >

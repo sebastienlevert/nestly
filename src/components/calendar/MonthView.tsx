@@ -58,7 +58,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b bg-card">
         {dateHelpers.getWeekDays(currentDate).map(day => (
-          <div key={day.toISOString()} className="p-3 text-center text-base font-medium text-muted-foreground border-r border-border last:border-r-0">
+          <div key={day.toISOString()} className="p-3 text-center text-lg font-medium text-muted-foreground border-r border-border last:border-r-0">
             {dateHelpers.formatDate(day, 'EEE', locale)}
           </div>
         ))}
@@ -93,9 +93,9 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
                   >
                     <div className="flex flex-col h-full">
                       {/* Date number */}
-                      <div className={`text-base font-medium mb-1 ${
+                      <div className={`text-lg font-medium mb-1 ${
                         isToday
-                          ? 'bg-muted-foreground text-background rounded-full w-6 h-6 flex items-center justify-center font-bold'
+                          ? 'bg-muted-foreground text-background rounded-full w-7 h-7 flex items-center justify-center font-bold'
                           : !inCurrentMonth
                           ? 'text-muted-foreground/50'
                           : 'text-foreground'

@@ -212,16 +212,16 @@ export const MealPlannerPage: React.FC = () => {
           }`}
         >
           <div className="flex items-baseline gap-2">
-            <span className={`text-xl font-bold ${isToday ? 'text-primary' : 'text-foreground'}`}>
+            <span className={`text-2xl font-bold ${isToday ? 'text-primary' : 'text-foreground'}`}>
               {dateHelpers.formatDate(day, 'd')}
             </span>
-            <span className={`text-base font-medium ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+            <span className={`text-lg font-medium ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
               {locale === 'en'
                 ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                 : dateHelpers.formatDate(day, 'EEE', locale)}
             </span>
             {isMobile && (
-              <span className={`text-sm ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
+              <span className={`text-base ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
                 {dateHelpers.formatDate(day, 'MMM', locale)}
               </span>
             )}
@@ -257,10 +257,10 @@ export const MealPlannerPage: React.FC = () => {
       >
         <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-foreground">
+            <span className="text-2xl font-bold text-foreground">
               {dateHelpers.formatDate(nextWeekStart, 'd')}–{dateHelpers.formatDate(nextWeekEndDate, 'd')}
             </span>
-            <span className="text-base font-medium text-muted-foreground">
+            <span className="text-lg font-medium text-muted-foreground">
               {monthLabel}
             </span>
           </div>
@@ -274,10 +274,10 @@ export const MealPlannerPage: React.FC = () => {
             nextWeekByDay.map(({ day, meals }) => (
               <div key={day.toISOString()}>
                 <div className="flex items-baseline gap-1.5 mb-1.5 lg:mb-2">
-                  <span className="text-sm lg:text-base font-bold text-foreground">
+                  <span className="text-base lg:text-lg font-bold text-foreground">
                     {dateHelpers.formatDate(day, 'd')}
                   </span>
-                  <span className="text-sm lg:text-base font-medium text-muted-foreground">
+                  <span className="text-base lg:text-lg font-medium text-muted-foreground">
                     {locale === 'en'
                       ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                       : dateHelpers.formatDate(day, 'EEE', locale)}

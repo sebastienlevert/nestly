@@ -165,28 +165,28 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
           }`}
         >
           <div className="flex items-baseline gap-2">
-            <span className={`text-xl font-bold ${isToday ? 'text-primary' : 'text-foreground'}`}>
+            <span className={`text-2xl font-bold ${isToday ? 'text-primary' : 'text-foreground'}`}>
               {dateHelpers.formatDate(day, 'd')}
             </span>
-            <span className={`text-base font-medium ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+            <span className={`text-lg font-medium ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
               {locale === 'en'
                 ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                 : dateHelpers.formatDate(day, 'EEE', locale)}
             </span>
             {isMobile && (
-              <span className={`text-sm ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
+              <span className={`text-base ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
                 {dateHelpers.formatDate(day, 'MMM', locale)}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {weather && (
               <span
-                className="flex items-center gap-1 text-sm text-muted-foreground select-none"
+                className="flex items-center gap-1.5 text-sm text-muted-foreground select-none"
                 title={`${t.weather?.conditions?.[weather.key as keyof typeof t.weather.conditions] ?? weather.key} — ${weather.high}°/${weather.low}°`}
               >
-                <span className="text-lg leading-none">{weather.icon}</span>
-                <span className="text-xs font-medium">{weather.high}°</span>
+                <span className="text-xl leading-none">{weather.icon}</span>
+                <span className="text-sm font-medium">{weather.high}°</span>
               </span>
             )}
             <button
@@ -239,10 +239,10 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
       {/* Header */}
       <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
-          <span className="text-xl font-bold text-foreground">
+          <span className="text-2xl font-bold text-foreground">
             {nextWeekHeader.days}
           </span>
-          <span className="text-base font-medium text-muted-foreground">
+          <span className="text-lg font-medium text-muted-foreground">
             {nextWeekHeader.month}
           </span>
         </div>
@@ -257,10 +257,10 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
           nextWeekByDay.map(({ day, events: dayEvents }) => (
             <div key={day.toISOString()}>
               <div className="flex items-baseline gap-1.5 mb-1.5">
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-base font-bold text-foreground">
                   {dateHelpers.formatDate(day, 'd')}
                 </span>
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-base font-medium text-muted-foreground">
                   {locale === 'en'
                     ? dateHelpers.formatDate(day, 'EEE', locale).charAt(0).toUpperCase() + dateHelpers.formatDate(day, 'EEE', locale).slice(1)
                     : dateHelpers.formatDate(day, 'EEE', locale)}
