@@ -25,7 +25,7 @@ export const CalendarPage: React.FC = () => {
   useDateTick(useCallback(() => setCurrentDate(new Date()), []));
 
   // Swipe: left → forward, right → backward
-  const swipeHandlers = useSwipe(
+  const { ref: swipeRef, ...swipeHandlers } = useSwipe(
     useCallback(() => {
       setCurrentDate(d => currentView === 'agenda' ? addWeeks(d, 1) : addMonths(d, 1));
     }, [currentView]),
@@ -78,7 +78,7 @@ export const CalendarPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-hidden relative" style={{ touchAction: 'pan-y' }} {...swipeHandlers}>
+      <div ref={swipeRef} className="flex-1 overflow-hidden relative" style={{ touchAction: 'pan-y' }} {...swipeHandlers}>
         {currentView === 'agenda' && (
           <AgendaView
             currentDate={currentDate}
