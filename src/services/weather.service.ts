@@ -5,6 +5,16 @@ export interface DayForecast {
   weatherCode: number;
   temperatureMax: number;
   temperatureMin: number;
+  precipitationSum: number;       // mm
+  precipitationProbabilityMax: number; // %
+  windSpeedMax: number;           // km/h
+  windGustsMax: number;           // km/h
+  windDirection: number;          // degrees
+  uvIndexMax: number;
+  sunrise: string;                // ISO time
+  sunset: string;                 // ISO time
+  apparentTemperatureMax: number;
+  apparentTemperatureMin: number;
 }
 
 interface WeatherCache {
@@ -121,7 +131,7 @@ export async function fetchWeatherForecast(): Promise<DayForecast[]> {
     longitude = loc.longitude;
   }
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max,sunrise,sunset&forecast_days=16&timezone=auto`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
@@ -132,6 +142,16 @@ export async function fetchWeatherForecast(): Promise<DayForecast[]> {
     weatherCode: data.daily.weather_code[i],
     temperatureMax: Math.round(data.daily.temperature_2m_max[i]),
     temperatureMin: Math.round(data.daily.temperature_2m_min[i]),
+    apparentTemperatureMax: Math.round(data.daily.apparent_temperature_max[i]),
+    apparentTemperatureMin: Math.round(data.daily.apparent_temperature_min[i]),
+    precipitationSum: data.daily.precipitation_sum[i] ?? 0,
+    precipitationProbabilityMax: data.daily.precipitation_probability_max[i] ?? 0,
+    windSpeedMax: Math.round(data.daily.wind_speed_10m_max[i] ?? 0),
+    windGustsMax: Math.round(data.daily.wind_gusts_10m_max[i] ?? 0),
+    windDirection: Math.round(data.daily.wind_direction_10m_dominant[i] ?? 0),
+    uvIndexMax: data.daily.uv_index_max[i] ?? 0,
+    sunrise: data.daily.sunrise[i] ?? '',
+    sunset: data.daily.sunset[i] ?? '',
   }));
 
   setCache({ forecasts, timestamp: Date.now(), latitude, longitude, locationKey });

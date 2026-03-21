@@ -1,29 +1,47 @@
 import React, { useMemo, useRef, useEffect } from 'react';
-import { CloudSun, Thermometer } from 'lucide-react';
+import { CloudSun, Thermometer, Droplets, Wind, Sun, Sunrise, Sunset } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
 import { useLocale } from '../contexts/LocaleContext';
 import { dateHelpers } from '../utils/dateHelpers';
 import { getWeatherInfo, type DayForecast } from '../services/weather.service';
 import { addDays } from 'date-fns';
 
+/** Wind direction degrees → compass label */
+function windCompass(deg: number): string {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+/** UV index → risk label + color class */
+function uvLevel(uv: number): { label: string; color: string } {
+  if (uv <= 2) return { label: 'Low', color: 'text-green-500' };
+  if (uv <= 5) return { label: 'Moderate', color: 'text-yellow-500' };
+  if (uv <= 7) return { label: 'High', color: 'text-orange-500' };
+  if (uv <= 10) return { label: 'Very High', color: 'text-red-500' };
+  return { label: 'Extreme', color: 'text-purple-500' };
+}
+
+/** Format HH:MM from ISO datetime */
+function formatTime(iso: string): string {
+  if (!iso) return '--:--';
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 export const WeatherPage: React.FC = () => {
   const { forecasts, loading } = useWeather();
   const { locale, t } = useLocale();
   const todayRef = useRef<HTMLDivElement>(null);
 
-  // Next 8 days starting from today
   const today = useMemo(() => new Date(), []);
   const days = useMemo(() =>
     Array.from({ length: 8 }, (_, i) => addDays(today, i)),
     [today]
   );
 
-  // Map forecasts by date string for quick lookup
   const forecastMap = useMemo(() => {
     const map = new Map<string, DayForecast>();
-    for (const f of forecasts) {
-      map.set(f.date, f);
-    }
+    for (const f of forecasts) map.set(f.date, f);
     return map;
   }, [forecasts]);
 
@@ -32,7 +50,6 @@ export const WeatherPage: React.FC = () => {
     return forecastMap.get(key) ?? null;
   };
 
-  // Auto-scroll to today on mobile
   useEffect(() => {
     if (todayRef.current) {
       todayRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -41,7 +58,6 @@ export const WeatherPage: React.FC = () => {
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  // Desktop grid: top row 4, bottom row 4
   const topRow = days.slice(0, 4);
   const bottomRow = days.slice(4, 8);
 
@@ -101,25 +117,27 @@ export const WeatherPage: React.FC = () => {
         </div>
 
         {/* Weather details */}
-        <div className={`p-4 flex-1 flex flex-col gap-3 ${isMobile ? '' : ''}`}>
+        <div className="p-4 flex-1 flex flex-col gap-2.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {forecast && info ? (
             <>
-              {/* Condition label */}
-              <p className="text-sm font-medium text-foreground">{info.label}</p>
+              {/* Condition */}
+              <p className="text-sm font-semibold text-foreground">{info.label}</p>
 
-              {/* Temperature */}
+              {/* Temperature with feels-like */}
               <div className="flex items-center gap-2">
-                <Thermometer size={16} className="text-muted-foreground shrink-0" />
+                <Thermometer size={15} className="text-muted-foreground shrink-0" />
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-foreground">{Math.round(forecast.temperatureMax)}°</span>
-                  <span className="text-lg text-muted-foreground">/</span>
-                  <span className="text-lg text-muted-foreground">{Math.round(forecast.temperatureMin)}°</span>
+                  <span className="text-xl font-bold text-foreground">{forecast.temperatureMax}°</span>
+                  <span className="text-sm text-muted-foreground">/ {forecast.temperatureMin}°</span>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground -mt-1 ml-[23px]">
+                Feels {forecast.apparentTemperatureMax}° / {forecast.apparentTemperatureMin}°
+              </p>
 
-              {/* Temp bar visual */}
-              <div className="mt-1">
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
+              {/* Temp bar */}
+              <div className="ml-[23px]">
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -128,9 +146,50 @@ export const WeatherPage: React.FC = () => {
                     }}
                   />
                 </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-xs text-muted-foreground">{Math.round(forecast.temperatureMin)}°</span>
-                  <span className="text-xs text-muted-foreground">{Math.round(forecast.temperatureMax)}°</span>
+              </div>
+
+              {/* Precipitation */}
+              <div className="flex items-center gap-2">
+                <Droplets size={15} className="text-blue-400 shrink-0" />
+                <span className="text-sm text-foreground">
+                  {forecast.precipitationProbabilityMax}%
+                  {forecast.precipitationSum > 0 && (
+                    <span className="text-muted-foreground"> · {forecast.precipitationSum.toFixed(1)} mm</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Wind */}
+              <div className="flex items-center gap-2">
+                <Wind size={15} className="text-muted-foreground shrink-0" />
+                <span className="text-sm text-foreground">
+                  {forecast.windSpeedMax} km/h {windCompass(forecast.windDirection)}
+                  {forecast.windGustsMax > forecast.windSpeedMax && (
+                    <span className="text-muted-foreground"> · gusts {forecast.windGustsMax}</span>
+                  )}
+                </span>
+              </div>
+
+              {/* UV Index */}
+              <div className="flex items-center gap-2">
+                <Sun size={15} className={`shrink-0 ${uvLevel(forecast.uvIndexMax).color}`} />
+                <span className="text-sm text-foreground">
+                  UV {Math.round(forecast.uvIndexMax)}
+                  <span className={`ml-1 text-xs font-medium ${uvLevel(forecast.uvIndexMax).color}`}>
+                    {uvLevel(forecast.uvIndexMax).label}
+                  </span>
+                </span>
+              </div>
+
+              {/* Sunrise / Sunset */}
+              <div className="flex items-center gap-3 mt-auto pt-1 border-t border-border/50">
+                <div className="flex items-center gap-1.5">
+                  <Sunrise size={14} className="text-orange-400" />
+                  <span className="text-xs text-muted-foreground">{formatTime(forecast.sunrise)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Sunset size={14} className="text-indigo-400" />
+                  <span className="text-xs text-muted-foreground">{formatTime(forecast.sunset)}</span>
                 </div>
               </div>
             </>
@@ -166,13 +225,12 @@ export const WeatherPage: React.FC = () => {
   );
 };
 
-/** Returns a CSS color based on temperature */
 function getTempGradient(temp: number): string {
-  if (temp <= -10) return '#60a5fa';  // blue-400
-  if (temp <= 0) return '#93c5fd';    // blue-300
-  if (temp <= 10) return '#67e8f9';   // cyan-300
-  if (temp <= 20) return '#86efac';   // green-300
-  if (temp <= 25) return '#fde047';   // yellow-300
-  if (temp <= 30) return '#fb923c';   // orange-400
-  return '#ef4444';                    // red-500
+  if (temp <= -10) return '#60a5fa';
+  if (temp <= 0) return '#93c5fd';
+  if (temp <= 10) return '#67e8f9';
+  if (temp <= 20) return '#86efac';
+  if (temp <= 25) return '#fde047';
+  if (temp <= 30) return '#fb923c';
+  return '#ef4444';
 }
