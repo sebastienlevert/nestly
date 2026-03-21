@@ -59,7 +59,7 @@ const HourlyChart: React.FC<{ points: HourlyPoint[] }> = ({ points }) => {
   const minIdx = temps.lastIndexOf(minT);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20">
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-20">
       <defs>
         <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="currentColor" stopOpacity="0.15" />
