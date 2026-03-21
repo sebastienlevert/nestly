@@ -65,6 +65,14 @@ export const TasksPage: React.FC = () => {
           {/* Spacer */}
           <div className="flex-1 min-w-0" />
 
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus size={20} />
+            {t.actions.newTask}
+          </Button>
+
           {/* Sync status */}
           <div className="flex items-center">
             {(isSyncing || isLoading) ? (
@@ -77,14 +85,6 @@ export const TasksPage: React.FC = () => {
               </div>
             ) : null}
           </div>
-
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus size={20} />
-            {t.actions.newTask}
-          </Button>
         </div>
       </div>
 
