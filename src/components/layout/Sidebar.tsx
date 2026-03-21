@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Calendar, CheckSquare, UtensilsCrossed, Settings, BookOpen, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Calendar, CheckSquare, UtensilsCrossed, Settings, BookOpen, X } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
 
 interface NavItem {
@@ -14,10 +14,9 @@ interface SidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
   collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, collapsed = false, onToggleCollapse }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, collapsed = false }) => {
   const { t } = useLocale();
   const location = useLocation();
 
@@ -119,15 +118,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
           collapsed ? 'w-14 items-center px-1' : 'w-48 px-3'
         } py-3`}
       >
-        {/* Collapse toggle */}
-        <button
-          onClick={onToggleCollapse}
-          className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-muted transition-colors mb-2 self-center"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-        </button>
-
         <nav className="flex flex-col flex-1">
           <div className="flex flex-col gap-1">
             {renderDesktopItems(topItems)}

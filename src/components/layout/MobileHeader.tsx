@@ -13,6 +13,7 @@ import { NestlyLogo } from '../common/NestlyLogo';
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
+  onSidebarCollapse?: () => void;
 }
 
 const routeTitles: Record<string, string> = {
@@ -24,7 +25,7 @@ const routeTitles: Record<string, string> = {
   '/settings': 'settings',
 };
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSidebarCollapse }) => {
   const { t } = useLocale();
   const { accounts, isAuthenticated } = useAuth();
   const { isSyncing: calSyncing, isLoading: calLoading, lastSyncTime: calLastSync } = useCalendar();
@@ -46,12 +47,21 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
       <div className="flex items-center h-14 px-4 gap-2">
         {/* Left: hamburger + logo + title */}
         <div className="flex items-center min-w-0 shrink-0">
+          {/* Mobile: open drawer */}
           <button
             onClick={onMenuToggle}
             className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors touch-target -ml-1"
             aria-label="Open menu"
           >
             <Menu size={24} />
+          </button>
+          {/* Desktop: toggle sidebar collapse */}
+          <button
+            onClick={onSidebarCollapse}
+            className="hidden lg:flex w-10 h-10 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors -ml-1"
+            aria-label="Toggle sidebar"
+          >
+            <Menu size={20} />
           </button>
 
           <div className="hidden lg:flex items-center gap-2.5 lg:ml-0 min-w-0">
