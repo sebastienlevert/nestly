@@ -6,6 +6,7 @@ import { dateHelpers } from '../../utils/dateHelpers';
 import type { CalendarEvent } from '../../types/calendar.types';
 import { EventCard } from './EventCard';
 import { addDays } from 'date-fns';
+import { useWeather } from '../../hooks/useWeather';
 
 interface AgendaViewProps {
   currentDate: Date;
@@ -17,6 +18,7 @@ interface AgendaViewProps {
 export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEvent, onDateChange, onEventClick }) => {
   const { events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
+  const { getWeatherForDate } = useWeather();
   const gridRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLDivElement>(null);
 
@@ -146,6 +148,8 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
       new Date(event.end.dateTime) >= now
     );
 
+    const weather = getWeatherForDate(day);
+
     return (
       <div
         key={day.toISOString()}
@@ -175,12 +179,23 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
               </span>
             )}
           </div>
-          <button
-            onClick={() => handleDayClick(day)}
-            className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Plus size={24} />
-          </button>
+          <div className="flex items-center gap-1">
+            {weather && (
+              <span
+                className="flex items-center gap-1 text-sm text-muted-foreground select-none"
+                title={`${weather.label} — ${weather.high}°/${weather.low}°`}
+              >
+                <span className="text-lg leading-none">{weather.icon}</span>
+                <span className="text-xs font-medium">{weather.high}°</span>
+              </span>
+            )}
+            <button
+              onClick={() => handleDayClick(day)}
+              className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Plus size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Events */}
