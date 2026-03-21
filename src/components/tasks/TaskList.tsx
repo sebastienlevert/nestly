@@ -69,8 +69,8 @@ export const TaskList: React.FC<TaskListProps> = ({ showCompleted = false }) => 
           const allowEdit = settings.allowTopLevelEdit;
 
           return (
-            <div key={listId} className="card">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
+            <div key={listId} className="border border-border rounded-xl overflow-hidden bg-card">
+              <h3 className="text-base font-semibold text-foreground px-4 py-3 bg-muted/30 border-b border-border">
                 {list?.displayName || t.events.unknown}
                 {account && (
                   <span className="text-sm font-normal text-muted-foreground ml-2">
@@ -79,12 +79,12 @@ export const TaskList: React.FC<TaskListProps> = ({ showCompleted = false }) => 
                 )}
               </h3>
 
-              <div className="space-y-2">
+              <div className="divide-y divide-border">
                 {listTasks.map(task => (
                   <div
                     key={task.id}
                     onClick={() => setSelectedTask(task)}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors border cursor-pointer"
+                    className="flex items-start gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                   >
                     {/* Checkbox — only if editing allowed */}
                     {allowEdit && (

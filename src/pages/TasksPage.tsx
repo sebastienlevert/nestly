@@ -89,7 +89,7 @@ export const TasksPage: React.FC = () => {
       </div>
 
       {/* Task List */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 max-w-5xl mx-auto w-full">
+      <div className="flex-1 overflow-auto p-3 sm:p-4 w-full">
         <TaskList showCompleted={showCompleted} />
       </div>
 
