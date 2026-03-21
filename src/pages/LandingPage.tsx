@@ -12,9 +12,11 @@ import {
   ArrowRight,
   Sparkles,
   MonitorSmartphone,
+  BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { DocsSection } from '../components/common/DocsSection';
 
 const REPO_URL = 'https://github.com/sebastienlevert/nestly';
 const REPO_API = 'https://api.github.com/repos/sebastienlevert/nestly';
@@ -138,7 +140,14 @@ export const LandingPage: React.FC = () => {
             </div>
             <span className="text-xl font-bold tracking-tight">Nestly</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <a
+              href="#docs"
+              className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <BookOpen size={16} />
+              Docs
+            </a>
             <a
               href={REPO_URL}
               target="_blank"
@@ -318,6 +327,11 @@ export const LandingPage: React.FC = () => {
             />
           </div>
         </div>
+      </section>
+
+      {/* ── Docs ───────────────────────────────────────────────── */}
+      <section className="border-y border-border bg-background">
+        <DocsSection />
       </section>
 
       {/* ── Open Source Banner ──────────────────────────────────── */}
