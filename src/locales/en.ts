@@ -5,6 +5,7 @@ export const en = {
     todos: 'To Dos',
     mealPlanner: 'Meals',
     settings: 'Settings',
+    docs: 'Docs',
   },
 
   // Calendar Views

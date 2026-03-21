@@ -13,6 +13,7 @@ import { MealsPage } from './pages/MealsPage';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { MealPlannerPage } from './pages/MealPlannerPage';
+import { DocsPage } from './pages/DocsPage';
 import { LandingPage } from './pages/LandingPage';
 import { useAutoReload } from './hooks/useAutoReload';
 import { useAuth } from './contexts/AuthContext';
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="meals" element={<MealsPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="meal-planner" element={<MealPlannerPage />} />
+        <Route path="docs" element={<DocsPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

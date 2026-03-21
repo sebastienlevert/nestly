@@ -7,6 +7,7 @@ export const frCA: TranslationKeys = {
     todos: 'Tâches',
     mealPlanner: 'Repas',
     settings: 'Paramètres',
+    docs: 'Docs',
   },
 
   // Calendar Views
