@@ -8,15 +8,14 @@ import { AgendaView } from '../components/calendar/AgendaView';
 import { MonthView } from '../components/calendar/MonthView';
 import { CreateEventModal } from '../components/calendar/CreateEventModal';
 import { EventDetailsModal } from '../components/calendar/EventDetailsModal';
-import { CalendarHeader } from '../components/calendar/CalendarHeader';
 import { ViewSwitcher } from '../components/calendar/ViewSwitcher';
-import { dateHelpers } from '../utils/dateHelpers';
+import { DateStrip } from '../components/calendar/DateStrip';
 import { useDateTick } from '../hooks/useDateTick';
 import type { CalendarView, CalendarEvent } from '../types/calendar.types';
 
 export const CalendarPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const { t, locale } = useLocale();
+  const { t } = useLocale();
   const [currentView, setCurrentView] = useState<CalendarView>('agenda');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
@@ -29,9 +28,14 @@ export const CalendarPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  // Inject view switcher into global header
+  // Inject view switcher + date strip into global header
   useHeaderControls(
-    <ViewSwitcher currentView={currentView} onViewChange={setCurrentView} />
+    <>
+      <ViewSwitcher currentView={currentView} onViewChange={setCurrentView} />
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <DateStrip currentDate={currentDate} onDateChange={setCurrentDate} />
+      </div>
+    </>
   );
 
   if (!isAuthenticated) {
@@ -62,43 +66,8 @@ export const CalendarPage: React.FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-  // Calculate month/year display based on current view and date
-  const getMonthYearDisplay = (): string => {
-    if (currentView === 'agenda') {
-      const weekStart = dateHelpers.getWeekStart(currentDate);
-      const weekEnd = dateHelpers.getWeekEnd(currentDate);
-
-      const firstMonth = weekStart.getMonth();
-      const firstYear = weekStart.getFullYear();
-      const lastMonth = weekEnd.getMonth();
-      const lastYear = weekEnd.getFullYear();
-
-      if (firstMonth === lastMonth && firstYear === lastYear) {
-        return capitalize(dateHelpers.formatDate(weekStart, 'MMMM yyyy', locale));
-      }
-
-      if (firstYear === lastYear) {
-        return `${capitalize(dateHelpers.formatDate(weekStart, 'MMMM', locale))} / ${capitalize(dateHelpers.formatDate(weekEnd, 'MMMM yyyy', locale))}`;
-      }
-
-      return `${capitalize(dateHelpers.formatDate(weekStart, 'MMMM yyyy', locale))} / ${capitalize(dateHelpers.formatDate(weekEnd, 'MMMM yyyy', locale))}`;
-    } else if (currentView === 'month') {
-      return capitalize(dateHelpers.formatDate(currentDate, 'MMMM yyyy', locale));
-    }
-    return '';
-  };
-
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader
-        currentView={currentView}
-        currentDate={currentDate}
-        onDateChange={setCurrentDate}
-        monthYearDisplay={getMonthYearDisplay()}
-      />
-
       <div className="flex-1 overflow-hidden relative">
         {currentView === 'agenda' && (
           <AgendaView

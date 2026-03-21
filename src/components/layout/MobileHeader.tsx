@@ -66,12 +66,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Right: module controls + user avatars */}
-        <div className="flex items-center gap-2 shrink-0">
-          {headerControls}
-
-          {isAuthenticated && accounts.length > 0 && (
-            <div className="relative flex items-center gap-1.5 ml-1">
+        {/* Right: user avatars */}
+        {isAuthenticated && accounts.length > 0 && (
+          <div className="relative flex items-center gap-1.5 shrink-0">
             {accounts.map((account) => (
               <UserAvatar
                 key={account.homeAccountId}
@@ -80,7 +77,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
                 size="sm"
               />
             ))}
-            {/* Sync badge — overlays bottom-right of last avatar */}
+            {/* Sync badge */}
             {anySyncing ? (
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-card flex items-center justify-center">
                 <Loader2 size={11} className="text-primary animate-spin" />
@@ -91,9 +88,15 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
               </div>
             ) : null}
           </div>
-          )}
-        </div>
+        )}
       </div>
+
+      {/* Module controls — full width below top bar */}
+      {headerControls && (
+        <div className="flex items-center gap-2 px-4 pb-2">
+          {headerControls}
+        </div>
+      )}
     </header>
   );
 };
