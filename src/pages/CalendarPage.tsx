@@ -9,7 +9,7 @@ import { MonthView } from '../components/calendar/MonthView';
 import { CreateEventModal } from '../components/calendar/CreateEventModal';
 import { EventDetailsModal } from '../components/calendar/EventDetailsModal';
 import { ViewSwitcher } from '../components/calendar/ViewSwitcher';
-import { DateStrip } from '../components/calendar/DateStrip';
+import { DatePicker } from '../components/calendar/DatePicker';
 import { useDateTick } from '../hooks/useDateTick';
 import type { CalendarView, CalendarEvent } from '../types/calendar.types';
 
@@ -28,13 +28,11 @@ export const CalendarPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  // Inject view switcher + date strip into global header
+  // Inject date picker + view switcher into global header
   useHeaderControls(
     <>
+      <DatePicker currentDate={currentDate} onDateChange={setCurrentDate} />
       <ViewSwitcher currentView={currentView} onViewChange={setCurrentView} />
-      <div className="flex-1 min-w-0 overflow-hidden">
-        <DateStrip currentDate={currentDate} onDateChange={setCurrentDate} />
-      </div>
     </>
   );
 
