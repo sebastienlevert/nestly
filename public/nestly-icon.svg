@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="nest" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="egg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="60%" style="stop-color:#e0e7ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <!-- Nest bowl (curved basket shape) -->
+  <path d="M130 310 Q130 410 256 410 Q382 410 382 310" fill="none" stroke="url(#nest)" stroke-width="28" stroke-linecap="round"/>
+  <!-- Nest weave lines -->
+  <path d="M148 330 Q256 380 364 330" fill="none" stroke="#a78bfa" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+  <path d="M155 360 Q256 400 357 360" fill="none" stroke="#a78bfa" stroke-width="12" stroke-linecap="round" opacity="0.4"/>
+  <!-- Three eggs sitting in the nest -->
+  <ellipse cx="200" cy="290" rx="38" ry="48" fill="url(#egg)" opacity="0.95" transform="rotate(-10 200 290)"/>
+  <ellipse cx="256" cy="280" rx="38" ry="50" fill="url(#egg)" opacity="0.95"/>
+  <ellipse cx="312" cy="290" rx="38" ry="48" fill="url(#egg)" opacity="0.95" transform="rotate(10 312 290)"/>
+  <!-- Subtle egg shine -->
+  <ellipse cx="190" cy="272" rx="12" ry="16" fill="white" opacity="0.3" transform="rotate(-10 190 272)"/>
+  <ellipse cx="248" cy="262" rx="12" ry="16" fill="white" opacity="0.3"/>
+  <ellipse cx="304" cy="272" rx="12" ry="16" fill="white" opacity="0.3" transform="rotate(10 304 272)"/>
+  <!-- Small heart above nest -->
+  <path d="M256 170 C256 170 240 148 224 148 C206 148 192 164 192 180 C192 208 256 230 256 230 C256 230 320 208 320 180 C320 164 306 148 288 148 C272 148 256 170 256 170Z" fill="#f9a8d4" opacity="0.85"/>
+</svg>

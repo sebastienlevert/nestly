@@ -42,9 +42,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           </button>
 
           <div className="flex items-center gap-2.5 ml-3 lg:ml-0 min-w-0">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
-              N
-            </div>
+            <img src="/nestly-icon.svg" alt="Nestly" className="w-8 h-8 rounded-lg shrink-0" />
             <div className="flex items-baseline gap-2 min-w-0">
               <span className="font-display font-bold text-foreground text-base">Nestly</span>
               <span className="text-sm text-muted-foreground truncate">{pageTitle}</span>

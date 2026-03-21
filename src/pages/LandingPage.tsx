@@ -133,9 +133,7 @@ export const LandingPage: React.FC = () => {
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-              N
-            </div>
+            <img src="/nestly-icon.svg" alt="Nestly" className="w-8 h-8 rounded-lg" />
             <span className="text-xl font-bold tracking-tight">Nestly</span>
           </div>
           <div className="flex items-center gap-4">
@@ -361,7 +359,7 @@ export const LandingPage: React.FC = () => {
       <footer className="border-t border-border bg-muted/10">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">N</div>
+            <img src="/nestly-icon.svg" alt="Nestly" className="w-6 h-6 rounded" />
             <span>Nestly — Built with ❤️ for every nest</span>
           </div>
           <div className="flex items-center gap-4">
