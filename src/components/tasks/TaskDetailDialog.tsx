@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogBody,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -175,27 +176,30 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
                   </div>
                 ))}
 
-                {/* Add new item form */}
-                <form onSubmit={handleAddItem} className="flex items-center gap-2 pt-2">
-                  <Plus size={20} className="text-muted-foreground flex-shrink-0" />
-                  <Input
-                    type="text"
-                    value={newItemName}
-                    onChange={(e) => setNewItemName(e.target.value)}
-                    placeholder={t.tasks.addChecklistItem}
-                    className="flex-1 h-9"
-                    disabled={isAdding}
-                  />
-                  {newItemName.trim() && (
-                    <Button type="submit" size="sm" disabled={isAdding}>
-                      {isAdding ? <Loader2 size={16} className="animate-spin" /> : t.actions.add}
-                    </Button>
-                  )}
-                </form>
+                {/* checklist items list only */}
               </div>
             )}
           </div>
         </DialogBody>
+
+        <DialogFooter className="justify-stretch">
+          <form onSubmit={handleAddItem} className="flex items-center gap-2 w-full">
+            <Plus size={20} className="text-muted-foreground flex-shrink-0" />
+            <Input
+              type="text"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              placeholder={t.tasks.addChecklistItem}
+              className="flex-1"
+              disabled={isAdding}
+            />
+            {newItemName.trim() && (
+              <Button type="submit" disabled={isAdding}>
+                {isAdding ? <Loader2 size={16} className="animate-spin" /> : t.actions.add}
+              </Button>
+            )}
+          </form>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
