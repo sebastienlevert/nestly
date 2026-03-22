@@ -34,6 +34,7 @@ export const MealPlannerPage: React.FC = () => {
   const { calendars, events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const todayRef = useRef<HTMLDivElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -110,6 +111,8 @@ export const MealPlannerPage: React.FC = () => {
     const timer = setTimeout(() => {
       if (todayRef.current) {
         todayRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (mobileListRef.current) {
+        mobileListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }, 100);
     return () => clearTimeout(timer);
@@ -314,7 +317,7 @@ export const MealPlannerPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Mobile: single column scrollable list */}
-      <div className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
+      <div ref={mobileListRef} className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
         {weekDays.map(day => renderDayCell(day, true))}
         {renderNextWeekTile()}
       </div>

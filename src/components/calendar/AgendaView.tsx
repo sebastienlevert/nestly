@@ -21,6 +21,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
   const { getWeatherForDate } = useWeather();
   const gridRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLDivElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
 
   // Always snap to the week start (Monday)
   const weekStart = useMemo(() => dateHelpers.getWeekStart(currentDate), [currentDate]);
@@ -129,10 +130,11 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
 
   // Auto-scroll to today on mobile
   useEffect(() => {
-    // Small delay to ensure DOM is fully rendered before scrolling
     const timer = setTimeout(() => {
       if (todayRef.current) {
         todayRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (mobileListRef.current) {
+        mobileListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }, 100);
     return () => clearTimeout(timer);
@@ -292,7 +294,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
   return (
     <div ref={gridRef} className="flex flex-col h-full bg-background">
       {/* Mobile: single column scrollable list */}
-      <div className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
+      <div ref={mobileListRef} className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
         {weekDays.map(day => renderDayCell(day, true))}
         {renderNextWeekTile()}
       </div>
