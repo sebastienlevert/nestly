@@ -98,15 +98,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
             {t.tasks.addTaskDescription}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <DialogBody className="space-y-4">
             {error && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
                 {error}
               </div>
             )}
-
-            {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="taskTitle">{t.tasks.taskTitle} *</Label>
               <Input

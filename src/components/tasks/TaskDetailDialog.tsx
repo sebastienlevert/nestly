@@ -102,7 +102,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-xl">{t.tasks.taskDetails}</DialogTitle>
+          <DialogTitle className="text-xl">{task.title || t.tasks.taskDetails}</DialogTitle>
         </DialogHeader>
 
         <DialogBody className="space-y-4">

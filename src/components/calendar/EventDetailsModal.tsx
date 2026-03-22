@@ -153,7 +153,7 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-xl">
-              {isEditing ? t.events.editEvent : t.events.eventDetails}
+              {isEditing ? (event?.subject || t.events.editEvent) : (event?.subject || t.events.eventDetails)}
             </DialogTitle>
             {!isEditing && event && (
               <DialogDescription className="sr-only">
@@ -164,7 +164,7 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
           {/* Content */}
           {isEditing ? (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <DialogBody className="space-y-4">
                 {error && (
                   <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">

@@ -160,7 +160,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             {t.events.addEventDescription}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <DialogBody className="space-y-4">
             {error && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
