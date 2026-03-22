@@ -60,11 +60,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           {/* Mobile: page title */}
           <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
 
-          {/* Desktop: logo + page title */}
-          <div className="hidden lg:flex items-center gap-3 min-w-0 h-full">
-            <NestlyLogo size={40} className="rounded-lg shrink-0" />
-            <span className="text-lg text-muted-foreground truncate">{pageTitle}</span>
-          </div>
+          {/* Desktop: page title */}
+          <span className="hidden lg:block text-lg text-muted-foreground truncate">{pageTitle}</span>
         </div>
 
         {/* Spacer */}
