@@ -5,10 +5,11 @@ import { useLocale } from '../contexts/LocaleContext';
 import { StorageService } from '../services/storage.service';
 import { dateHelpers } from '../utils/dateHelpers';
 import type { CalendarEvent } from '../types/calendar.types';
-import { addDays } from 'date-fns';
+import { addDays, addWeeks } from 'date-fns';
 import { MealModal } from '../components/meals/MealModal';
 import { DatePicker } from '../components/calendar/DatePicker';
 import { useHeaderControls } from '../contexts/HeaderControlsContext';
+import { useSwipe } from '../hooks/useSwipe';
 
 const MEAL_TYPES = [
   { key: 'breakfast', emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -37,6 +38,12 @@ export const MealPlannerPage: React.FC = () => {
   const mobileListRef = useRef<HTMLDivElement>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // Swipe: left → next week, right → previous week
+  const { ref: swipeRef, ...swipeHandlers } = useSwipe(
+    useCallback(() => setCurrentDate(d => addWeeks(d, 1)), []),
+    useCallback(() => setCurrentDate(d => addWeeks(d, -1)), []),
+  );
 
   // Inject date picker into global header
   useHeaderControls(
@@ -315,7 +322,7 @@ export const MealPlannerPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div ref={swipeRef} className="flex flex-col h-full" style={{ touchAction: 'pan-y' }} {...swipeHandlers}>
       {/* Mobile: single column scrollable list */}
       <div ref={mobileListRef} className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3">
         {weekDays.map(day => renderDayCell(day, true))}
