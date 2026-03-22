@@ -173,51 +173,26 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                   </Label>
                 </div>
 
-                {/* Date and Time */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t.events.startDate} *</Label>
-                    <DatePickerField
-                      value={formData.startDate}
-                      onChange={v => setFormData(prev => ({ ...prev, startDate: v }))}
-                    />
-                  </div>
-
-                  {!formData.isAllDay && (
-                    <div className="space-y-2">
-                      <Label htmlFor="startTime">{t.events.startTime} *</Label>
-                      <Input
-                        id="startTime"
-                        type="time"
-                        value={formData.startTime}
-                        onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  )}
+                {/* Start Date & Time */}
+                <div className="space-y-2">
+                  <Label>{t.events.startDate}{!formData.isAllDay && ` & ${t.events.startTime}`} *</Label>
+                  <DatePickerField
+                    value={formData.startDate}
+                    onChange={v => setFormData(prev => ({ ...prev, startDate: v }))}
+                    time={formData.isAllDay ? undefined : formData.startTime}
+                    onTimeChange={formData.isAllDay ? undefined : (v => setFormData(prev => ({ ...prev, startTime: v })))}
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t.events.endDate} *</Label>
-                    <DatePickerField
-                      value={formData.endDate}
-                      onChange={v => setFormData(prev => ({ ...prev, endDate: v }))}
-                    />
-                  </div>
-
-                  {!formData.isAllDay && (
-                    <div className="space-y-2">
-                      <Label htmlFor="endTime">{t.events.endTime} *</Label>
-                      <Input
-                        id="endTime"
-                        type="time"
-                        value={formData.endTime}
-                        onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  )}
+                {/* End Date & Time */}
+                <div className="space-y-2">
+                  <Label>{t.events.endDate}{!formData.isAllDay && ` & ${t.events.endTime}`} *</Label>
+                  <DatePickerField
+                    value={formData.endDate}
+                    onChange={v => setFormData(prev => ({ ...prev, endDate: v }))}
+                    time={formData.isAllDay ? undefined : formData.endTime}
+                    onTimeChange={formData.isAllDay ? undefined : (v => setFormData(prev => ({ ...prev, endTime: v })))}
+                  />
                 </div>
 
                 {/* Location */}
