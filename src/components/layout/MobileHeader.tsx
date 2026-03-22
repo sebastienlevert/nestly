@@ -13,8 +13,6 @@ import { NestlyLogo } from '../common/NestlyLogo';
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
-  onSidebarCollapse?: () => void;
-  sidebarCollapsed?: boolean;
 }
 
 const routeTitles: Record<string, string> = {
@@ -28,7 +26,7 @@ const routeTitles: Record<string, string> = {
   '/settings': 'settings',
 };
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSidebarCollapse, sidebarCollapsed }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
   const { t } = useLocale();
   const { accounts, isAuthenticated } = useAuth();
   const { isSyncing: calSyncing, isLoading: calLoading, lastSyncTime: calLastSync } = useCalendar();
@@ -47,22 +45,14 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-30">
-      <div className="flex items-center h-14 lg:h-[72px] px-2 lg:px-0 gap-2 lg:gap-3">
+      <div className="flex items-center h-14 lg:h-[72px] px-2 lg:px-3 gap-2 lg:gap-3">
         {/* Left: hamburger + logo + title */}
         <div className="flex items-center min-w-0 shrink-0 h-full">
-          {/* Mobile: open drawer */}
+          {/* Hamburger — opens drawer on all sizes */}
           <button
             onClick={onMenuToggle}
-            className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors touch-target ml-1"
+            className="w-11 h-11 lg:w-14 lg:h-14 flex items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors touch-target ml-1 lg:ml-0"
             aria-label="Open menu"
-          >
-            <Menu size={24} />
-          </button>
-          {/* Desktop: toggle sidebar collapse — matches sidebar w-14 so icon aligns with nav icons */}
-          <button
-            onClick={onSidebarCollapse}
-            className="hidden lg:flex w-14 h-14 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors"
-            aria-label="Toggle sidebar"
           >
             <Menu size={24} />
           </button>
@@ -71,12 +61,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
           <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
 
           {/* Desktop: logo + title */}
-          <div className="hidden lg:flex items-center min-w-0 h-full">
-            <div className={`flex items-center gap-3 overflow-hidden transition-all duration-200 ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-              <NestlyLogo size={40} className="rounded-lg shrink-0" />
-              <span className="font-display font-bold text-foreground text-xl whitespace-nowrap">Nestly</span>
-            </div>
-            <span className={`text-lg text-muted-foreground truncate transition-all duration-200 ${sidebarCollapsed ? 'ml-0' : 'ml-3'}`}>{pageTitle}</span>
+          <div className="hidden lg:flex items-center gap-3 min-w-0 h-full">
+            <NestlyLogo size={40} className="rounded-lg shrink-0" />
+            <span className="font-display font-bold text-foreground text-xl whitespace-nowrap">Nestly</span>
+            <span className="text-lg text-muted-foreground truncate">{pageTitle}</span>
           </div>
         </div>
 
