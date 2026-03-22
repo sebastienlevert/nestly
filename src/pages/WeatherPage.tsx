@@ -12,13 +12,13 @@ function windCompass(deg: number): string {
   return dirs[Math.round(deg / 45) % 8];
 }
 
-/** UV index → risk label + color class */
-function uvLevel(uv: number): { label: string; color: string } {
-  if (uv <= 2) return { label: 'Low', color: 'text-green-500' };
-  if (uv <= 5) return { label: 'Moderate', color: 'text-yellow-500' };
-  if (uv <= 7) return { label: 'High', color: 'text-orange-500' };
-  if (uv <= 10) return { label: 'Very High', color: 'text-red-500' };
-  return { label: 'Extreme', color: 'text-purple-500' };
+/** UV index → risk key + color class */
+function uvLevel(uv: number): { key: string; color: string } {
+  if (uv <= 2) return { key: 'low', color: 'text-green-500' };
+  if (uv <= 5) return { key: 'moderate', color: 'text-yellow-500' };
+  if (uv <= 7) return { key: 'high', color: 'text-orange-500' };
+  if (uv <= 10) return { key: 'veryHigh', color: 'text-red-500' };
+  return { key: 'extreme', color: 'text-purple-500' };
 }
 
 /** Format HH:MM from ISO datetime */
@@ -260,7 +260,7 @@ export const WeatherPage: React.FC = () => {
                   <span className="text-sm text-foreground">
                     UV {Math.round(forecast.uvIndexMax)}
                     <span className={`ml-1 text-xs font-medium ${uvLevel(forecast.uvIndexMax).color}`}>
-                      {uvLevel(forecast.uvIndexMax).label}
+                      {(t.weather?.uv as Record<string, string>)?.[uvLevel(forecast.uvIndexMax).key] ?? uvLevel(forecast.uvIndexMax).key}
                     </span>
                   </span>
                 </div>

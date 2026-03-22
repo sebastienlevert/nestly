@@ -150,6 +150,13 @@ export const frCA: TranslationKeys = {
     configureLocation: 'Définissez votre emplacement dans les paramètres pour voir les prévisions météo.',
     feels: 'Ressenti',
     gusts: 'rafales',
+    uv: {
+      low: 'Faible',
+      moderate: 'Modéré',
+      high: 'Élevé',
+      veryHigh: 'Très élevé',
+      extreme: 'Extrême',
+    },
     conditions: {
       clearSky: 'Ciel dégagé',
       mainlyClear: 'Généralement dégagé',

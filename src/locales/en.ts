@@ -148,6 +148,13 @@ export const en = {
     configureLocation: 'Set your location in Settings to see weather forecasts.',
     feels: 'Feels',
     gusts: 'gusts',
+    uv: {
+      low: 'Low',
+      moderate: 'Moderate',
+      high: 'High',
+      veryHigh: 'Very High',
+      extreme: 'Extreme',
+    },
     conditions: {
       clearSky: 'Clear sky',
       mainlyClear: 'Mainly clear',
