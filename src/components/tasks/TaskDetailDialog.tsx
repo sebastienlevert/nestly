@@ -103,7 +103,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
           <DialogTitle className="text-xl">{task.title || t.tasks.taskDetails}</DialogTitle>
         </DialogHeader>
 
-        <DialogBody className="space-y-2">
+        <DialogBody className="space-y-2 pt-2">
           {/* Due date */}
           {task.dueDateTime && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
