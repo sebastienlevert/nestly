@@ -113,7 +113,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
           <span className="truncate">{triggerLabel}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0" sideOffset={8}>
+      <PopoverContent align="start" className="w-auto p-0 z-[60]" sideOffset={8}>
         <div className="flex">
           {/* Calendar side */}
           <div className="p-3">
@@ -181,7 +181,11 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
           {showTime && (
             <div className="border-l border-border flex">
               {/* Hours */}
-              <div ref={hourRef} className="h-[300px] overflow-y-auto py-1 px-1 scrollbar-thin">
+              <div
+                ref={hourRef}
+                className="h-[300px] overflow-y-auto py-1 px-1 overscroll-contain"
+                onPointerDown={e => e.stopPropagation()}
+              >
                 {HOURS.map(h => (
                   <button
                     type="button"
@@ -199,7 +203,11 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
                 ))}
               </div>
               {/* Minutes */}
-              <div ref={minuteRef} className="h-[300px] overflow-y-auto py-1 px-1 border-l border-border scrollbar-thin">
+              <div
+                ref={minuteRef}
+                className="h-[300px] overflow-y-auto py-1 px-1 border-l border-border overscroll-contain"
+                onPointerDown={e => e.stopPropagation()}
+              >
                 {MINUTES.map(m => (
                   <button
                     type="button"
