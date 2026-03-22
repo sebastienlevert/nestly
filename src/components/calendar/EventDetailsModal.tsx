@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, MapPin, Users, Trash2, Edit2, Calendar as CalendarIcon, Repeat } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import type { CalendarEvent } from '../../types/calendar.types';
-import { dateHelpers } from '../../utils/dateHelpers';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import {
   Dialog,
   DialogBody,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -19,8 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 interface EventDetailsModalProps {
   isOpen: boolean;
@@ -34,17 +30,29 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   event,
 }) => {
   const { calendars, updateEvent, deleteEvent } = useCalendar();
-  const { locale, t } = useLocale();
-  const [isEditing, setIsEditing] = useState(false);
+  const { t } = useLocale();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Reset edit mode when modal closes or event changes
+  // Populate form data when modal opens with an event
   useEffect(() => {
+    if (isOpen && event) {
+      const s = new Date(event.start.dateTime);
+      const e = new Date(event.end.dateTime);
+      setFormData({
+        subject: event.subject,
+        body: event.bodyPreview || '',
+        startDate: s.toISOString().split('T')[0],
+        startTime: `${s.getHours().toString().padStart(2, '0')}:${s.getMinutes().toString().padStart(2, '0')}`,
+        endDate: e.toISOString().split('T')[0],
+        endTime: `${e.getHours().toString().padStart(2, '0')}:${e.getMinutes().toString().padStart(2, '0')}`,
+        location: event.location?.displayName || '',
+        isAllDay: event.isAllDay,
+      });
+    }
     if (!isOpen) {
-      setIsEditing(false);
       setError(null);
     }
   }, [isOpen, event]);
@@ -63,34 +71,9 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   if (!isOpen || !event) return null;
 
   const calendar = calendars.find(cal => cal.id === event.calendarId);
-  const eventColor = calendar?.color || '#0ea5e9';
   const canEdit = calendar?.canEdit;
 
-  const startDate = new Date(event.start.dateTime);
-  const endDate = new Date(event.end.dateTime);
-  const startTime = dateHelpers.formatTime(event.start.dateTime, locale);
-  const endTime = dateHelpers.formatTime(event.end.dateTime, locale);
-
-  const handleEdit = () => {
-    setFormData({
-      subject: event.subject,
-      body: event.bodyPreview || '',
-      startDate: startDate.toISOString().split('T')[0],
-      startTime: `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}`,
-      endDate: endDate.toISOString().split('T')[0],
-      endTime: `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`,
-      location: event.location?.displayName || '',
-      isAllDay: event.isAllDay,
-    });
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit= async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
@@ -118,7 +101,6 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         isAllDay: formData.isAllDay,
       });
 
-      setIsEditing(false);
       onClose();
     } catch (err: any) {
       setError(err.message || t.events.failedToUpdate);
@@ -153,18 +135,11 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-xl">
-              {isEditing ? (event?.subject || t.events.editEvent) : (event?.subject || t.events.eventDetails)}
+              {event?.subject || t.events.editEvent}
             </DialogTitle>
-            {!isEditing && event && (
-              <DialogDescription className="sr-only">
-                View details for {event.subject}
-              </DialogDescription>
-            )}
           </DialogHeader>
 
-          {/* Content */}
-          {isEditing ? (
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <DialogBody className="space-y-4">
                 {error && (
                   <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
@@ -275,185 +250,38 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 </div>
               </DialogBody>
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleCancelEdit}
-                  disabled={isSubmitting}
-                >
-                  {t.actions.cancel}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? t.actions.saving : t.actions.saveChanges}
-                </Button>
+              <DialogFooter className="justify-between">
+                {canEdit ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isSubmitting || isDeleting}
+                  >
+                    <Trash2 size={18} />
+                    {t.actions.delete}
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                  >
+                    {t.actions.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? t.actions.saving : t.actions.saveChanges}
+                  </Button>
+                </div>
               </DialogFooter>
             </form>
-          ) : (
-            <DialogBody className="space-y-4">
-              {error && (
-                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-                  {error}
-                </div>
-              )}
-
-              {/* Action buttons */}
-              {canEdit && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleEdit}
-                    aria-label="Edit"
-                    title="Edit event"
-                    className="text-primary hover:bg-primary/10"
-                  >
-                    <Edit2 size={20} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleDelete}
-                    aria-label="Delete"
-                    title="Delete event"
-                    disabled={isDeleting}
-                    className="text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 size={20} />
-                  </Button>
-                </div>
-              )}
-
-              {/* Event Title */}
-              <div>
-                <h3 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                  {event.recurrence && <Repeat size={24} />}
-                  {event.subject}
-                </h3>
-              </div>
-
-              {/* Calendar Badge */}
-              {calendar && (
-                <div className="flex items-center gap-2">
-                  <CalendarIcon size={16} className="text-muted-foreground" />
-                  <Badge
-                    variant="secondary"
-                    className="text-xs"
-                    style={{
-                      backgroundColor: eventColor,
-                      color: 'white',
-                    }}
-                  >
-                    {calendar.name}
-                  </Badge>
-                </div>
-              )}
-
-              {/* Date and Time */}
-              <div className="flex items-start gap-3">
-                <Clock size={20} className="text-muted-foreground mt-0.5" />
-                <div>
-                  {event.isAllDay ? (
-                    <div>
-                      <div className="font-medium text-foreground">{t.calendar.allDay}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {dateHelpers.formatDate(startDate, 'PPP', locale)}
-                        {startDate.toDateString() !== endDate.toDateString() && (
-                          <> - {dateHelpers.formatDate(endDate, 'PPP', locale)}</>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="font-medium text-foreground">
-                        {dateHelpers.formatDate(startDate, 'PPP', locale)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {startTime} - {endTime}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Location */}
-              {event.location && event.location.displayName && (
-                <div className="flex items-start gap-3">
-                  <MapPin size={20} className="text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium text-foreground">{t.events.location}</div>
-                    <div className="text-sm text-muted-foreground">{event.location.displayName}</div>
-                  </div>
-                </div>
-              )}
-
-              {/* Organizer */}
-              {event.organizer && (
-                <div className="flex items-start gap-3">
-                  <Users size={20} className="text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="font-medium text-foreground">{t.events.organizer}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {event.organizer.emailAddress.name} ({event.organizer.emailAddress.address})
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Attendees */}
-              {event.attendees && event.attendees.length > 0 && (
-                <div className="flex items-start gap-3">
-                  <Users size={20} className="text-muted-foreground mt-0.5" />
-                  <div className="flex-1">
-                    <div className="font-medium text-foreground mb-2">
-                      {t.events.attendees} ({event.attendees.length})
-                    </div>
-                    <div className="space-y-1">
-                      {event.attendees.map((attendee, index) => (
-                        <div key={index} className="text-sm text-muted-foreground">
-                          {attendee.emailAddress.name} ({attendee.emailAddress.address})
-                          <span className="text-xs ml-2">
-                            {attendee.status.response}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Description */}
-              {event.bodyPreview && (
-                <>
-                  <Separator />
-                  <div>
-                    <div className="font-medium text-foreground mb-2">{t.events.description}</div>
-                    <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {event.bodyPreview}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Status badges */}
-              <Separator />
-              <div className="flex gap-2">
-                {event.isCancelled && (
-                  <Badge variant="destructive" className="text-xs">
-                    {t.events.cancelled}
-                  </Badge>
-                )}
-                {!canEdit && (
-                  <Badge variant="secondary" className="text-xs">
-                    {t.events.readOnly}
-                  </Badge>
-                )}
-              </div>
-            </DialogBody>
-          )}
         </DialogContent>
       </Dialog>
 
