@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 
 interface TaskDetailDialogProps {
   isOpen: boolean;
@@ -104,7 +103,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
           <DialogTitle className="text-xl">{task.title || t.tasks.taskDetails}</DialogTitle>
         </DialogHeader>
 
-        <DialogBody className="space-y-4">
+        <DialogBody className="space-y-2">
           {/* Due date */}
           {task.dueDateTime && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -119,8 +118,6 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
               {task.body.content}
             </div>
           )}
-
-          <Separator />
 
           {/* Checklist items */}
           <div>
