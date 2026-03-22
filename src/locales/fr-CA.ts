@@ -285,6 +285,8 @@ export const frCA: TranslationKeys = {
     addChecklistItem: 'Ajouter un élément...',
     noChecklistItems: 'Aucun élément dans la liste',
     deleteChecklistItem: 'Supprimer l\'élément',
+    deleteChecklistItemConfirm: 'Êtes-vous sûr de vouloir supprimer cet élément?',
+    deleteTask: 'Supprimer la tâche',
     taskDetails: 'Détails de la tâche',
     due: 'Échéance',
   },
@@ -389,6 +391,8 @@ export const frCA: TranslationKeys = {
     mealCalendarHelp: 'Sélectionnez le calendrier à utiliser pour les événements de repas.',
     selectCalendar: 'Sélectionner un calendrier...',
     none: 'Aucun',
+    deleteMeal: 'Supprimer le repas',
+    deleteMealConfirm: 'Êtes-vous sûr de vouloir supprimer ce repas?',
   },
   landing: {
     badge: 'Gratuit et open source',

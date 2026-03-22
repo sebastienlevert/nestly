@@ -5,6 +5,7 @@ import { useLocale } from '../../contexts/LocaleContext';
 import type { TodoTask } from '../../types/task.types';
 import { dateHelpers } from '../../utils/dateHelpers';
 import { TaskDetailDialog } from './TaskDetailDialog';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 
 export const TaskList: React.FC = () => {
   const { tasks, lists, toggleTaskComplete, deleteTask, listSettings, createTask } = useTask();
@@ -12,6 +13,8 @@ export const TaskList: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TodoTask | null>(null);
   const [addingToListId, setAddingToListId] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [taskToDelete, setTaskToDelete] = useState<TodoTask | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredTasks = tasks.filter(task => task.status !== 'completed');
 
@@ -33,14 +36,21 @@ export const TaskList: React.FC = () => {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, task: TodoTask) => {
+  const handleDelete = (e: React.MouseEvent, task: TodoTask) => {
     e.stopPropagation();
-    if (confirm(t.tasks.deleteConfirm)) {
-      try {
-        await deleteTask(task.id, task.accountId);
-      } catch (error) {
-        // Error is handled in context
-      }
+    setTaskToDelete(task);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteTask(taskToDelete.id, taskToDelete.accountId);
+    } catch (error) {
+      // Error is handled in context
+    } finally {
+      setIsDeleting(false);
+      setTaskToDelete(null);
     }
   };
 
@@ -199,6 +209,17 @@ export const TaskList: React.FC = () => {
             ? (listSettings[selectedTask.listId] || { allowTopLevelEdit: true }).allowTopLevelEdit
             : true
         }
+      />
+
+      <ConfirmDialog
+        isOpen={!!taskToDelete}
+        onClose={() => setTaskToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title={t.tasks.deleteTask || 'Delete Task'}
+        message={t.tasks.deleteConfirm}
+        confirmText={t.actions.delete}
+        cancelText={t.actions.cancel}
+        isLoading={isDeleting}
       />
     </>
   );

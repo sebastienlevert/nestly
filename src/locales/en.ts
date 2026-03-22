@@ -283,6 +283,8 @@ export const en = {
     addChecklistItem: 'Add item...',
     noChecklistItems: 'No checklist items',
     deleteChecklistItem: 'Delete item',
+    deleteChecklistItemConfirm: 'Are you sure you want to delete this checklist item?',
+    deleteTask: 'Delete Task',
     taskDetails: 'Task Details',
     due: 'Due',
   },
@@ -387,6 +389,8 @@ export const en = {
     mealCalendarHelp: 'Select which calendar to use for meal planning events.',
     selectCalendar: 'Select a calendar...',
     none: 'None',
+    deleteMeal: 'Delete Meal',
+    deleteMealConfirm: 'Are you sure you want to delete this meal?',
   },
   landing: {
     badge: 'Free & Open Source',

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 
 interface TaskDetailDialogProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [newItemName, setNewItemName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && task) {
@@ -79,6 +81,8 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
       setItems(prev => prev.filter(i => i.id !== itemId));
     } catch (err) {
       console.error('Failed to delete checklist item:', err);
+    } finally {
+      setItemToDelete(null);
     }
   };
 
@@ -97,6 +101,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   const checkedCount = items.filter(i => i.isChecked).length;
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
@@ -164,7 +169,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
                     </span>
 
                     <button
-                      onClick={() => handleDeleteItem(item.id)}
+                      onClick={() => setItemToDelete(item.id)}
                       className="btn-icon p-1 text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                       aria-label={t.tasks.deleteChecklistItem}
                     >
@@ -199,5 +204,16 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+      <ConfirmDialog
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={() => itemToDelete && handleDeleteItem(itemToDelete)}
+        title={t.tasks.deleteChecklistItem}
+        message={t.tasks.deleteChecklistItemConfirm || 'Are you sure you want to delete this item?'}
+        confirmText={t.actions.delete}
+        cancelText={t.actions.cancel}
+      />
+    </>
   );
 };

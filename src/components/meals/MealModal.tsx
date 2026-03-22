@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePickerField } from '@/components/ui/date-picker-field';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 
 const MEAL_TYPES = [
   { key: 'breakfast' as const, emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -87,6 +88,7 @@ export const MealModal: React.FC<MealModalProps> = ({
   const [date, setDate] = useState(formatDateStr(initialDate || new Date()));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -153,21 +155,28 @@ export const MealModal: React.FC<MealModalProps> = ({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!editMeal) return;
     setIsSubmitting(true);
     try {
       await deleteEvent(editMeal.id, editMeal.accountId);
+      setShowDeleteConfirm(false);
       onClose();
     } catch (err) {
       console.error('Failed to delete meal:', err);
       setError(t.common?.error || 'Error');
+      setShowDeleteConfirm(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
@@ -287,5 +296,17 @@ export const MealModal: React.FC<MealModalProps> = ({
         </form>
       </DialogContent>
     </Dialog>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleConfirmDelete}
+        title={t.mealPlanner?.deleteMeal || 'Delete Meal'}
+        message={t.mealPlanner?.deleteMealConfirm || 'Are you sure you want to delete this meal?'}
+        confirmText={t.actions?.delete || 'Delete'}
+        cancelText={t.actions?.cancel || 'Cancel'}
+        isLoading={isSubmitting}
+      />
+    </>
   );
 };
