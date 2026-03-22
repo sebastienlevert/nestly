@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright configuration for Family Planner visual testing
+ * Playwright configuration for Nestly visual testing
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({

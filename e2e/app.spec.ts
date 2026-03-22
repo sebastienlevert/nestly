@@ -1,70 +1,55 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
- * Basic smoke tests for Family Planner application
+ * Basic smoke tests for the Nestly application
  */
-test.describe('Family Planner App', () => {
+
+/** Navigate to a page using the sidebar drawer. */
+async function navigateViaSidebar(page: Page, linkName: RegExp) {
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const sidebar = page.locator('aside');
+  await sidebar.waitFor({ state: 'visible' });
+  await sidebar.getByRole('link', { name: linkName }).click();
+  await page.waitForLoadState('networkidle');
+}
+
+test.describe('Nestly App', () => {
   test('should load the homepage', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for app to load
     await page.waitForLoadState('networkidle');
-
-    // Check that the page title is correct
-    await expect(page).toHaveTitle(/Family Planner/i);
+    await expect(page).toHaveTitle(/Nestly/i);
   });
 
   test('should display the header', async ({ page }) => {
     await page.goto('/');
-
-    // Check for header element
     const header = page.locator('header');
     await expect(header).toBeVisible();
   });
 
-  test('should show FAB menu button', async ({ page }) => {
+  test('should show sidebar navigation links', async ({ page }) => {
     await page.goto('/');
 
-    // FAB menu button should be visible
-    const fabButton = page.locator('button').filter({ hasText: /menu|☰/i }).last();
-    await expect(fabButton).toBeVisible();
+    // Open sidebar via hamburger menu
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    const sidebar = page.locator('aside');
+    await sidebar.waitFor({ state: 'visible' });
 
-    // Take a screenshot of the initial state
-    await page.screenshot({ path: 'e2e/screenshots/homepage.png', fullPage: true });
+    // Verify key navigation links are present
+    await expect(sidebar.getByRole('link', { name: /calendar/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /tasks/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /meals/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /settings/i })).toBeVisible();
+
+    await page.screenshot({ path: 'e2e/screenshots/sidebar-open.png', fullPage: true });
   });
 
-  test('should open FAB menu on click', async ({ page }) => {
+  test('should navigate to Settings page via sidebar', async ({ page }) => {
     await page.goto('/');
 
-    // Find and click the FAB button (the fixed bottom-right button)
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
+    await navigateViaSidebar(page, /settings/i);
 
-    // Wait for menu to expand
-    await page.waitForTimeout(300);
+    await expect(page).toHaveURL(/#\/settings/);
 
-    // Take screenshot of expanded menu
-    await page.screenshot({ path: 'e2e/screenshots/fab-menu-open.png', fullPage: true });
-
-    // Menu items should be visible
-    await expect(page.locator('text=/Calendar|Photos|Meals|Tasks|Settings/i').first()).toBeVisible();
-  });
-
-  test('should navigate to Settings page', async ({ page }) => {
-    await page.goto('/');
-
-    // Click FAB menu
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
-    await page.waitForTimeout(300);
-
-    // Click Settings
-    await page.locator('text=/Settings/i').first().click();
-
-    // Should navigate to settings
-    await expect(page).toHaveURL(/\/settings/);
-
-    // Take screenshot
     await page.screenshot({ path: 'e2e/screenshots/settings-page.png', fullPage: true });
   });
 });
@@ -76,23 +61,16 @@ test.describe('Visual Regression', () => {
   test('should match homepage snapshot', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-
-    // Take full-page screenshot for visual comparison
     await expect(page).toHaveScreenshot('homepage.png', {
       fullPage: true,
-      maxDiffPixels: 100, // Allow small differences
+      maxDiffPixels: 100,
     });
   });
 
   test('should match tablet layout', async ({ page, viewport }) => {
-    // This test runs in the 'tablet' project with Surface Pro dimensions
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-
-    // Verify viewport is tablet-sized
     expect(viewport?.width).toBeGreaterThanOrEqual(1024);
-
-    // Take screenshot
     await expect(page).toHaveScreenshot('tablet-view.png', {
       fullPage: true,
       maxDiffPixels: 100,
@@ -107,22 +85,18 @@ test.describe('Touch Interactions', () => {
   test('should have touch-friendly button sizes', async ({ page }) => {
     await page.goto('/');
 
-    // Open FAB menu
-    const fabButton = page.locator('button[class*="fixed"][class*="bottom"]').last();
-    await fabButton.click();
-    await page.waitForTimeout(300);
+    // Open sidebar to expose navigation links
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    const sidebar = page.locator('aside');
+    await sidebar.waitFor({ state: 'visible' });
 
-    // Get all menu buttons
-    const menuButtons = page.locator('button').filter({ hasText: /Calendar|Photos|Meals|Tasks|Settings/i });
-
-    // Check that buttons meet minimum touch target size (44x44px)
-    const count = await menuButtons.count();
+    // Get all navigation links in the sidebar
+    const navLinks = sidebar.getByRole('link');
+    const count = await navLinks.count();
     for (let i = 0; i < count; i++) {
-      const button = menuButtons.nth(i);
-      const box = await button.boundingBox();
-
+      const link = navLinks.nth(i);
+      const box = await link.boundingBox();
       if (box) {
-        // Verify minimum 44px touch target
         expect(box.width).toBeGreaterThanOrEqual(44);
         expect(box.height).toBeGreaterThanOrEqual(44);
       }

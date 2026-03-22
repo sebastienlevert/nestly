@@ -11,20 +11,20 @@ test.describe('UI Validation Suite', () => {
   test('Homepage loads with header', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
+
     const header = page.locator('header');
     await expect(header).toBeVisible();
-    
+
     await page.screenshot({ path: 'test-screenshots/homepage.png', fullPage: true });
   });
 
   test.describe('Page Navigation', () => {
     const pages = [
-      { name: 'Calendar', url: '/calendar' },
-      { name: 'Photos', url: '/photos' },
-      { name: 'Meals', url: '/meals' },
-      { name: 'Tasks', url: '/tasks' },
-      { name: 'Settings', url: '/settings' }
+      { name: 'Calendar', url: '/#/calendar' },
+      { name: 'Photos', url: '/#/photos' },
+      { name: 'Meals', url: '/#/meals' },
+      { name: 'Tasks', url: '/#/tasks' },
+      { name: 'Settings', url: '/#/settings' }
     ];
 
     for (const testPage of pages) {
@@ -35,9 +35,9 @@ test.describe('UI Validation Suite', () => {
         const root = page.locator('#root');
         await expect(root).not.toBeEmpty();
 
-        await page.screenshot({ 
-          path: `test-screenshots/${testPage.name.toLowerCase()}.png`, 
-          fullPage: true 
+        await page.screenshot({
+          path: `test-screenshots/${testPage.name.toLowerCase()}.png`,
+          fullPage: true
         });
       });
     }
@@ -49,13 +49,13 @@ test.describe('UI Validation Suite', () => {
       await page.waitForLoadState('networkidle');
 
       const buttons = await page.locator('button').all();
-      
+
       for (const button of buttons) {
         const box = await button.boundingBox();
-        
+
         if (box && box.width > 0 && box.height > 0) {
           const text = await button.textContent();
-          
+
           expect(box.width, `Button "${text?.trim()}" width should be >= 44px`).toBeGreaterThanOrEqual(44);
           expect(box.height, `Button "${text?.trim()}" height should be >= 44px`).toBeGreaterThanOrEqual(44);
         }
@@ -66,7 +66,7 @@ test.describe('UI Validation Suite', () => {
   test.describe('Responsive Design', () => {
     test('Tablet viewport (1280x800)', async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
-      await page.goto('/calendar');
+      await page.goto('/#/calendar');
       await page.waitForLoadState('networkidle');
 
       const header = page.locator('header');
@@ -77,7 +77,7 @@ test.describe('UI Validation Suite', () => {
 
     test('Desktop viewport (1920x1080)', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
-      await page.goto('/calendar');
+      await page.goto('/#/calendar');
       await page.waitForLoadState('networkidle');
 
       const header = page.locator('header');
@@ -98,7 +98,6 @@ test.describe('UI Validation Suite', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     expect(errors, 'Should have no critical console errors').toHaveLength(0);
   });
