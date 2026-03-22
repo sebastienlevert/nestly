@@ -32,43 +32,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
   const navItems: NavItem[] = [
     {
       to: '/calendar',
-      icon: <Calendar size={22} />,
+      icon: <Calendar size={24} />,
       labelKey: 'calendar',
       section: 'top',
     },
     {
       to: '/tasks',
-      icon: <CheckSquare size={22} />,
+      icon: <CheckSquare size={24} />,
       labelKey: 'todos',
       section: 'top',
     },
     {
       to: '/meals',
-      icon: <UtensilsCrossed size={22} />,
+      icon: <UtensilsCrossed size={24} />,
       labelKey: 'mealPlanner',
       section: 'top',
     },
     {
       to: '/weather',
-      icon: <CloudSun size={22} />,
+      icon: <CloudSun size={24} />,
       labelKey: 'weather',
       section: 'top',
     },
     {
       to: '/docs',
-      icon: <BookOpen size={22} />,
+      icon: <BookOpen size={24} />,
       labelKey: 'docs',
       section: 'bottom',
     },
     {
       to: '/home',
-      icon: <Home size={22} />,
+      icon: <Home size={24} />,
       labelKey: 'home',
       section: 'bottom',
     },
     {
       to: '/settings',
-      icon: <Settings size={22} />,
+      icon: <Settings size={24} />,
       labelKey: 'settings',
       section: 'bottom',
     },
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
         className={({ isActive }) => desktopNavClass(isActive)}
       >
         {/* Fixed-width icon column — matches collapsed sidebar width so icon never moves */}
-        <span className="w-10 shrink-0 flex items-center justify-center">{item.icon}</span>
+        <span className="w-14 shrink-0 flex items-center justify-center">{item.icon}</span>
         <span className={`text-sm font-medium truncate transition-opacity duration-200 pr-2 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
           {t.nav[item.labelKey as keyof typeof t.nav]}
         </span>
@@ -125,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
       {/* Desktop sidebar — always visible on lg+ */}
       <aside
         className={`hidden lg:flex flex-col bg-card border-r border-border shrink-0 overflow-hidden transition-all duration-200 ${
-          collapsed ? 'w-10' : 'w-44'
+          collapsed ? 'w-14' : 'w-48'
         } py-3`}
       >
         <nav className="flex flex-col flex-1">
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
               className="w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors touch-target"
               aria-label="Close menu"
             >
-              <X size={22} />
+              <X size={24} />
             </button>
           </div>
         </div>
