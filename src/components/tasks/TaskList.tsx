@@ -88,7 +88,7 @@ export const TaskList: React.FC = () => {
           return (
             <div key={listId} className="border border-border rounded-xl overflow-hidden bg-card">
               <div className="flex items-center px-4 py-3 bg-muted/30 border-b border-border">
-                <h3 className="text-base font-semibold text-foreground flex-1">
+                <h3 className="text-2xl font-bold text-foreground flex-1">
                   {list?.displayName || t.events.unknown}
                 </h3>
                 {allowEdit && (
