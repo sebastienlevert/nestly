@@ -6,9 +6,11 @@ import type { TodoTask } from '../../types/task.types';
 import { dateHelpers } from '../../utils/dateHelpers';
 import { TaskDetailDialog } from './TaskDetailDialog';
 import { ConfirmDialog } from '../common/ConfirmDialog';
+import { TaskListSkeleton } from '../ui/skeleton';
+import { SwipeToDelete } from '../ui/swipe-to-delete';
 
 export const TaskList: React.FC = () => {
-  const { tasks, lists, toggleTaskComplete, deleteTask, listSettings, createTask } = useTask();
+  const { tasks, lists, toggleTaskComplete, deleteTask, listSettings, createTask, isLoading } = useTask();
   const { locale, t } = useLocale();
   const [selectedTask, setSelectedTask] = useState<TodoTask | null>(null);
   const [addingToListId, setAddingToListId] = useState<string | null>(null);
@@ -30,6 +32,7 @@ export const TaskList: React.FC = () => {
   const handleToggle = async (e: React.MouseEvent, task: TodoTask) => {
     e.stopPropagation();
     try {
+      if (navigator.vibrate) navigator.vibrate(10);
       await toggleTaskComplete(task);
     } catch (error) {
       // Error is handled in context
@@ -68,11 +71,16 @@ export const TaskList: React.FC = () => {
     }
   };
 
+  if (isLoading && tasks.length === 0) {
+    return <TaskListSkeleton />;
+  }
+
   if (filteredTasks.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <CheckCircle2 size={48} className="mx-auto mb-3 text-muted-foreground" />
-        <p>{t.tasks.noActiveTasks}</p>
+      <div className="text-center py-16 text-muted-foreground">
+        <CheckCircle2 size={56} className="mx-auto mb-4 text-green-500/50" />
+        <p className="text-lg font-medium text-foreground mb-1">{t.tasks.noActiveTasks}</p>
+        <p className="text-sm">{t.tasks.allCaughtUp || 'All caught up!'}</p>
       </div>
     );
   }
@@ -125,11 +133,14 @@ export const TaskList: React.FC = () => {
                   </div>
                 )}
                 {listTasks.map(task => (
-                  <div
+                  <SwipeToDelete
                     key={task.id}
-                    onClick={() => setSelectedTask(task)}
-                    className={`flex items-center gap-3 hover:bg-muted/50 transition-colors cursor-pointer ${allowEdit ? 'px-3 py-2 sm:px-4 sm:py-2.5' : 'p-3 sm:p-4'}`}
+                    onDelete={() => setTaskToDelete(task)}
                   >
+                    <div
+                      onClick={() => setSelectedTask(task)}
+                      className={`flex items-center gap-3 hover:bg-muted/50 transition-colors cursor-pointer ${allowEdit ? 'px-3 py-2 sm:px-4 sm:py-2.5' : 'p-3 sm:p-4'}`}
+                    >
                     {/* Checkbox — only if editing allowed */}
                     {allowEdit && (
                       <button
@@ -195,6 +206,7 @@ export const TaskList: React.FC = () => {
                       <ChevronRight size={20} className="text-muted-foreground flex-shrink-0 mt-1" />
                     )}
                   </div>
+                  </SwipeToDelete>
                 ))}
               </div>
             </div>

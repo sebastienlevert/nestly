@@ -91,6 +91,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   const handleToggleItem = async (item: ChecklistItem) => {
     if (!task) return;
     try {
+      if (navigator.vibrate) navigator.vibrate(10);
       const updated = await toggleChecklistItem(task, item);
       setItems(prev => prev.map(i => (i.id === item.id ? updated : i)));
     } catch (err) {

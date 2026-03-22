@@ -7,6 +7,7 @@ import type { CalendarEvent } from '../../types/calendar.types';
 import { EventCard } from './EventCard';
 import { addDays } from 'date-fns';
 import { useWeather } from '../../hooks/useWeather';
+import { AgendaSkeleton } from '../ui/skeleton';
 
 interface AgendaViewProps {
   currentDate: Date;
@@ -16,7 +17,7 @@ interface AgendaViewProps {
 }
 
 export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEvent, onDateChange, onEventClick }) => {
-  const { events, getEventsForDateRange, ensureDateRange } = useCalendar();
+  const { events, getEventsForDateRange, ensureDateRange, isLoading } = useCalendar();
   const { locale, t } = useLocale();
   const { getWeatherForDate } = useWeather();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -290,6 +291,10 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
       </div>
     </div>
   );
+
+  if (isLoading && events.length === 0) {
+    return <AgendaSkeleton />;
+  }
 
   return (
     <div ref={gridRef} className="flex flex-col h-full bg-background">

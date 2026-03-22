@@ -277,6 +277,7 @@ export const frCA: TranslationKeys = {
     active: 'Actives',
     completed: 'Terminées',
     noActiveTasks: 'Aucune tâche active',
+    allCaughtUp: 'Tout est fait! Profitez de votre temps libre.',
     noCompletedTasks: 'Aucune tâche terminée',
     deleteConfirm: 'Supprimer cette tâche?',
     failedToCreate: 'Échec de la création de la tâche',

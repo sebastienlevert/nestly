@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, Loader2, Check } from 'lucide-react';
+import { Menu, Loader2, Check, WifiOff } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCalendar } from '../../contexts/CalendarContext';
@@ -8,6 +8,7 @@ import { useTask } from '../../contexts/TaskContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useProfilePhotos } from '../../hooks/useProfilePhotos';
 import { useHeaderControlsSlot } from '../../contexts/HeaderControlsContext';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { UserAvatar } from '../common/UserAvatar';
 
 interface MobileHeaderProps {
@@ -34,6 +35,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
   const photos = useProfilePhotos();
   const location = useLocation();
   const headerControls = useHeaderControlsSlot();
+  const isOnline = useOnlineStatus();
 
   const anySyncing = calSyncing || calLoading || taskSyncing || taskLoading || settingsSyncing;
   const anySynced = !!(calLastSync || taskLastSync);
@@ -81,7 +83,11 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
                 />
               ))}
               {/* Sync badge */}
-              {anySyncing ? (
+              {!isOnline ? (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-yellow-500 flex items-center justify-center" title="Offline">
+                  <WifiOff size={8} className="text-white" strokeWidth={3} />
+                </div>
+              ) : anySyncing ? (
                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-card flex items-center justify-center">
                   <Loader2 size={9} className="text-primary animate-spin" />
                 </div>

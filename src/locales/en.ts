@@ -275,6 +275,7 @@ export const en = {
     active: 'Active',
     completed: 'Completed',
     noActiveTasks: 'No active tasks',
+    allCaughtUp: 'All caught up! Enjoy your free time.',
     noCompletedTasks: 'No completed tasks',
     deleteConfirm: 'Delete this task?',
     failedToCreate: 'Failed to create task',

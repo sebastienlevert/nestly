@@ -138,9 +138,9 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
             </div>
 
             {/* Calendar grid */}
-            <div className="space-y-0.5">
+            <div role="grid" aria-label={monthLabel} className="space-y-0.5">
               {weeks.map((week, wi) => (
-                <div key={wi} className="grid grid-cols-7">
+                <div key={wi} role="row" className="grid grid-cols-7">
                   {week.map((day) => {
                     const isSelected = selected ? dateHelpers.isSameDay(day, selected) : false;
                     const isToday = dateHelpers.isToday(day);
@@ -149,7 +149,10 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
                     return (
                       <button
                         type="button"
+                        role="gridcell"
                         key={day.toISOString()}
+                        aria-selected={isSelected}
+                        aria-current={isToday ? 'date' : undefined}
                         onClick={() => handleDayClick(day)}
                         className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm transition-colors ${
                           isSelected
