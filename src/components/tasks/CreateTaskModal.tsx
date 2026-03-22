@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -156,12 +157,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
 
             {/* Due Date */}
             <div className="space-y-2">
-              <Label htmlFor="dueDate">{t.tasks.dueDate}</Label>
-              <Input
-                id="dueDate"
-                type="date"
+              <Label>{t.tasks.dueDate}</Label>
+              <DatePickerField
                 value={formData.dueDate}
-                onChange={e => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                onChange={v => setFormData(prev => ({ ...prev, dueDate: v }))}
               />
             </div>
 

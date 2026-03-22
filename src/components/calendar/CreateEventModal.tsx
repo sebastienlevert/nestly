@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -223,13 +224,10 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">{t.events.startDate} *</Label>
-                <Input
-                  id="startDate"
-                  type="date"
+                <Label>{t.events.startDate} *</Label>
+                <DatePickerField
                   value={formData.startDate}
-                  onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  required
+                  onChange={v => setFormData(prev => ({ ...prev, startDate: v }))}
                 />
               </div>
 
@@ -249,13 +247,10 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="endDate">{t.events.endDate} *</Label>
-                <Input
-                  id="endDate"
-                  type="date"
+                <Label>{t.events.endDate} *</Label>
+                <DatePickerField
                   value={formData.endDate}
-                  onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                  required
+                  onChange={v => setFormData(prev => ({ ...prev, endDate: v }))}
                 />
               </div>
 

@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 
 const MEAL_TYPES = [
   { key: 'breakfast' as const, emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -228,13 +229,10 @@ export const MealModal: React.FC<MealModalProps> = ({
 
             {/* Date */}
             <div className="space-y-2">
-              <Label htmlFor="meal-date">{t.mealPlanner?.date || 'Date'} *</Label>
-              <Input
-                id="meal-date"
-                type="date"
+              <Label>{t.mealPlanner?.date || 'Date'} *</Label>
+              <DatePickerField
                 value={date}
-                onChange={e => setDate(e.target.value)}
-                required
+                onChange={v => setDate(v)}
               />
             </div>
 
