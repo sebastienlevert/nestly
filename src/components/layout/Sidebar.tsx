@@ -32,43 +32,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
   const navItems: NavItem[] = [
     {
       to: '/calendar',
-      icon: <Calendar size={24} />,
+      icon: <Calendar size={30} />,
       labelKey: 'calendar',
       section: 'top',
     },
     {
       to: '/tasks',
-      icon: <CheckSquare size={24} />,
+      icon: <CheckSquare size={30} />,
       labelKey: 'todos',
       section: 'top',
     },
     {
       to: '/meals',
-      icon: <UtensilsCrossed size={24} />,
+      icon: <UtensilsCrossed size={30} />,
       labelKey: 'mealPlanner',
       section: 'top',
     },
     {
       to: '/weather',
-      icon: <CloudSun size={24} />,
+      icon: <CloudSun size={30} />,
       labelKey: 'weather',
       section: 'top',
     },
     {
       to: '/docs',
-      icon: <BookOpen size={24} />,
+      icon: <BookOpen size={30} />,
       labelKey: 'docs',
       section: 'bottom',
     },
     {
       to: '/home',
-      icon: <Home size={24} />,
+      icon: <Home size={30} />,
       labelKey: 'home',
       section: 'bottom',
     },
     {
       to: '/settings',
-      icon: <Settings size={24} />,
+      icon: <Settings size={30} />,
       labelKey: 'settings',
       section: 'bottom',
     },
@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
 
   // Desktop nav link styles — icons stay in fixed position, label appears on expand
   const desktopNavClass = (isActive: boolean) =>
-    `flex items-center rounded-md transition-all duration-200 h-8 overflow-hidden whitespace-nowrap ${
+    `flex items-center rounded-md transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
       isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
     }`;
 
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
               className="w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors touch-target"
               aria-label="Close menu"
             >
-              <X size={24} />
+              <X size={30} />
             </button>
           </div>
         </div>
