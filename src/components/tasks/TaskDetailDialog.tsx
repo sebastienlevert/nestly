@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Plus, Trash2, AlertCircle, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { useTask } from '../../contexts/TaskContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import type { TodoTask, ChecklistItem } from '../../types/task.types';
@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 interface TaskDetailDialogProps {
@@ -29,7 +28,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   task,
   allowEdit: _allowEdit,
 }) => {
-  const { getChecklistItems, createChecklistItem, deleteChecklistItem, toggleChecklistItem, lists } = useTask();
+  const { getChecklistItems, createChecklistItem, deleteChecklistItem, toggleChecklistItem } = useTask();
   const { locale, t } = useLocale();
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +94,6 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
 
   if (!task) return null;
 
-  const list = lists.find(l => l.id === task.listId);
   const checkedCount = items.filter(i => i.isChecked).length;
 
   return (
@@ -106,21 +104,6 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
         </DialogHeader>
 
         <DialogBody className="space-y-4">
-          {/* Task title */}
-          <div>
-            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-              {task.importance === 'high' && <AlertCircle size={20} className="text-red-600 flex-shrink-0" />}
-              {task.title}
-            </h3>
-          </div>
-
-          {/* List badge */}
-          {list && (
-            <Badge variant="secondary" className="text-xs">
-              {list.displayName}
-            </Badge>
-          )}
-
           {/* Due date */}
           {task.dueDateTime && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
