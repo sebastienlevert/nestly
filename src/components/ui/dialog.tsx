@@ -70,6 +70,7 @@ const DialogHeader = ({
     {onClose ? (
       <button
         onClick={onClose}
+        aria-label="Close"
         className="w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors shrink-0 ml-3"
       >
         <X className="h-5 w-5" />

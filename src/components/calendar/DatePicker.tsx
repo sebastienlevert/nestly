@@ -69,11 +69,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({ currentDate, onDateChang
       <PopoverContent align="end" className="w-auto p-3" sideOffset={8}>
         {/* Month nav */}
         <div className="flex items-center justify-between mb-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewMonth(m => subMonths(m, 1))}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Previous month" onClick={() => setViewMonth(m => subMonths(m, 1))}>
             <ChevronLeft size={16} />
           </Button>
           <span className="text-sm font-semibold">{monthLabel}</span>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewMonth(m => addMonths(m, 1))}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Next month" onClick={() => setViewMonth(m => addMonths(m, 1))}>
             <ChevronRight size={16} />
           </Button>
         </div>

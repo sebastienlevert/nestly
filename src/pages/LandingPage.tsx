@@ -168,7 +168,7 @@ export const LandingPage: React.FC = () => {
                 ))}
               </button>
             ) : (
-              <Button onClick={handleGetStarted} disabled={isLoading} size="sm">
+              <Button onClick={handleGetStarted} disabled={isLoading} size="sm" className="h-12">
                 {isLoading ? l.signingIn : l.getStarted}
               </Button>
             )}
@@ -367,7 +367,7 @@ export const LandingPage: React.FC = () => {
                 {stars > 0 && <span className="ml-1.5 text-xs bg-muted px-2 py-0.5 rounded-full font-medium"><AnimatedNumber target={stars} /></span>}
               </Button>
             </a>
-            <Button onClick={isAuthenticated ? () => navigate('/calendar') : handleGetStarted} disabled={isLoading} className="h-11 px-6 rounded-xl">
+            <Button onClick={isAuthenticated ? () => navigate('/calendar') : handleGetStarted} disabled={isLoading} className="h-12 px-6 rounded-xl">
               <Zap size={16} className="mr-1" />
               {isLoading ? l.signingIn : isAuthenticated ? l.goToDashboard : l.getStartedFree}
             </Button>

@@ -119,11 +119,11 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
           <div className="p-3">
             {/* Month nav */}
             <div className="flex items-center justify-between mb-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewMonth(m => subMonths(m, 1))}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Previous month" onClick={() => setViewMonth(m => subMonths(m, 1))}>
                 <ChevronLeft size={16} />
               </Button>
               <span className="text-sm font-semibold">{monthLabel}</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewMonth(m => addMonths(m, 1))}>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Next month" onClick={() => setViewMonth(m => addMonths(m, 1))}>
                 <ChevronRight size={16} />
               </Button>
             </div>
@@ -184,7 +184,10 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
               <div
                 ref={hourRef}
                 className="h-[300px] overflow-y-auto py-1 px-1 overscroll-contain"
+                style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
                 onPointerDown={e => e.stopPropagation()}
+                onTouchStart={e => e.stopPropagation()}
+                onTouchMove={e => e.stopPropagation()}
               >
                 {HOURS.map(h => (
                   <button
@@ -206,7 +209,10 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
               <div
                 ref={minuteRef}
                 className="h-[300px] overflow-y-auto py-1 px-1 border-l border-border overscroll-contain"
+                style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
                 onPointerDown={e => e.stopPropagation()}
+                onTouchStart={e => e.stopPropagation()}
+                onTouchMove={e => e.stopPropagation()}
               >
                 {MINUTES.map(m => (
                   <button
