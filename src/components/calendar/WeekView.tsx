@@ -31,7 +31,7 @@ export const WeekView: React.FC<WeekViewProps> = ({ currentDate, onCreateEvent, 
   const { events, getEventsForDateRange, calendars, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const sevenAmRef = useRef<HTMLDivElement>(null);
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
   const [allDayDialogOpen, setAllDayDialogOpen] = useState(false);
   const [selectedDayAllDayEvents, setSelectedDayAllDayEvents] = useState<{ date: Date; events: CalendarEvent[] } | null>(null);
 
@@ -49,6 +49,15 @@ export const WeekView: React.FC<WeekViewProps> = ({ currentDate, onCreateEvent, 
     return dateHelpers.getWeekEnd(currentWeekStart);
   }, [currentWeekStart]);
 
+  // Scroll to current hour when viewing today, otherwise 7 AM
+  const scrollTargetHour = useMemo(() => {
+    const viewingToday = weekDays.some(d => dateHelpers.isToday(d));
+    if (viewingToday) {
+      return Math.max(new Date().getHours() - 1, 0);
+    }
+    return 7;
+  }, [weekDays]);
+
   // Ensure events are loaded for the visible week
   useEffect(() => {
     ensureDateRange(currentWeekStart, weekEnd);
@@ -62,10 +71,10 @@ export const WeekView: React.FC<WeekViewProps> = ({ currentDate, onCreateEvent, 
     return Array.from({ length: 24 }, (_, i) => i);
   }, []);
 
-  // Scroll to 7AM on mount and when date changes
+  // Scroll to target hour on mount and when date changes
   useEffect(() => {
-    if (sevenAmRef.current) {
-      sevenAmRef.current.scrollIntoView({ block: 'start' });
+    if (scrollTargetRef.current) {
+      scrollTargetRef.current.scrollIntoView({ block: 'start' });
     }
   }, [currentDate]);
 
@@ -294,7 +303,7 @@ export const WeekView: React.FC<WeekViewProps> = ({ currentDate, onCreateEvent, 
             {hours.map(hour => (
               <div
                 key={hour}
-                ref={hour === 7 ? sevenAmRef : null}
+                ref={hour === scrollTargetHour ? scrollTargetRef : null}
                 className="p-2 text-sm text-muted-foreground text-right pr-2 border-b border-border"
                 style={{ minHeight: '70px' }}
               >

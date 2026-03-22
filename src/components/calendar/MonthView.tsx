@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { dateHelpers } from '../../utils/dateHelpers';
@@ -14,9 +14,20 @@ interface MonthViewProps {
 export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, onEventClick }) => {
   const { events, getEventsForDateRange, ensureDateRange } = useCalendar();
   const { locale } = useLocale();
+  const todayRowRef = useRef<HTMLDivElement>(null);
 
   const calendarGrid = useMemo(() => {
     return dateHelpers.getMonthCalendarGrid(currentDate);
+  }, [currentDate]);
+
+  // Scroll to the week row containing today
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (todayRowRef.current) {
+        todayRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, [currentDate]);
 
   const gridStart = useMemo(() => calendarGrid[0][0], [calendarGrid]);
@@ -74,6 +85,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
             return (
               <div
                 key={weekIndex}
+                ref={containsToday ? todayRowRef : undefined}
                 className={`grid grid-cols-7 border-b ${
                   containsToday ? 'flex-[2]' : 'flex-1'
                 }`}

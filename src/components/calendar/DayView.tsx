@@ -31,7 +31,15 @@ export const DayView: React.FC<DayViewProps> = ({ currentDate, onCreateEvent, on
   const { events, getEventsForDateRange, calendars, ensureDateRange } = useCalendar();
   const { locale, t } = useLocale();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const sevenAmRef = useRef<HTMLDivElement>(null);
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to current hour when viewing today, otherwise 7 AM
+  const scrollTargetHour = useMemo(() => {
+    if (dateHelpers.isToday(currentDate)) {
+      return Math.max(new Date().getHours() - 1, 0);
+    }
+    return 7;
+  }, [currentDate]);
   const [allDayDialogOpen, setAllDayDialogOpen] = useState(false);
 
   const MAX_VISIBLE_ALL_DAY = 3; // Show max 3 all-day events before "+X more" button
@@ -66,10 +74,10 @@ export const DayView: React.FC<DayViewProps> = ({ currentDate, onCreateEvent, on
     return Array.from({ length: 24 }, (_, i) => i);
   }, []);
 
-  // Scroll to 7AM on mount and when date changes
+  // Scroll to target hour on mount and when date changes
   useEffect(() => {
-    if (sevenAmRef.current) {
-      sevenAmRef.current.scrollIntoView({ block: 'start' });
+    if (scrollTargetRef.current) {
+      scrollTargetRef.current.scrollIntoView({ block: 'start' });
     }
   }, [currentDate]);
 
@@ -207,7 +215,7 @@ export const DayView: React.FC<DayViewProps> = ({ currentDate, onCreateEvent, on
             {hours.map(hour => (
               <div
                 key={hour}
-                ref={hour === 7 ? sevenAmRef : null}
+                ref={hour === scrollTargetHour ? scrollTargetRef : null}
                 className="p-2 text-sm text-muted-foreground text-right border-b border-border"
                 style={{ minHeight: '70px' }}
               >
