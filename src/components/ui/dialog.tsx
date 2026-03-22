@@ -41,8 +41,8 @@ const DialogContent = React.forwardRef<
         "fixed z-50 flex flex-col bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         // Mobile: full screen
         "inset-0",
-        // Desktop: 80% × 80% centered with rounded corners
-        "lg:inset-auto lg:left-[10%] lg:top-[10%] lg:w-[80%] lg:h-[80%] lg:rounded-xl lg:border",
+        // Desktop: 80% wide, height adapts to content, max 80% viewport, centered
+        "lg:inset-auto lg:left-[10%] lg:top-[50%] lg:-translate-y-1/2 lg:w-[80%] lg:max-h-[80vh] lg:rounded-xl lg:border",
         className
       )}
       {...props}
