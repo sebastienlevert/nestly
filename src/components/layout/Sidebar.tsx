@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
 
   // Desktop nav link styles — icons stay in fixed position, label appears on expand
   const desktopNavClass = (isActive: boolean) =>
-    `flex items-center rounded-md transition-all duration-200 h-10 overflow-hidden whitespace-nowrap ${
+    `flex items-center rounded-md transition-all duration-200 h-8 overflow-hidden whitespace-nowrap ${
       isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
     }`;
 
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
         className={({ isActive }) => desktopNavClass(isActive)}
       >
         {/* Fixed-width icon column — matches collapsed sidebar width so icon never moves */}
-        <span className="w-12 shrink-0 flex items-center justify-center">{item.icon}</span>
+        <span className="w-10 shrink-0 flex items-center justify-center">{item.icon}</span>
         <span className={`text-sm font-medium truncate transition-opacity duration-200 pr-2 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
           {t.nav[item.labelKey as keyof typeof t.nav]}
         </span>
@@ -125,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose, c
       {/* Desktop sidebar — always visible on lg+ */}
       <aside
         className={`hidden lg:flex flex-col bg-card border-r border-border shrink-0 overflow-hidden transition-all duration-200 ${
-          collapsed ? 'w-12' : 'w-44'
+          collapsed ? 'w-10' : 'w-44'
         } py-3`}
       >
         <nav className="flex flex-col flex-1">

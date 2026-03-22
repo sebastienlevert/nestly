@@ -58,10 +58,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle, onSide
           >
             <Menu size={24} />
           </button>
-          {/* Desktop: toggle sidebar collapse — matches sidebar w-12 so icon aligns with nav icons */}
+          {/* Desktop: toggle sidebar collapse — matches sidebar w-10 so icon aligns with nav icons */}
           <button
             onClick={onSidebarCollapse}
-            className="hidden lg:flex w-12 h-14 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors"
+            className="hidden lg:flex w-10 h-14 items-center justify-center rounded-lg text-foreground hover:bg-muted transition-colors"
             aria-label="Toggle sidebar"
           >
             <Menu size={24} />
