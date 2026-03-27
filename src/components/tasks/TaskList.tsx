@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CheckCircle2, Circle, Trash2, Calendar as CalendarIcon, AlertCircle, ChevronRight, Plus } from 'lucide-react';
 import { useTask } from '../../contexts/TaskContext';
 import { useLocale } from '../../contexts/LocaleContext';
@@ -17,6 +17,7 @@ export const TaskList: React.FC = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [taskToDelete, setTaskToDelete] = useState<TodoTask | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const quickAddInputRef = useRef<HTMLInputElement>(null);
 
   const filteredTasks = tasks.filter(task => task.status !== 'completed');
 
@@ -65,7 +66,8 @@ export const TaskList: React.FC = () => {
     try {
       await createTask({ title, listId, accountId: list.accountId });
       setNewTaskTitle('');
-      setAddingToListId(null);
+      // Keep input open for rapid entry; refocus
+      setTimeout(() => quickAddInputRef.current?.focus(), 50);
     } catch {
       // Error handled in context
     }
@@ -114,28 +116,11 @@ export const TaskList: React.FC = () => {
               </div>
 
               <div className="divide-y divide-border">
-                {addingToListId === listId && (
-                  <div className="flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 bg-muted/20">
-                    <Circle size={24} className="text-muted-foreground/40 flex-shrink-0" />
-                    <input
-                      type="text"
-                      autoFocus
-                      value={newTaskTitle}
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleQuickAdd(listId);
-                        if (e.key === 'Escape') { setAddingToListId(null); setNewTaskTitle(''); }
-                      }}
-                      onBlur={() => { if (!newTaskTitle.trim()) { setAddingToListId(null); setNewTaskTitle(''); } }}
-                      placeholder={t.actions.newTask + '...'}
-                      className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-none text-sm font-medium"
-                    />
-                  </div>
-                )}
                 {listTasks.map(task => (
                   <SwipeToDelete
                     key={task.id}
                     onDelete={() => setTaskToDelete(task)}
+                    disabled={!allowEdit}
                   >
                     <div
                       onClick={() => setSelectedTask(task)}
@@ -193,7 +178,7 @@ export const TaskList: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Right side: delete or chevron */}
+                    {/* Right side: delete in normal mode, chevron in grocery mode */}
                     {allowEdit ? (
                       <button
                         onClick={(e) => handleDelete(e, task)}
@@ -208,6 +193,25 @@ export const TaskList: React.FC = () => {
                   </div>
                   </SwipeToDelete>
                 ))}
+                {addingToListId === listId && (
+                  <div className="flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 bg-muted/20">
+                    <Circle size={24} className="text-muted-foreground/40 flex-shrink-0" />
+                    <input
+                      ref={quickAddInputRef}
+                      type="text"
+                      autoFocus
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleQuickAdd(listId);
+                        if (e.key === 'Escape') { setAddingToListId(null); setNewTaskTitle(''); }
+                      }}
+                      onBlur={() => { if (!newTaskTitle.trim()) { setAddingToListId(null); setNewTaskTitle(''); } }}
+                      placeholder={t.actions.newTask + '...'}
+                      className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/60 outline-none text-sm font-medium"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );

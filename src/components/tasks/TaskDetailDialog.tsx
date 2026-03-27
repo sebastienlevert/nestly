@@ -37,6 +37,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const newItemInputRef = useRef<HTMLInputElement>(null);
+  const itemsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && task) {
@@ -68,7 +69,10 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
       const newItem = await createChecklistItem(task, newItemName.trim());
       setItems(prev => [...prev, newItem]);
       setNewItemName('');
-      setTimeout(() => newItemInputRef.current?.focus(), 50);
+      setTimeout(() => {
+        newItemInputRef.current?.focus();
+        itemsEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
     } catch (err) {
       console.error('Failed to add checklist item:', err);
     } finally {
@@ -181,7 +185,7 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
                   </div>
                 ))}
 
-                {/* checklist items list only */}
+                <div ref={itemsEndRef} />
               </div>
             )}
           </div>

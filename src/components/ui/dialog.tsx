@@ -39,10 +39,10 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed z-50 flex flex-col bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        // Mobile: full screen, slide up from bottom
-        "inset-0 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4",
+        // Mobile: full screen with dynamic viewport height (shrinks when keyboard opens)
+        "inset-x-0 top-0 h-[100dvh] data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4",
         // Desktop: 80% wide, height adapts to content, max 80% viewport, centered, zoom animation
-        "lg:inset-auto lg:left-[10%] lg:top-[50%] lg:-translate-y-1/2 lg:w-[80%] lg:max-h-[80vh] lg:rounded-xl lg:border lg:data-[state=open]:slide-in-from-bottom-0 lg:data-[state=closed]:slide-out-to-bottom-0 lg:data-[state=open]:zoom-in-95 lg:data-[state=closed]:zoom-out-95",
+        "lg:inset-auto lg:left-[10%] lg:top-[50%] lg:-translate-y-1/2 lg:w-[80%] lg:h-auto lg:max-h-[80vh] lg:rounded-xl lg:border lg:data-[state=open]:slide-in-from-bottom-0 lg:data-[state=closed]:slide-out-to-bottom-0 lg:data-[state=open]:zoom-in-95 lg:data-[state=closed]:zoom-out-95",
         className
       )}
       {...props}

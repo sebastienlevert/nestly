@@ -219,12 +219,21 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
   const createChecklistItem = async (task: TodoTask, displayName: string): Promise<ChecklistItem> => {
     const accessToken = await getAccessToken(task.accountId);
-    return todoService.createChecklistItem(task.listId, task.id, displayName, accessToken, task.accountId);
+    const newItem = await todoService.createChecklistItem(task.listId, task.id, displayName, accessToken, task.accountId);
+    // Update parent task's checklist count in local state
+    setTasks(prev => prev.map(t =>
+      t.id === task.id ? { ...t, checklistItemCount: (t.checklistItemCount || 0) + 1 } : t
+    ));
+    return newItem;
   };
 
   const deleteChecklistItem = async (task: TodoTask, itemId: string): Promise<void> => {
     const accessToken = await getAccessToken(task.accountId);
     await todoService.deleteChecklistItem(task.listId, task.id, itemId, accessToken);
+    // Update parent task's checklist count in local state
+    setTasks(prev => prev.map(t =>
+      t.id === task.id ? { ...t, checklistItemCount: Math.max((t.checklistItemCount || 1) - 1, 0) } : t
+    ));
   };
 
   const toggleChecklistItem = async (task: TodoTask, item: ChecklistItem): Promise<ChecklistItem> => {

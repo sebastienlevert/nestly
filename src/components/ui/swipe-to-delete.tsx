@@ -5,6 +5,7 @@ interface SwipeToDeleteProps {
   onDelete: () => void;
   threshold?: number;
   className?: string;
+  disabled?: boolean;
 }
 
 export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({
@@ -12,6 +13,7 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({
   onDelete,
   threshold = 80,
   className = '',
+  disabled = false,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
@@ -20,6 +22,7 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({
   const [swiping, setSwiping] = useState(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (disabled) return;
     startX.current = e.touches[0].clientX;
     currentX.current = e.touches[0].clientX;
     setSwiping(true);
