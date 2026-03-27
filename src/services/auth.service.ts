@@ -47,6 +47,13 @@ class AuthService {
       throw new Error('Auth service not initialized');
     }
 
+    // Standalone PWA can't open popups — use redirect flow instead
+    if (this.shouldUseRedirect()) {
+      await this.loginRedirect();
+      // Page navigates away; this line is never reached
+      throw new Error('Redirecting to login...');
+    }
+
     try {
       const response: AuthenticationResult = await this.msalInstance.loginPopup({
         scopes: appConfig.microsoft.scopes,
@@ -54,7 +61,15 @@ class AuthService {
       });
 
       return this.createAuthAccount(response);
-    } catch (error) {
+    } catch (error: any) {
+      // Popup blocked — fall back to redirect
+      if (error?.errorCode === 'popup_window_error' ||
+          error?.errorCode === 'empty_window_error' ||
+          error?.errorCode === 'monitor_popup_timeout') {
+        console.warn('[Auth] Popup blocked, falling back to redirect');
+        await this.loginRedirect();
+        throw new Error('Redirecting to login...');
+      }
       console.error('Login failed:', error);
       throw new Error('Failed to sign in');
     }
@@ -92,14 +107,35 @@ class AuthService {
     } catch (error) {
       console.error('Silent token acquisition failed:', error);
 
-      // Try interactive token acquisition
+      // Standalone PWA can't open popups — use redirect for token refresh
+      if (this.shouldUseRedirect()) {
+        console.warn('[Auth] Silent refresh failed in PWA, falling back to redirect');
+        await this.msalInstance.acquireTokenRedirect({
+          scopes: appConfig.microsoft.scopes,
+          account: account,
+        });
+        // Page navigates away
+        throw new Error('Redirecting for token refresh...');
+      }
+
+      // Desktop: try interactive popup
       try {
         const response = await this.msalInstance.acquireTokenPopup({
           scopes: appConfig.microsoft.scopes,
           account: account,
         });
         return response.accessToken;
-      } catch (popupError) {
+      } catch (popupError: any) {
+        // Popup also failed — try redirect as last resort
+        if (popupError?.errorCode === 'popup_window_error' ||
+            popupError?.errorCode === 'empty_window_error') {
+          console.warn('[Auth] Popup token refresh failed, falling back to redirect');
+          await this.msalInstance.acquireTokenRedirect({
+            scopes: appConfig.microsoft.scopes,
+            account: account,
+          });
+          throw new Error('Redirecting for token refresh...');
+        }
         console.error('Popup token acquisition failed:', popupError);
         throw new Error('Failed to refresh token');
       }
@@ -165,6 +201,11 @@ class AuthService {
 
     try {
       const response = await this.msalInstance.handleRedirectPromise();
+      if (response?.account) {
+        // Save/update account from redirect result (login or token refresh)
+        const account = this.createAuthAccount(response);
+        this.saveAccount(account);
+      }
       return response;
     } catch (error) {
       console.error('Redirect callback handling failed:', error);
@@ -174,6 +215,12 @@ class AuthService {
 
   isInitialized(): boolean {
     return this.initialized;
+  }
+
+  // Standalone PWA or mobile contexts where popups don't work reliably
+  private shouldUseRedirect(): boolean {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           (window.navigator as any).standalone === true;
   }
 
   // Save account to storage
