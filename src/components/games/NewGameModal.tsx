@@ -126,13 +126,13 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
-      <DialogContent className="max-w-md mx-auto max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-md mx-auto sm:max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{step === 'select' ? t.games.selectGame : t.games.players}</DialogTitle>
         </DialogHeader>
 
         {step === 'select' && (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3 px-1 flex-1 min-h-0">
             {/* Search */}
             <Input
               value={search}
@@ -162,8 +162,8 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
               })}
             </div>
 
-            {/* Filtered game list */}
-            <div className="max-h-[40vh] overflow-y-auto space-y-1.5">
+            {/* Filtered game list — fill remaining space on mobile */}
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-1.5">
               {filteredGames.map(game => (
                 <button
                   key={game.id}
