@@ -8,6 +8,19 @@
   /* Disable browser back/forward navigation gestures (Edge/Chrome swipe) */
   html, body {
     overscroll-behavior-x: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Prevent PWA zoom-out on first load and ensure full-screen rendering */
+  html {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe area insets for notched devices in standalone PWA mode */
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
   :root {
