@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { ChevronRight, Plus, UtensilsCrossed, Link as LinkIcon, Pencil } from 'lucide-react';
+import { ChevronRight, Plus, UtensilsCrossed, Link as LinkIcon, Pencil, Sparkles } from 'lucide-react';
 import { useCalendar } from '../contexts/CalendarContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { StorageService } from '../services/storage.service';
@@ -7,9 +7,11 @@ import { dateHelpers } from '../utils/dateHelpers';
 import type { CalendarEvent } from '../types/calendar.types';
 import { addDays, addWeeks } from 'date-fns';
 import { MealModal } from '../components/meals/MealModal';
+import { ImagineModal } from '../components/meals/ImagineModal';
 import { DatePicker } from '../components/calendar/DatePicker';
 import { useHeaderControls } from '../contexts/HeaderControlsContext';
 import { useSwipe } from '../hooks/useSwipe';
+import { Button } from '@/components/ui/button';
 
 const MEAL_TYPES = [
   { key: 'breakfast', emoji: '🥐', defaultStartHour: 7, defaultStartMin: 30, defaultEndHour: 8, defaultEndMin: 0 },
@@ -45,9 +47,20 @@ export const MealPlannerPage: React.FC = () => {
     useCallback(() => setCurrentDate(d => addWeeks(d, -1)), []),
   );
 
-  // Inject date picker into global header
+  // Inject date picker + imagine button into global header
   useHeaderControls(
-    <DatePicker currentDate={currentDate} onDateChange={setCurrentDate} />
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setImagineOpen(true)}
+        className="gap-1.5 text-amber-500 hover:text-amber-400 hover:bg-amber-500/10"
+      >
+        <Sparkles size={18} />
+        <span className="hidden sm:inline">{t.mealPlanner?.imagine || 'Imagine'}</span>
+      </Button>
+      <DatePicker currentDate={currentDate} onDateChange={setCurrentDate} />
+    </>
   );
 
   // Modal state
@@ -55,6 +68,7 @@ export const MealPlannerPage: React.FC = () => {
   const [modalDate, setModalDate] = useState<Date | null>(null);
   const [modalType, setModalType] = useState<MealKey>('breakfast');
   const [modalEditMeal, setModalEditMeal] = useState<CalendarEvent | null>(null);
+  const [imagineOpen, setImagineOpen] = useState(false);
 
   const mealCalendarId = useMemo(() => {
     return StorageService.getSettings().mealCalendarId || null;
@@ -351,6 +365,15 @@ export const MealPlannerPage: React.FC = () => {
           initialDate={modalDate || undefined}
           initialType={modalType}
           editMeal={modalEditMeal}
+        />
+      )}
+
+      {/* Imagine Modal */}
+      {mealCalendar && (
+        <ImagineModal
+          isOpen={imagineOpen}
+          onClose={() => setImagineOpen(false)}
+          mealCalendar={mealCalendar}
         />
       )}
     </div>
