@@ -30,8 +30,8 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
     return () => clearTimeout(timer);
   }, [currentDate]);
 
-  const gridStart = useMemo(() => calendarGrid[0][0], [calendarGrid]);
-  const gridEnd = useMemo(() => calendarGrid[calendarGrid.length - 1][6], [calendarGrid]);
+  const gridStart = useMemo(() => dateHelpers.getDayStart(calendarGrid[0][0]), [calendarGrid]);
+  const gridEnd = useMemo(() => dateHelpers.getDayEnd(calendarGrid[calendarGrid.length - 1][6]), [calendarGrid]);
 
   // Ensure events are loaded for the visible month grid
   useEffect(() => {
@@ -69,7 +69,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b bg-card">
         {dateHelpers.getWeekDays(currentDate).map(day => (
-          <div key={day.toISOString()} className="p-3 text-center text-lg font-medium text-muted-foreground border-r border-border last:border-r-0">
+          <div key={day.toISOString()} className="py-1.5 text-center text-xs font-medium text-muted-foreground border-r border-border last:border-r-0">
             {dateHelpers.formatDate(day, 'EEE', locale)}
           </div>
         ))}
@@ -86,9 +86,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
               <div
                 key={weekIndex}
                 ref={containsToday ? todayRowRef : undefined}
-                className={`grid grid-cols-7 border-b ${
-                  containsToday ? 'flex-[2]' : 'flex-1'
-                }`}
+                className={`grid grid-cols-7 border-b flex-1`}
               >
                 {week.map((date, dayIndex) => {
                 const dayEvents = getEventsForDate(date);
@@ -98,16 +96,16 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
                 return (
                   <div
                     key={dayIndex}
-                    className={`border-r border-border last:border-r-0 p-3 cursor-pointer hover:bg-secondary/20 transition-colors touch-optimized ${
+                    className={`border-r border-border last:border-r-0 p-1 cursor-pointer hover:bg-secondary/20 transition-colors ${
                       !inCurrentMonth ? 'bg-muted' : 'bg-card'
                     } ${isToday ? 'ring-2 ring-inset ring-primary' : ''}`}
                     onClick={() => handleDateClick(date)}
                   >
                     <div className="flex flex-col h-full">
                       {/* Date number */}
-                      <div className={`text-lg font-medium mb-1 ${
+                      <div className={`text-xs font-medium mb-0.5 ${
                         isToday
-                          ? 'bg-muted-foreground text-background rounded-full w-7 h-7 flex items-center justify-center font-bold'
+                          ? 'bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px]'
                           : !inCurrentMonth
                           ? 'text-muted-foreground/50'
                           : 'text-foreground'
@@ -118,7 +116,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
                       {/* Event indicators */}
                       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         {dayEvents.length > 0 && (
-                          <div className="space-y-1">
+                          <div className="space-y-0.5">
                             {dayEvents.map((event) => {
                               const eventEnd = new Date(event.end.dateTime);
                               const isPast = eventEnd < new Date();
@@ -127,7 +125,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
                                 <EventCard
                                   key={event.id}
                                   event={event}
-                                  compact
+                                  mini
                                   isPast={isPast}
                                   onClick={() => onEventClick?.(event)}
                                 />

@@ -115,7 +115,8 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
       if (nextEvent) {
         const containerRect = container.getBoundingClientRect();
         const eventRect = nextEvent.getBoundingClientRect();
-        container.scrollTop = Math.max(0, eventRect.top - containerRect.top + container.scrollTop);
+        const paddingTop = parseFloat(getComputedStyle(container).paddingTop) || 0;
+        container.scrollTop = Math.max(0, eventRect.top - containerRect.top + container.scrollTop - paddingTop);
       }
     });
   }, []);

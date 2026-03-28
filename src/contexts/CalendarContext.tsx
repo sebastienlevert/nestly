@@ -283,11 +283,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
 
   // Ensure events are loaded for a given date range, fetching if needed
   const ensureDateRange = useCallback((start: Date, end: Date) => {
+    if (calendars.length === 0 || accounts.length === 0) return;
+
     const range = fetchedRangeRef.current;
-    if (!range || calendars.length === 0 || accounts.length === 0) return;
 
     // Already covered
-    if (start >= range.start && end <= range.end) return;
+    if (range && start.getTime() >= range.start.getTime() && end.getTime() <= range.end.getTime()) return;
 
     // If currently fetching, queue the range for later
     if (isFetchingRef.current) {
@@ -299,47 +300,58 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       return;
     }
 
-    let fetchStart: Date | null = null;
-    let fetchEnd: Date | null = null;
+    let fetchStart: Date;
+    let fetchEnd: Date;
 
-    // Need to fetch earlier data — extend by an extra month backward
-    if (start < range.start) {
+    if (!range) {
+      // No range fetched yet — fetch the full requested range with a month buffer each side
       fetchStart = new Date(start.getFullYear(), start.getMonth() - 1, 1);
-      fetchEnd = new Date(range.start.getTime() - 1);
+      fetchEnd = new Date(end.getFullYear(), end.getMonth() + 2, 0);
+    } else {
+      // Extend existing range as needed
+      fetchStart = range.end;
+      fetchEnd = range.start;
+
+      // Need to fetch earlier data — extend by an extra month backward
+      if (start.getTime() < range.start.getTime()) {
+        fetchStart = new Date(start.getFullYear(), start.getMonth() - 1, 1);
+        fetchEnd = new Date(range.start.getTime() - 1);
+      }
+
+      // Need to fetch later data — extend by an extra month forward
+      if (end.getTime() > range.end.getTime()) {
+        fetchStart = fetchStart.getTime() < range.start.getTime() ? fetchStart : new Date(range.end.getTime() + 1);
+        const extendedEnd = new Date(end.getFullYear(), end.getMonth() + 2, 0);
+        fetchEnd = extendedEnd;
+      }
+
+      // Safety check — if computed range is invalid, bail
+      if (fetchStart.getTime() >= fetchEnd.getTime()) return;
     }
 
-    // Need to fetch later data — extend by an extra month forward
-    if (end > range.end) {
-      fetchStart = fetchStart || new Date(range.end.getTime() + 1);
-      const extendedEnd = new Date(end.getFullYear(), end.getMonth() + 2, 0);
-      fetchEnd = extendedEnd;
-    }
+    // Extend tracked range immediately to prevent duplicate fetches
+    fetchedRangeRef.current = {
+      start: range ? (fetchStart < range.start ? fetchStart : range.start) : fetchStart,
+      end: range ? (fetchEnd > range.end ? fetchEnd : range.end) : fetchEnd,
+    };
 
-    if (fetchStart && fetchEnd) {
-      // Extend tracked range immediately to prevent duplicate fetches
-      fetchedRangeRef.current = {
-        start: fetchStart < range.start ? fetchStart : range.start,
-        end: fetchEnd > range.end ? fetchEnd : range.end,
-      };
+    isFetchingRef.current = true;
+    setIsSyncing(true);
 
-      isFetchingRef.current = true;
-      setIsSyncing(true);
+    fetchEventsForDateRange(fetchStart, fetchEnd)
+      .catch(err => console.error('Failed to load additional events:', err))
+      .finally(() => {
+        isFetchingRef.current = false;
 
-      fetchEventsForDateRange(fetchStart, fetchEnd)
-        .catch(err => console.error('Failed to load additional events:', err))
-        .finally(() => {
-          isFetchingRef.current = false;
-
-          // Process any queued range request
-          const pending = pendingRangeRef.current;
-          if (pending) {
-            pendingRangeRef.current = null;
-            ensureDateRangeRef.current(pending.start, pending.end);
-          } else {
-            setIsSyncing(false);
-          }
-        });
-    }
+        // Process any queued range request
+        const pending = pendingRangeRef.current;
+        if (pending) {
+          pendingRangeRef.current = null;
+          ensureDateRangeRef.current(pending.start, pending.end);
+        } else {
+          setIsSyncing(false);
+        }
+      });
   }, [calendars, accounts, getAccessToken]);
 
   // Keep ref in sync so async callbacks always call the latest version

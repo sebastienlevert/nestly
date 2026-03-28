@@ -9,6 +9,8 @@ import { StorageService } from '../../services/storage.service';
 interface EventCardProps {
   event: CalendarEvent;
   compact?: boolean;
+  /** Ultra-compact single-line pill for month view */
+  mini?: boolean;
   onClick?: () => void;
   isPast?: boolean;
 }
@@ -24,7 +26,7 @@ function getMealEmoji(event: CalendarEvent): string | null {
   return null;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({ event, compact = false, onClick, isPast = false }) => {
+export const EventCard: React.FC<EventCardProps> = ({ event, compact = false, mini = false, onClick, isPast = false }) => {
   const { calendars } = useCalendar();
   const { t } = useLocale();
 
@@ -39,6 +41,25 @@ export const EventCard: React.FC<EventCardProps> = ({ event, compact = false, on
 
   const startTime = dateHelpers.formatTime(event.start.dateTime);
   const endTime = dateHelpers.formatTime(event.end.dateTime);
+
+  if (mini) {
+    return (
+      <div
+        className={`rounded px-1.5 py-0.5 text-xs cursor-pointer truncate transition-opacity hover:opacity-80 ${isPast ? 'opacity-50 bg-muted' : ''}`}
+        style={{
+          backgroundColor: isPast ? undefined : `${eventColor}40`,
+          color: isPast ? undefined : eventColor,
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        {displayEmoji && <span className="mr-0.5">{displayEmoji}</span>}
+        <span className="font-medium">{event.subject}</span>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
