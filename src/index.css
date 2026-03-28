@@ -5,6 +5,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Disable browser back/forward navigation gestures (Edge/Chrome swipe) */
+  html, body {
+    overscroll-behavior-x: none;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;

@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
+import { addMonths } from 'date-fns';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { dateHelpers } from '../../utils/dateHelpers';
@@ -12,7 +13,7 @@ interface MonthViewProps {
 }
 
 export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, onEventClick }) => {
-  const { events, getEventsForDateRange, ensureDateRange } = useCalendar();
+  const { events, calendars, getEventsForDateRange, ensureDateRange, isSyncing } = useCalendar();
   const { locale } = useLocale();
   const todayRowRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +35,27 @@ export const MonthView: React.FC<MonthViewProps> = ({ currentDate, onDateClick, 
   const gridEnd = useMemo(() => dateHelpers.getDayEnd(calendarGrid[calendarGrid.length - 1][6]), [calendarGrid]);
 
   // Ensure events are loaded for the visible month grid
+  // Re-trigger when calendars load or sync completes (isSyncing goes false)
   useEffect(() => {
     ensureDateRange(gridStart, gridEnd);
-  }, [gridStart, gridEnd, ensureDateRange]);
+  }, [gridStart, gridEnd, ensureDateRange, calendars.length, isSyncing]);
+
+  // Prefetch previous and next month in the background for smooth swiping
+  useEffect(() => {
+    if (calendars.length === 0) return;
+
+    const timer = setTimeout(() => {
+      const prevMonth = addMonths(currentDate, -1);
+      const nextMonth = addMonths(currentDate, 1);
+      const prevGrid = dateHelpers.getMonthCalendarGrid(prevMonth);
+      const nextGrid = dateHelpers.getMonthCalendarGrid(nextMonth);
+      const prefetchStart = dateHelpers.getDayStart(prevGrid[0][0]);
+      const prefetchEnd = dateHelpers.getDayEnd(nextGrid[nextGrid.length - 1][6]);
+      ensureDateRange(prefetchStart, prefetchEnd);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentDate, ensureDateRange, calendars.length]);
 
   const monthEvents = useMemo(() => {
     return getEventsForDateRange(gridStart, gridEnd);
