@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '../common/ConfirmDialog';
+import { SwipeToDelete } from '../ui/swipe-to-delete';
 
 interface TaskDetailDialogProps {
   isOpen: boolean;
@@ -155,34 +156,38 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
                 )}
 
                 {items.map(item => (
-                  <div
+                  <SwipeToDelete
                     key={item.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                    onDelete={() => setItemToDelete(item.id)}
                   >
-                    <button
-                      onClick={() => handleToggleItem(item)}
-                      className="touch-target flex-shrink-0"
-                      aria-label={item.isChecked ? t.actions.markIncomplete : t.actions.markComplete}
+                    <div
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
                     >
-                      {item.isChecked ? (
-                        <CheckCircle2 size={22} className="text-green-600" />
-                      ) : (
-                        <Circle size={22} className="text-muted-foreground hover:text-primary" />
-                      )}
-                    </button>
+                      <button
+                        onClick={() => handleToggleItem(item)}
+                        className="touch-target flex-shrink-0"
+                        aria-label={item.isChecked ? t.actions.markIncomplete : t.actions.markComplete}
+                      >
+                        {item.isChecked ? (
+                          <CheckCircle2 size={22} className="text-green-600" />
+                        ) : (
+                          <Circle size={22} className="text-muted-foreground hover:text-primary" />
+                        )}
+                      </button>
 
-                    <span className={`flex-1 text-sm ${item.isChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                      {item.displayName}
-                    </span>
+                      <span className={`flex-1 text-sm ${item.isChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        {item.displayName}
+                      </span>
 
-                    <button
-                      onClick={() => setItemToDelete(item.id)}
-                      className="btn-icon p-1 text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                      aria-label={t.tasks.deleteChecklistItem}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => setItemToDelete(item.id)}
+                        className="btn-icon p-1 text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        aria-label={t.tasks.deleteChecklistItem}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </SwipeToDelete>
                 ))}
 
                 <div ref={itemsEndRef} />
