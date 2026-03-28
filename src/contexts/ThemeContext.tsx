@@ -51,9 +51,16 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
+const THEME_STORAGE_KEY = 'nestly_selected_theme';
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [themeName, setThemeName] = useState<ThemeName>(() => {
-    // Load theme from settings
+    // Load theme from its own dedicated key (immune to settings race conditions)
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeName | null;
+      if (saved && themes[saved]) return saved;
+    } catch { /* ignore */ }
+    // Migrate from legacy planner_settings if present
     const settings = StorageService.getSettings();
     return settings.theme || defaultTheme;
   });
@@ -62,8 +69,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const setTheme = (newTheme: ThemeName) => {
     setThemeName(newTheme);
-    const settings = StorageService.getSettings();
-    StorageService.setSettings({ ...settings, theme: newTheme });
+    // Write to dedicated key — cannot be overwritten by other contexts
+    try { localStorage.setItem(THEME_STORAGE_KEY, newTheme); } catch { /* ignore */ }
   };
 
   // Apply theme to document root

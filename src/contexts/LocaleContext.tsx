@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
 import { translations, type Locale } from '../locales';
 import type { TranslationKeys } from '../locales/en';
 import { StorageService } from '../services/storage.service';
@@ -23,22 +23,24 @@ interface LocaleProviderProps {
   children: ReactNode;
 }
 
-export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
-  const [locale, setLocaleState] = useState<Locale>('en');
+const LOCALE_STORAGE_KEY = 'nestly_selected_locale';
 
-  useEffect(() => {
-    // Load locale from settings
+export const LocaleProvider: React.FC<LocaleProviderProps> = ({ children }) => {
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    // Load locale from its own dedicated key (immune to settings race conditions)
+    try {
+      const saved = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
+      if (saved && translations[saved]) return saved;
+    } catch { /* ignore */ }
+    // Migrate from legacy planner_settings
     const settings = StorageService.getSettings();
-    if (settings.locale) {
-      setLocaleState(settings.locale);
-    }
-  }, []);
+    return settings.locale || 'en';
+  });
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    // Save to settings
-    const settings = StorageService.getSettings();
-    StorageService.setSettings({ ...settings, locale: newLocale });
+    // Write to dedicated key — cannot be overwritten by other contexts
+    try { localStorage.setItem(LOCALE_STORAGE_KEY, newLocale); } catch { /* ignore */ }
     // Dispatch event to notify other components
     window.dispatchEvent(new CustomEvent('locale-changed'));
   };
