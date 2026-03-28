@@ -111,6 +111,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       themeColorMeta.setAttribute('content', primaryHex);
     }
 
+    // Persist hex colors so the inline script in index.html can apply them
+    // before React hydrates (avoids Android status bar flash)
+    try {
+      localStorage.setItem('nestly_theme_color', primaryHex);
+      localStorage.setItem('nestly_theme_bg', bgHex);
+    } catch { /* storage full or unavailable */ }
+
     // Dynamically update favicon to reflect theme primary color
     const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
       <rect width="32" height="32" rx="7" fill="${primaryHex}"/>
