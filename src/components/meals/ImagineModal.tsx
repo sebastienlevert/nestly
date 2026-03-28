@@ -85,11 +85,11 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
       setRecipe(result);
       setStep('recipe');
     } catch (err: any) {
-      setError(err.message || 'Failed to generate recipe');
+      setError(err.message || t.mealPlanner?.failedToGenerate || 'Failed to generate recipe');
     } finally {
       setIsGenerating(false);
     }
-  }, [fridgeText, mealType]);
+  }, [fridgeText, mealType, t]);
 
   const handleTryAnother = useCallback(async () => {
     setError(null);
@@ -98,12 +98,11 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
       const result = await openaiService.imagineMeal(fridgeText.trim(), mealType);
       setRecipe(result);
     } catch (err: any) {
-      setError(err.message || 'Failed to generate recipe');
+      setError(err.message || t.mealPlanner?.failedToGenerate || 'Failed to generate recipe');
     } finally {
       setIsGenerating(false);
     }
-  }, [fridgeText, mealType]);
-
+  }, [fridgeText, mealType, t]);
   const handleUseRecipe = useCallback(() => {
     setStep('schedule');
   }, []);
@@ -127,11 +126,11 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
         calendarId: mealCalendar.id,
         accountId: mealCalendar.accountId,
         isReminderOn: false,
-        body: `${recipe.description}\n\nIngredients:\n${recipe.ingredients.map(i => `• ${i}`).join('\n')}\n\nInstructions:\n${recipe.instructions.map((s, i) => `${i + 1}. ${s}`).join('\n')}`,
+        body: `${recipe.description}\n\n${t.meals?.ingredients || 'Ingredients'}:\n${recipe.ingredients.map(i => `• ${i}`).join('\n')}\n\n${t.meals?.instructions || 'Instructions'}:\n${recipe.instructions.map((s, i) => `${i + 1}. ${s}`).join('\n')}`,
       });
       setStep('done');
     } catch (err: any) {
-      setError(err.message || 'Failed to add meal');
+      setError(err.message || t.mealPlanner?.failedToAddMeal || 'Failed to add meal');
     } finally {
       setIsAdding(false);
     }
@@ -155,9 +154,7 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
           </DialogHeader>
           <DialogBody className="flex flex-col items-center justify-center py-8 gap-4 text-center">
             <Sparkles size={40} className="text-amber-500/50" />
-            <p className="text-muted-foreground">
-              Go to <strong className="text-foreground">Settings → AI</strong> to configure your Azure OpenAI endpoint, API key, and deployment name.
-            </p>
+            <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: t.mealPlanner?.goToSettingsAI || 'Go to <strong class="text-foreground">Settings → AI</strong> to configure your Azure OpenAI endpoint, API key, and deployment name.' }} />
           </DialogBody>
           <DialogFooter>
             <Button variant="secondary" onClick={handleClose}>
@@ -265,9 +262,9 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
 
             {/* Meta */}
             <div className="flex gap-4 text-sm text-muted-foreground">
-              {recipe.prepTime && <span>⏱️ Prep: {recipe.prepTime}</span>}
-              {recipe.cookTime && <span>🔥 Cook: {recipe.cookTime}</span>}
-              {recipe.servings && <span>🍽️ Serves {recipe.servings}</span>}
+              {recipe.prepTime && <span>⏱️ {t.meals?.prep || 'Prep:'} {recipe.prepTime}</span>}
+              {recipe.cookTime && <span>🔥 {t.meals?.cook || 'Cook:'} {recipe.cookTime}</span>}
+              {recipe.servings && <span>🍽️ {t.mealPlanner?.serves || 'Serves'} {recipe.servings}</span>}
             </div>
 
             {/* Ingredients */}

@@ -483,7 +483,7 @@ export const SettingsPage: React.FC = () => {
                     placeholder={t.mealPlanner?.aiEndpointPlaceholder || 'https://your-resource.openai.azure.com'}
                   />
                   <p className="text-xs text-muted-foreground">
-                    The base URL of your Azure OpenAI resource.
+                    {t.mealPlanner?.aiEndpointHelp || 'The base URL of your Azure OpenAI resource.'}
                   </p>
                 </div>
 
@@ -497,7 +497,7 @@ export const SettingsPage: React.FC = () => {
                     placeholder={t.mealPlanner?.aiKeyPlaceholder || 'Your API key'}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Your API key is stored locally in your browser only.
+                    {t.mealPlanner?.aiKeyHelp || 'Your API key is stored locally in your browser only.'}
                   </p>
                 </div>
 
@@ -510,7 +510,7 @@ export const SettingsPage: React.FC = () => {
                     placeholder={t.mealPlanner?.aiDeploymentPlaceholder || 'gpt-4o'}
                   />
                   <p className="text-xs text-muted-foreground">
-                    The name of your model deployment (e.g. gpt-4o, gpt-4o-mini).
+                    {t.mealPlanner?.aiDeploymentHelp || 'The name of your model deployment (e.g. gpt-4o, gpt-4o-mini).'}
                   </p>
                 </div>
 
