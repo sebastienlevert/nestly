@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, Loader2, Check, WifiOff } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
@@ -26,6 +26,35 @@ const routeTitles: Record<string, string> = {
   '/settings': 'settings',
 };
 
+/** Displays current time in 24 h format, updates every minute. Desktop only. */
+const DesktopClock: React.FC = () => {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+
+    // Align the first tick to the start of the next minute
+    const ms = (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
+    const timeout = setTimeout(() => {
+      setNow(new Date());
+      interval = setInterval(() => setNow(new Date()), 60_000);
+    }, ms);
+
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
+  const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  return (
+    <span className="hidden lg:flex absolute inset-x-0 items-center justify-center text-3xl font-semibold text-muted-foreground tabular-nums tracking-wide select-none pointer-events-none">
+      {time}
+    </span>
+  );
+};
+
 export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
   const { t } = useLocale();
   const { accounts, isAuthenticated } = useAuth();
@@ -46,7 +75,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-30">
-      <div className="flex items-center h-14 lg:h-[72px] px-2 lg:px-3 gap-2 lg:gap-3">
+      <div className="relative flex items-center h-14 lg:h-[72px] px-2 lg:px-3 gap-2 lg:gap-3">
         {/* Left: hamburger + logo + title */}
         <div className="flex items-center min-w-0 shrink-0 h-full">
           {/* Hamburger — opens drawer on all sizes */}
@@ -64,6 +93,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           {/* Desktop: page title */}
           <span className="hidden lg:block text-lg text-muted-foreground truncate">{pageTitle}</span>
         </div>
+
+        {/* Center: clock (desktop only, absolutely centered) */}
+        <DesktopClock />
 
         {/* Spacer */}
         <div className="flex-1" />
