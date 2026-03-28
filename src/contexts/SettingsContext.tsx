@@ -43,10 +43,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     initialSyncDone.current = true;
 
     (async () => {
+      // Keep track of the latest merged settings to avoid stale closures
+      let current = settings;
+
       // 1. Load from IndexedDB cache (instant)
       const cached = await oneDriveSettingsService.getCached();
       if (cached) {
-        const merged = { ...settings, ...cached };
+        // Merge cached over current, but preserve local-only keys (theme, locale)
+        const merged = { ...current, ...cached, theme: current.theme ?? cached.theme, locale: current.locale ?? cached.locale };
+        current = merged;
         setSettings(merged);
         StorageService.setSettings(merged);
       }
@@ -57,12 +62,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (token) {
         const remote = await oneDriveSettingsService.read(token);
         if (remote) {
-          const merged = { ...settings, ...remote };
+          // Merge remote over current, but preserve local-only keys (theme, locale)
+          const merged = { ...current, ...remote, theme: current.theme ?? remote.theme, locale: current.locale ?? remote.locale };
           setSettings(merged);
           StorageService.setSettings(merged);
         } else if (!cached) {
           // No remote settings yet — push current local settings to OneDrive
-          await oneDriveSettingsService.write(token, settings);
+          await oneDriveSettingsService.write(token, current);
         }
         setLastSyncTime(Date.now());
       }
