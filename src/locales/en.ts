@@ -9,6 +9,8 @@ export const en = {
     home: 'Home',
     settings: 'Settings',
     docs: 'Docs',
+    groupPlanning: 'Planning',
+    groupFamilyTime: 'Family Time',
   },
 
   // Calendar Views

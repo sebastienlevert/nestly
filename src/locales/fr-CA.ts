@@ -11,6 +11,8 @@ export const frCA: TranslationKeys = {
     home: 'Accueil',
     settings: 'Paramètres',
     docs: 'Docs',
+    groupPlanning: 'Planification',
+    groupFamilyTime: 'Temps en famille',
   },
 
   // Calendar Views

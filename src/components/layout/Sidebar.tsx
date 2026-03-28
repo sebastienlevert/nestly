@@ -8,7 +8,7 @@ interface NavItem {
   to: string;
   icon: React.ReactNode;
   labelKey: string;
-  section: 'top' | 'bottom';
+  group: 'planning' | 'familyTime' | 'bottom';
 }
 
 interface SidebarProps {
@@ -33,54 +33,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
       to: '/calendar',
       icon: <Calendar size={30} />,
       labelKey: 'calendar',
-      section: 'top',
+      group: 'planning',
     },
     {
       to: '/tasks',
       icon: <CheckSquare size={30} />,
       labelKey: 'todos',
-      section: 'top',
+      group: 'planning',
     },
     {
       to: '/meals',
       icon: <UtensilsCrossed size={30} />,
       labelKey: 'mealPlanner',
-      section: 'top',
+      group: 'planning',
     },
     {
       to: '/games',
       icon: <Dices size={30} />,
       labelKey: 'games',
-      section: 'top',
+      group: 'familyTime',
     },
     {
       to: '/weather',
       icon: <CloudSun size={30} />,
       labelKey: 'weather',
-      section: 'top',
+      group: 'familyTime',
     },
     {
       to: '/docs',
       icon: <BookOpen size={30} />,
       labelKey: 'docs',
-      section: 'bottom',
+      group: 'bottom',
     },
     {
       to: '/home',
       icon: <Home size={30} />,
       labelKey: 'home',
-      section: 'bottom',
+      group: 'bottom',
     },
     {
       to: '/settings',
       icon: <Settings size={30} />,
       labelKey: 'settings',
-      section: 'bottom',
+      group: 'bottom',
     },
   ];
 
-  const topItems = navItems.filter(item => item.section === 'top');
-  const bottomItems = navItems.filter(item => item.section === 'bottom');
+  const planningItems = navItems.filter(item => item.group === 'planning');
+  const familyTimeItems = navItems.filter(item => item.group === 'familyTime');
+  const bottomItems = navItems.filter(item => item.group === 'bottom');
 
   // Nav link styles
   const navClass = (isActive: boolean) =>
@@ -139,9 +140,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
 
         {/* Nav items */}
         <nav className="flex-1 overflow-auto px-3 py-4 flex flex-col">
+          {/* Planning group */}
           <div className="flex flex-col gap-1">
-            {renderItems(topItems)}
+            <span className="px-4 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+              {t.nav.groupPlanning}
+            </span>
+            {renderItems(planningItems)}
           </div>
+
+          {/* Family Time group */}
+          <div className="flex flex-col gap-1 mt-4">
+            <span className="px-4 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+              {t.nav.groupFamilyTime}
+            </span>
+            {renderItems(familyTimeItems)}
+          </div>
+
           <div className="flex-1" />
           <div className="border-t border-border pt-3 mt-3">
             <div className="flex flex-col gap-1">
