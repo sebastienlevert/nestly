@@ -43,12 +43,13 @@ export class OpenAIService {
     this.apiVersion = appConfig.openai.apiVersion;
   }
 
-  async generateRecipes(ingredients: string[]): Promise<Recipe[]> {
+  async generateRecipes(ingredients: string[], locale: string = 'en'): Promise<Recipe[]> {
     const config = getConfig();
     if (!config.endpoint || !config.apiKey || !config.deployment) {
       throw new Error('Azure OpenAI is not configured. Please check your environment variables.');
     }
 
+    const langInstruction = locale.startsWith('fr') ? 'Respond entirely in French.' : '';
     const url = `${config.endpoint}/openai/deployments/${config.deployment}/chat/completions?api-version=${this.apiVersion}`;
 
     const prompt = `You are a helpful cooking assistant. Based on the following ingredients, suggest 3 creative and practical recipes that can be made using these ingredients. You may assume common pantry staples (salt, pepper, oil, etc.) are available.
@@ -63,6 +64,8 @@ For each recipe, provide:
 4. Step-by-step instructions
 5. Estimated prep time and cook time
 6. Number of servings
+
+${langInstruction}
 
 Format your response as valid JSON array with this structure:
 [
@@ -88,7 +91,7 @@ Format your response as valid JSON array with this structure:
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful cooking assistant that suggests creative recipes.',
+              content: `You are a helpful cooking assistant that suggests creative recipes.${locale.startsWith('fr') ? ' Always respond in French.' : ''}`,
             },
             {
               role: 'user',
@@ -164,12 +167,13 @@ Format your response as valid JSON array with this structure:
   }
 
   /** Generate a single simple recipe for a specific meal type based on fridge contents */
-  async imagineMeal(ingredients: string, mealType: 'breakfast' | 'lunch' | 'dinner'): Promise<Recipe> {
+  async imagineMeal(ingredients: string, mealType: 'breakfast' | 'lunch' | 'dinner', locale: string = 'en'): Promise<Recipe> {
     const config = getConfig();
     if (!config.endpoint || !config.apiKey || !config.deployment) {
       throw new Error('Azure OpenAI is not configured.');
     }
 
+    const langInstruction = locale.startsWith('fr') ? 'Respond entirely in French.' : '';
     const url = `${config.endpoint}/openai/deployments/${config.deployment}/chat/completions?api-version=${this.apiVersion}`;
 
     const prompt = `Based on these ingredients in my fridge, suggest ONE simple ${mealType} recipe.
@@ -177,7 +181,8 @@ Format your response as valid JSON array with this structure:
 Fridge contents: ${ingredients}
 
 You may assume common pantry staples (salt, pepper, oil, butter, flour, sugar, etc.) are available.
-Keep it simple and practical for a family. Return valid JSON with this structure:
+Keep it simple and practical for a family. ${langInstruction}
+Return valid JSON with this structure:
 {
   "title": "Recipe Name",
   "description": "Brief 1-2 sentence description",
@@ -196,7 +201,7 @@ Keep it simple and practical for a family. Return valid JSON with this structure
       },
       body: JSON.stringify({
         messages: [
-          { role: 'system', content: `You are a family cooking assistant. Suggest simple, practical ${mealType} recipes. Always respond with valid JSON only, no markdown.` },
+          { role: 'system', content: `You are a family cooking assistant. Suggest simple, practical ${mealType} recipes. Always respond with valid JSON only, no markdown.${locale.startsWith('fr') ? ' Always respond in French.' : ''}` },
           { role: 'user', content: prompt },
         ],
         temperature: 0.8,

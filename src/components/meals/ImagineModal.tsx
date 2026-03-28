@@ -49,7 +49,7 @@ interface ImagineModalProps {
 
 export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mealCalendar }) => {
   const { createEvent } = useCalendar();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const [step, setStep] = useState<Step>('input');
   const [mealType, setMealType] = useState<MealKey>(guessNextMealType());
@@ -81,7 +81,7 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
     setError(null);
     setIsGenerating(true);
     try {
-      const result = await openaiService.imagineMeal(fridgeText.trim(), mealType);
+      const result = await openaiService.imagineMeal(fridgeText.trim(), mealType, locale);
       setRecipe(result);
       setStep('recipe');
     } catch (err: any) {
@@ -89,20 +89,20 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
     } finally {
       setIsGenerating(false);
     }
-  }, [fridgeText, mealType, t]);
+  }, [fridgeText, mealType, t, locale]);
 
   const handleTryAnother = useCallback(async () => {
     setError(null);
     setIsGenerating(true);
     try {
-      const result = await openaiService.imagineMeal(fridgeText.trim(), mealType);
+      const result = await openaiService.imagineMeal(fridgeText.trim(), mealType, locale);
       setRecipe(result);
     } catch (err: any) {
       setError(err.message || t.mealPlanner?.failedToGenerate || 'Failed to generate recipe');
     } finally {
       setIsGenerating(false);
     }
-  }, [fridgeText, mealType, t]);
+  }, [fridgeText, mealType, t, locale]);
   const handleUseRecipe = useCallback(() => {
     setStep('schedule');
   }, []);

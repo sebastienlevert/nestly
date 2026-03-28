@@ -3,6 +3,7 @@ import { openaiService } from '../services/openai.service';
 import type { FridgeItem, Recipe, MealContextType } from '../types/meal.types';
 import { StorageService } from '../services/storage.service';
 import { cacheService } from '../services/idb-cache.service';
+import { useLocale } from './LocaleContext';
 
 const MealContext = createContext<MealContextType | undefined>(undefined);
 
@@ -19,6 +20,7 @@ interface MealProviderProps {
 }
 
 export const MealProvider: React.FC<MealProviderProps> = ({ children }) => {
+  const { locale } = useLocale();
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -87,7 +89,7 @@ export const MealProvider: React.FC<MealProviderProps> = ({ children }) => {
     setError(null);
 
     try {
-      const generatedRecipes = await openaiService.generateRecipes(ingredients);
+      const generatedRecipes = await openaiService.generateRecipes(ingredients, locale);
       setRecipes(prev => [...generatedRecipes, ...prev]);
       return generatedRecipes;
     } catch (err: any) {
