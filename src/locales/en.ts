@@ -574,6 +574,16 @@ export const en = {
     searchGames: 'Search games...',
     noGamesFound: 'No games found',
     allCategories: 'All',
+    categoryStrategy: 'Strategy',
+    categoryEuro: 'Euro',
+    categoryFamily: 'Family',
+    categoryDice: 'Dice',
+    categoryCard: 'Card',
+    categoryClassic: 'Classic',
+    categoryWar: 'War',
+    categoryTile: 'Tile',
+    categoryParty: 'Party',
+    categoryDuel: 'Duel',
   },
 };
 

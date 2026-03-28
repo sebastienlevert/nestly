@@ -18,6 +18,19 @@ interface NewGameModalProps {
 export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onGameCreated }) => {
   const { t } = useLocale();
   const { allTemplates, createSession, addCustomTemplate } = useGame();
+
+  const categoryLabels: Record<string, string> = {
+    Strategy: t.games.categoryStrategy,
+    Euro: t.games.categoryEuro,
+    Family: t.games.categoryFamily,
+    Dice: t.games.categoryDice,
+    Card: t.games.categoryCard,
+    Classic: t.games.categoryClassic,
+    War: t.games.categoryWar,
+    Tile: t.games.categoryTile,
+    Party: t.games.categoryParty,
+    Duel: t.games.categoryDuel,
+  };
   const [step, setStep] = useState<'select' | 'players'>('select');
   const [selectedTemplate, setSelectedTemplate] = useState<GameTemplate | null>(null);
   const [customName, setCustomName] = useState('');
@@ -144,9 +157,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
 
             {/* Category filter pills */}
             <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-              {[t.games.allCategories, ...GAME_CATEGORIES].map((cat, idx) => {
-                const value = idx === 0 ? 'All' : GAME_CATEGORIES[idx - 1];
-                return (
+              {['All', ...GAME_CATEGORIES].map(value => (
                   <button
                     key={value}
                     onClick={() => setCategory(value)}
@@ -156,10 +167,9 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
-                    {cat}
+                    {value === 'All' ? t.games.allCategories : categoryLabels[value] || value}
                   </button>
-                );
-              })}
+              ))}
             </div>
 
             {/* Filtered game list — fill remaining space on mobile */}
@@ -175,7 +185,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-foreground text-sm truncate">{game.name}</div>
-                    <div className="text-xs text-muted-foreground">{game.category ? `${game.category} · ` : ''}{game.minPlayers}–{game.maxPlayers} {t.games.players.toLowerCase()}</div>
+                    <div className="text-xs text-muted-foreground">{game.category ? `${categoryLabels[game.category] || game.category} · ` : ''}{game.minPlayers}–{game.maxPlayers} {t.games.players.toLowerCase()}</div>
                   </div>
                 </button>
               ))}
