@@ -142,7 +142,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, onCreateEve
     return () => clearTimeout(timer);
   }, [currentDate]);
 
-  // Top row: Mon–Thu, Bottom row: Fri–Sun + next week preview (desktop layout)
+  // Top row: Sun–Wed, Bottom row: Thu–Sat + next week preview (desktop layout)
   const topRow = weekDays.slice(0, 4);
   const bottomRow = weekDays.slice(4, 7);
 
