@@ -24,13 +24,16 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
   const [notes, setNotes] = useState(session.notes || '');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input when editing starts
+  // On mobile, don't auto-focus the input to avoid triggering the keyboard.
+  // Users can use the +/- buttons or tap the input to type manually.
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
+
   useEffect(() => {
-    if (editing && inputRef.current) {
+    if (editing && inputRef.current && !isMobile) {
       inputRef.current.focus();
       inputRef.current.select();
     }
-  }, [editing]);
+  }, [editing, isMobile]);
 
   const openEditor = useCallback((playerIndex: number, roundIndex: number) => {
     if (!session.isActive) return;
