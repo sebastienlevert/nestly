@@ -4,6 +4,7 @@ import { CalendarProvider } from './contexts/CalendarContext';
 import { MealProvider } from './contexts/MealContext';
 import { PhotoProvider } from './contexts/PhotoContext';
 import { TaskProvider } from './contexts/TaskContext';
+import { GameProvider } from './contexts/GameContext';
 import { LocaleProvider } from './contexts/LocaleContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -13,6 +14,7 @@ import { PhotosPage } from './pages/PhotosPage';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { MealPlannerPage } from './pages/MealPlannerPage';
+import { GamesPage } from './pages/GamesPage';
 import { WeatherPage } from './pages/WeatherPage';
 import { DocsPage } from './pages/DocsPage';
 import { LandingPage } from './pages/LandingPage';
@@ -53,6 +55,7 @@ function AppRoutes() {
             <Route path="photos" element={<PhotosPage />} />
             <Route path="tasks" element={<TasksPage />} />
             <Route path="meals" element={<MealPlannerPage />} />
+            <Route path="games" element={<GamesPage />} />
             <Route path="weather" element={<WeatherPage />} />
             <Route path="docs" element={<DocsPage />} />
             <Route path="docs/:sectionId" element={<DocsPage />} />
@@ -80,7 +83,9 @@ function App() {
                 <MealProvider>
                   <PhotoProvider>
                     <TaskProvider>
-                      <AppRoutes />
+                      <GameProvider>
+                        <AppRoutes />
+                      </GameProvider>
                     </TaskProvider>
                   </PhotoProvider>
                 </MealProvider>

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Calendar, CheckSquare, UtensilsCrossed, Settings, BookOpen, X, CloudSun, Home } from 'lucide-react';
+import { Calendar, CheckSquare, UtensilsCrossed, Settings, BookOpen, X, CloudSun, Home, Dices } from 'lucide-react';
 import { useLocale } from '../../contexts/LocaleContext';
 import { NestlyLogo } from '../common/NestlyLogo';
 
@@ -45,6 +45,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
       to: '/meals',
       icon: <UtensilsCrossed size={30} />,
       labelKey: 'mealPlanner',
+      section: 'top',
+    },
+    {
+      to: '/games',
+      icon: <Dices size={30} />,
+      labelKey: 'games',
       section: 'top',
     },
     {
