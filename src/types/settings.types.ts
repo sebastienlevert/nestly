@@ -1,6 +1,7 @@
 import type { Locale } from '../locales';
 import type { ThemeName } from '../config/themes';
 import type { TodoListSettings } from './task.types';
+import type { OpenAIConfig } from '../services/openai.service';
 
 export interface AppSettings {
   calendarName?: string;
@@ -13,4 +14,5 @@ export interface AppSettings {
   todoListSettings?: Record<string, TodoListSettings>;
   mealCalendarId?: string;
   weatherLocation?: string;
+  openaiConfig?: OpenAIConfig;
 }

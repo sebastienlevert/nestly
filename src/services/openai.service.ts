@@ -9,8 +9,9 @@ export interface OpenAIConfig {
   deployment: string;
 }
 
-/** Read user-configured OpenAI settings from localStorage, falling back to env vars */
+/** Read user-configured OpenAI settings, checking: localStorage → AppSettings → env vars */
 function getConfig(): OpenAIConfig {
+  // 1. Check dedicated localStorage key (most specific)
   try {
     const stored = localStorage.getItem(OPENAI_CONFIG_KEY);
     if (stored) {
@@ -21,6 +22,19 @@ function getConfig(): OpenAIConfig {
     }
   } catch { /* ignore parse errors */ }
 
+  // 2. Check synced AppSettings
+  try {
+    const settingsRaw = localStorage.getItem(appConfig.storage.keys.settings);
+    if (settingsRaw) {
+      const settings = JSON.parse(settingsRaw);
+      const cfg = settings?.openaiConfig as Partial<OpenAIConfig> | undefined;
+      if (cfg?.endpoint && cfg?.apiKey && cfg?.deployment) {
+        return cfg as OpenAIConfig;
+      }
+    }
+  } catch { /* ignore parse errors */ }
+
+  // 3. Fall back to env vars
   return {
     endpoint: appConfig.openai.endpoint,
     apiKey: appConfig.openai.apiKey,

@@ -99,7 +99,13 @@ export const SettingsPage: React.FC = () => {
     setSelectedTheme(appSettings.theme || themeName);
     setMealCalendarId(appSettings.mealCalendarId || '');
     setWeatherLocation(appSettings.weatherLocation || '');
-    setAiConfig(loadOpenAIConfig());
+    // Load AI config: prefer synced AppSettings, fall back to local-only config
+    const synced = appSettings.openaiConfig;
+    if (synced?.endpoint && synced?.apiKey && synced?.deployment) {
+      setAiConfig(synced);
+    } else {
+      setAiConfig(loadOpenAIConfig());
+    }
   }, [t, appSettings]);
 
   const handleSaveSettings = async () => {
@@ -518,6 +524,8 @@ export const SettingsPage: React.FC = () => {
                   <Button
                     onClick={() => {
                       saveOpenAIConfig(aiConfig);
+                      updateSettings({ openaiConfig: aiConfig });
+                      saveToCloud();
                       setAiConfigSaved(true);
                       setTimeout(() => setAiConfigSaved(false), 2000);
                     }}
