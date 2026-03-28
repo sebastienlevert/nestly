@@ -78,27 +78,29 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   // Update settings locally (does NOT save to OneDrive yet)
   const updateSettings = useCallback((updates: Partial<AppSettings>) => {
-    setSettings(prev => {
-      const updated = { ...prev, ...updates };
-      StorageService.setSettings(updated);
-      return updated;
-    });
+    // Always read fresh from localStorage to avoid overwriting changes
+    // made by other contexts (ThemeContext, LocaleContext, CalendarContext, etc.)
+    const fresh = StorageService.getSettings();
+    const updated = { ...fresh, ...updates };
+    StorageService.setSettings(updated);
+    setSettings(updated);
   }, []);
 
   // Save settings to both localStorage and OneDrive
   const saveSettings = useCallback(async () => {
-    // Always persist locally first
-    StorageService.setSettings(settings);
+    // Read fresh from localStorage — React state may be stale due to batched updates
+    const fresh = StorageService.getSettings();
+    setSettings(fresh);
 
     // Then push to OneDrive
     const token = await getToken();
     if (token) {
       setIsSyncing(true);
-      await oneDriveSettingsService.write(token, settings);
+      await oneDriveSettingsService.write(token, fresh);
       setLastSyncTime(Date.now());
       setIsSyncing(false);
     }
-  }, [settings, getToken]);
+  }, [getToken]);
 
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, isSyncing, lastSyncTime }}>
