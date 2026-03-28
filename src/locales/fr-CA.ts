@@ -573,5 +573,8 @@ export const frCA: TranslationKeys = {
     roundN: 'Manche {n}',
     quickEntry: 'Saisir les scores',
     enterAllScores: 'Saisir les scores pour la manche {n}',
+    searchGames: 'Rechercher un jeu...',
+    noGamesFound: 'Aucun jeu trouvé',
+    allCategories: 'Tous',
   },
 };

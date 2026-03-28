@@ -1,25 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useGame } from '../../contexts/GameContext';
-import { BUILT_IN_GAMES } from '../../types/game.types';
+import { BUILT_IN_GAMES, GAME_CATEGORIES } from '../../types/game.types';
 import type { GameTemplate, GameSession } from '../../types/game.types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Plus, X, Dices, TreePine, Bird, Gamepad2 } from 'lucide-react';
+import { Plus, X, Gamepad2 } from 'lucide-react';
 
 interface NewGameModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGameCreated: (session: GameSession) => void;
 }
-
-const gameIcons: Record<string, React.ReactNode> = {
-  'dice-hospital': <Dices size={20} />,
-  'parks': <TreePine size={20} />,
-  'wingspan': <Bird size={20} />,
-};
 
 export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onGameCreated }) => {
   const { t } = useLocale();
@@ -31,7 +25,19 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
   const [hasRounds, setHasRounds] = useState(true);
   const [players, setPlayers] = useState<string[]>(['', '']);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('All');
   const playerInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const filteredGames = useMemo(() => {
+    let list = [...BUILT_IN_GAMES, ...allTemplates.filter(tmpl => !tmpl.isBuiltIn)];
+    if (category !== 'All') list = list.filter(g => g.category === category);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(g => g.name.toLowerCase().includes(q));
+    }
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  }, [search, category, allTemplates]);
 
   const reset = () => {
     setStep('select');
@@ -41,6 +47,8 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
     setHasRounds(true);
     setPlayers(['', '']);
     setError('');
+    setSearch('');
+    setCategory('All');
   };
 
   const handleClose = () => {
@@ -125,49 +133,66 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
 
         {step === 'select' && (
           <div className="space-y-3">
-            {/* Built-in games */}
-            {BUILT_IN_GAMES.map(game => (
-              <button
-                key={game.id}
-                onClick={() => handleSelectGame(game)}
-                className="w-full flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-accent transition-colors text-left"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  {gameIcons[game.id] || <Gamepad2 size={20} />}
-                </div>
-                <div>
-                  <div className="font-medium text-foreground">{game.name}</div>
-                  <div className="text-sm text-muted-foreground">{game.minPlayers}–{game.maxPlayers} {t.games.players.toLowerCase()}</div>
-                </div>
-              </button>
-            ))}
+            {/* Search */}
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t.games.searchGames}
+              className="min-h-[44px] text-base"
+              autoFocus
+            />
 
-            {/* Custom templates */}
-            {allTemplates.filter(tmpl => !tmpl.isBuiltIn).map(game => (
-              <button
-                key={game.id}
-                onClick={() => handleSelectGame(game)}
-                className="w-full flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-accent transition-colors text-left"
-              >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground">
-                  <Gamepad2 size={20} />
-                </div>
-                <div>
-                  <div className="font-medium text-foreground">{game.name}</div>
-                  <div className="text-sm text-muted-foreground">{game.minPlayers}–{game.maxPlayers} {t.games.players.toLowerCase()}</div>
-                </div>
-              </button>
-            ))}
+            {/* Category filter pills */}
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+              {[t.games.allCategories, ...GAME_CATEGORIES].map((cat, idx) => {
+                const value = idx === 0 ? 'All' : GAME_CATEGORIES[idx - 1];
+                return (
+                  <button
+                    key={value}
+                    onClick={() => setCategory(value)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                      category === value
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Filtered game list */}
+            <div className="max-h-[40vh] overflow-y-auto space-y-1.5">
+              {filteredGames.map(game => (
+                <button
+                  key={game.id}
+                  onClick={() => handleSelectGame(game)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border hover:bg-accent transition-colors text-left min-h-[44px]"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                    <Gamepad2 size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground text-sm truncate">{game.name}</div>
+                    <div className="text-xs text-muted-foreground">{game.category ? `${game.category} · ` : ''}{game.minPlayers}–{game.maxPlayers} {t.games.players.toLowerCase()}</div>
+                  </div>
+                </button>
+              ))}
+              {filteredGames.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground py-4">{t.games.noGamesFound}</p>
+              )}
+            </div>
 
             {/* Custom game option */}
             <button
               onClick={handleSelectCustom}
-              className="w-full flex items-center gap-3 p-4 rounded-lg border-2 border-dashed border-border hover:border-primary hover:bg-accent/50 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 border-dashed border-border hover:border-primary hover:bg-accent/50 transition-colors text-left min-h-[44px]"
             >
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                <Plus size={20} />
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground flex-shrink-0">
+                <Plus size={16} />
               </div>
-              <div className="font-medium text-muted-foreground">{t.games.customGame}</div>
+              <div className="font-medium text-muted-foreground text-sm">{t.games.customGame}</div>
             </button>
           </div>
         )}
@@ -206,7 +231,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
             {/* Selected game name */}
             {!isCustom && selectedTemplate && (
               <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg">
-                {gameIcons[selectedTemplate.id] || <Gamepad2 size={18} />}
+                <Gamepad2 size={18} />
                 <span className="font-medium text-primary">{selectedTemplate.name}</span>
               </div>
             )}

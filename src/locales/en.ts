@@ -571,6 +571,9 @@ export const en = {
     roundN: 'Round {n}',
     quickEntry: 'Enter Scores',
     enterAllScores: 'Enter scores for round {n}',
+    searchGames: 'Search games...',
+    noGamesFound: 'No games found',
+    allCategories: 'All',
   },
 };
 
