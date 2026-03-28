@@ -584,6 +584,7 @@ export const en = {
     categoryTile: 'Tile',
     categoryParty: 'Party',
     categoryDuel: 'Duel',
+    category: 'Category',
   },
 };
 

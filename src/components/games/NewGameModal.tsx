@@ -132,7 +132,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
       return;
     }
 
-    const session = createSession(gameId, gameName, validPlayers, hasRounds);
+    const session = createSession(gameId, gameName, validPlayers, hasRounds, selectedTemplate?.scoringCategories);
     handleClose();
     onGameCreated(session);
   };

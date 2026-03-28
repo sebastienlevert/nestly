@@ -11,7 +11,7 @@ interface GameContextType {
   isLoading: boolean;
   isSyncing: boolean;
 
-  createSession: (gameId: string, gameName: string, playerNames: string[], hasRounds: boolean) => GameSession;
+  createSession: (gameId: string, gameName: string, playerNames: string[], hasRounds: boolean, scoringCategories?: string[]) => GameSession;
   updateSession: (session: GameSession) => void;
   deleteSession: (sessionId: string) => void;
   addRound: (sessionId: string) => void;
@@ -107,7 +107,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     })();
   }, [accounts, getToken]);
 
-  const createSession = useCallback((gameId: string, gameName: string, playerNames: string[], hasRounds: boolean): GameSession => {
+  const createSession = useCallback((gameId: string, gameName: string, playerNames: string[], hasRounds: boolean, scoringCategories?: string[]): GameSession => {
+    const numSlots = scoringCategories ? scoringCategories.length : (hasRounds ? 1 : 1);
     const session: GameSession = {
       id: `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       gameId,
@@ -115,10 +116,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       playedAt: new Date().toISOString(),
       players: playerNames.map(name => ({
         name,
-        roundScores: hasRounds ? [0] : [0],
+        roundScores: new Array(numSlots).fill(0),
         totalScore: 0,
       })),
-      rounds: hasRounds ? 1 : 1,
+      rounds: numSlots,
+      scoringCategories,
       isActive: true,
     };
     setSessions(prev => [session, ...prev]);

@@ -586,5 +586,6 @@ export const frCA: TranslationKeys = {
     categoryTile: 'Tuiles',
     categoryParty: 'Party',
     categoryDuel: 'Duel',
+    category: 'Catégorie',
   },
 };

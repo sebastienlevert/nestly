@@ -24,6 +24,9 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
   const [notes, setNotes] = useState(session.notes || '');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const categories = session.scoringCategories;
+  const isCategoryGame = categories && categories.length > 0;
+
   // On mobile, don't auto-focus the input to avoid triggering the keyboard.
   // Users can use the +/- buttons or tap the input to type manually.
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
@@ -96,9 +99,11 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
         </Button>
         {session.isActive && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleAddRound} className="min-h-[44px] px-3">
-              <Plus size={18} className="sm:mr-1" /> <span className="hidden sm:inline">{t.games.addRound}</span>
-            </Button>
+            {!isCategoryGame && (
+              <Button variant="outline" size="sm" onClick={handleAddRound} className="min-h-[44px] px-3">
+                <Plus size={18} className="sm:mr-1" /> <span className="hidden sm:inline">{t.games.addRound}</span>
+              </Button>
+            )}
             <Button size="sm" onClick={handleFinish} className="gap-1 min-h-[44px] px-3">
               <Check size={18} /> <span className="hidden sm:inline">{t.games.finishGame}</span>
             </Button>
@@ -126,7 +131,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
           <thead>
             <tr className="bg-muted/50">
               <th className="text-left p-2 sm:p-3 font-medium text-muted-foreground sticky left-0 bg-muted/50 text-xs sm:text-sm">
-                {t.games.round}
+                {isCategoryGame ? t.games.category : t.games.round}
               </th>
               {session.players.map((player, i) => (
                 <th key={i} className="text-center p-2 sm:p-3 font-medium text-foreground min-w-[60px] sm:min-w-[80px] text-xs sm:text-sm">
@@ -139,7 +144,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
             {Array.from({ length: session.rounds }, (_, roundIndex) => (
               <tr key={roundIndex} className="border-t border-border">
                 <td className="p-2 sm:p-3 font-medium text-muted-foreground sticky left-0 bg-card text-xs sm:text-sm whitespace-nowrap">
-                  {t.games.round} {roundIndex + 1}
+                  {isCategoryGame ? categories![roundIndex] : `${t.games.round} ${roundIndex + 1}`}
                 </td>
                 {session.players.map((player, playerIndex) => {
                   const isActive = editing?.player === playerIndex && editing?.round === roundIndex;
@@ -197,7 +202,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({ session, onBack }) => {
             {/* Player name + round label */}
             <div className="text-center pr-8">
               <p className="text-sm text-muted-foreground">
-                {t.games.round} {editing.round + 1}
+                {isCategoryGame ? categories![editing.round] : `${t.games.round} ${editing.round + 1}`}
               </p>
               <p className="text-lg font-semibold text-foreground">
                 {t.games.scoreForPlayer} {session.players[editing.player].name}
