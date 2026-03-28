@@ -387,6 +387,7 @@ export const en = {
     mealName: 'Meal name',
     date: 'Date',
     recipeLink: 'Recipe link',
+    descriptionPlaceholder: 'Recipe notes, ingredients, instructions...',
     noCalendar: 'No Meal Calendar Selected',
     noCalendarDesc: 'Go to Settings → Calendars and select a calendar for meal planning.',
     mealCalendar: 'Meal Calendar',

@@ -83,6 +83,7 @@ export const MealModal: React.FC<MealModalProps> = ({
   const isEditMode = !!editMeal;
 
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [recipeLink, setRecipeLink] = useState('');
   const [mealType, setMealType] = useState<MealKey>(initialType);
   const [date, setDate] = useState(formatDateStr(initialDate || new Date()));
@@ -95,11 +96,13 @@ export const MealModal: React.FC<MealModalProps> = ({
     if (isOpen) {
       if (editMeal) {
         setName(editMeal.subject);
+        setDescription(editMeal.bodyPreview || '');
         setRecipeLink(editMeal.location?.locationUri || editMeal.location?.displayName || '');
         setMealType(classifyMeal(editMeal));
         setDate(formatDateStr(new Date(editMeal.start.dateTime)));
       } else {
         setName('');
+        setDescription('');
         setRecipeLink('');
         setMealType(initialType || 'breakfast');
         setDate(formatDateStr(initialDate || new Date()));
@@ -134,6 +137,7 @@ export const MealModal: React.FC<MealModalProps> = ({
           start: { dateTime: formatLocalDateTime(startDate), timeZone: tz },
           end: { dateTime: formatLocalDateTime(endDate), timeZone: tz },
           location: locationData,
+          bodyPreview: description.trim() || undefined,
         });
       } else {
         await createEvent({
@@ -144,6 +148,7 @@ export const MealModal: React.FC<MealModalProps> = ({
           accountId: mealCalendar.accountId,
           isReminderOn: false,
           location: recipeLink.trim() || undefined,
+          body: description.trim() || undefined,
         });
       }
       onClose();
@@ -233,6 +238,19 @@ export const MealModal: React.FC<MealModalProps> = ({
                 placeholder={t.mealPlanner?.placeholder || "What's cooking?"}
                 required
                 autoFocus
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="meal-description">{t.events?.description || 'Description'}</Label>
+              <textarea
+                id="meal-description"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder={t.mealPlanner?.descriptionPlaceholder || 'Recipe notes, ingredients, instructions...'}
+                className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-none"
+                rows={3}
               />
             </div>
 

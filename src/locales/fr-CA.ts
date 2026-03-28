@@ -389,6 +389,7 @@ export const frCA: TranslationKeys = {
     mealName: 'Nom du repas',
     date: 'Date',
     recipeLink: 'Lien de recette',
+    descriptionPlaceholder: 'Notes de recette, ingrédients, instructions...',
     noCalendar: 'Aucun calendrier de repas sélectionné',
     noCalendarDesc: 'Allez dans Paramètres → Calendriers et sélectionnez un calendrier pour la planification des repas.',
     mealCalendar: 'Calendrier de repas',
