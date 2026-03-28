@@ -37,6 +37,14 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onCloseAutoFocus={() => {
+        // Force-remove stale scroll lock left by react-remove-scroll on mobile
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.body.style.removeProperty('margin-right');
+        document.body.style.removeProperty('--removed-body-scroll-bar-size');
+        document.documentElement.style.removeProperty('overflow');
+      }}
       className={cn(
         "fixed z-50 flex flex-col bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         // Mobile: full screen with dynamic viewport height (shrinks when keyboard opens)
