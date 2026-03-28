@@ -564,5 +564,12 @@ export const frCA: TranslationKeys = {
     custom: 'Personnalisé',
     saveScore: 'Sauvegarder',
     cancel: 'Annuler',
+    tapToEdit: 'Touchez un score pour modifier',
+    nextPlayer: 'Suivant',
+    done: 'Terminé',
+    scoreForPlayer: 'Score pour',
+    roundN: 'Manche {n}',
+    quickEntry: 'Saisir les scores',
+    enterAllScores: 'Saisir les scores pour la manche {n}',
   },
 };

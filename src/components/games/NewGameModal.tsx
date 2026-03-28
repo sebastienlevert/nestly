@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useGame } from '../../contexts/GameContext';
 import { BUILT_IN_GAMES } from '../../types/game.types';
@@ -31,6 +31,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
   const [hasRounds, setHasRounds] = useState(true);
   const [players, setPlayers] = useState<string[]>(['', '']);
   const [error, setError] = useState('');
+  const playerInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const reset = () => {
     setStep('select');
@@ -62,6 +63,11 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
 
   const handleAddPlayer = () => {
     setPlayers(prev => [...prev, '']);
+    // Auto-focus the new input after render
+    setTimeout(() => {
+      const lastRef = playerInputRefs.current[players.length];
+      if (lastRef) lastRef.focus();
+    }, 50);
   };
 
   const handleRemovePlayer = (index: number) => {
@@ -137,7 +143,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
             ))}
 
             {/* Custom templates */}
-            {allTemplates.filter(t => !t.isBuiltIn).map(game => (
+            {allTemplates.filter(tmpl => !tmpl.isBuiltIn).map(game => (
               <button
                 key={game.id}
                 onClick={() => handleSelectGame(game)}
@@ -181,6 +187,8 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder={t.games.gameNamePlaceholder}
+                  className="min-h-[44px] text-base"
+                  autoFocus
                 />
                 <div className="flex items-center gap-2 mt-2">
                   <input
@@ -209,26 +217,39 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onG
               {players.map((player, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
+                    ref={(el) => { playerInputRefs.current[index] = el; }}
                     value={player}
                     onChange={(e) => handlePlayerChange(index, e.target.value)}
                     placeholder={`${t.games.playerNamePlaceholder} ${index + 1}`}
-                    className="flex-1"
+                    className="flex-1 min-h-[44px] text-base"
+                    autoComplete="off"
+                    enterKeyHint={index < players.length - 1 ? 'next' : 'done'}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (index < players.length - 1) {
+                          playerInputRefs.current[index + 1]?.focus();
+                        } else if (player.trim()) {
+                          handleAddPlayer();
+                        }
+                      }
+                    }}
                   />
                   {players.length > 2 && (
-                    <Button variant="ghost" size="sm" onClick={() => handleRemovePlayer(index)}>
-                      <X size={16} />
+                    <Button variant="ghost" size="sm" onClick={() => handleRemovePlayer(index)} className="min-h-[44px] min-w-[44px] p-0">
+                      <X size={18} />
                     </Button>
                   )}
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={handleAddPlayer} className="w-full mt-2">
+              <Button variant="outline" size="sm" onClick={handleAddPlayer} className="w-full mt-2 min-h-[44px]">
                 <Plus size={16} className="mr-1" /> {t.games.addPlayer}
               </Button>
             </div>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button onClick={handleStart} className="w-full">
+            <Button onClick={handleStart} className="w-full min-h-[48px] text-base">
               {t.games.startGame}
             </Button>
           </div>

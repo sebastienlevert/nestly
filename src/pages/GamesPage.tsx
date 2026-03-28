@@ -79,8 +79,8 @@ export const GamesPage: React.FC = () => {
             {isSyncing && <Cloud size={14} className="animate-pulse text-primary" />}
           </p>
         </div>
-        <Button onClick={() => setShowNewGame(true)} className="gap-1">
-          <Plus size={18} /> {t.games.newGame}
+        <Button onClick={() => setShowNewGame(true)} className="gap-1 min-h-[44px]">
+          <Plus size={18} /> <span className="hidden sm:inline">{t.games.newGame}</span>
         </Button>
       </div>
 
@@ -90,6 +90,7 @@ export const GamesPage: React.FC = () => {
           variant={filter === 'active' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setFilter('active')}
+          className="min-h-[44px]"
         >
           {t.games.activeGames} {activeSessions.length > 0 && `(${activeSessions.length})`}
         </Button>
@@ -97,6 +98,7 @@ export const GamesPage: React.FC = () => {
           variant={filter === 'completed' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setFilter('completed')}
+          className="min-h-[44px]"
         >
           {t.games.completedGames} {completedSessions.length > 0 && `(${completedSessions.length})`}
         </Button>

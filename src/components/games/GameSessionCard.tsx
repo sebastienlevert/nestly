@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocale } from '../../contexts/LocaleContext';
 import type { GameSession } from '../../types/game.types';
 import { Button } from '../ui/button';
-import { Trophy, Play, Eye, Trash2, Dices, TreePine, Bird, Gamepad2 } from 'lucide-react';
+import { Trophy, Trash2, Dices, TreePine, Bird, Gamepad2 } from 'lucide-react';
 
 interface GameSessionCardProps {
   session: GameSession;
@@ -24,13 +24,19 @@ export const GameSessionCard: React.FC<GameSessionCardProps> = ({ session, onSel
   const isTie = winners.length > 1 && !session.isActive;
 
   return (
-    <div className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow bg-card">
+    <div
+      className="border border-border rounded-lg p-4 hover:shadow-md active:shadow-sm transition-shadow bg-card cursor-pointer"
+      onClick={() => onSelect(session)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') onSelect(session); }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${
             session.isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
           }`}>
-            {gameIcons[session.gameId] || <Gamepad2 size={18} />}
+            {gameIcons[session.gameId] || <Gamepad2 size={20} />}
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{session.gameName}</h3>
@@ -41,14 +47,14 @@ export const GameSessionCard: React.FC<GameSessionCardProps> = ({ session, onSel
           </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <Button variant="ghost" size="sm" onClick={() => onSelect(session)} className="h-8 w-8 p-0">
-            {session.isActive ? <Play size={16} /> : <Eye size={16} />}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(session.id)} className="h-8 w-8 p-0 text-destructive hover:text-destructive">
-            <Trash2 size={16} />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => { e.stopPropagation(); onDelete(session.id); }}
+          className="min-h-[44px] min-w-[44px] p-0 text-destructive hover:text-destructive shrink-0"
+        >
+          <Trash2 size={18} />
+        </Button>
       </div>
 
       {/* Player scores preview */}

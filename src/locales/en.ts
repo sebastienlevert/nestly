@@ -562,6 +562,13 @@ export const en = {
     custom: 'Custom',
     saveScore: 'Save',
     cancel: 'Cancel',
+    tapToEdit: 'Tap score to edit',
+    nextPlayer: 'Next',
+    done: 'Done',
+    scoreForPlayer: 'Score for',
+    roundN: 'Round {n}',
+    quickEntry: 'Enter Scores',
+    enterAllScores: 'Enter scores for round {n}',
   },
 };
 
