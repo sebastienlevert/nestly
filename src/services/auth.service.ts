@@ -20,11 +20,11 @@ class AuthService {
         },
         cache: {
           cacheLocation: 'localStorage',
-          storeAuthStateInCookie: false,
+          storeAuthStateInCookie: true, // Better persistence on mobile PWAs
         },
         system: {
           loggerOptions: {
-            logLevel: 3, // Verbose logging for debugging
+            logLevel: 3,
             loggerCallback: (_level: any, message: string, containsPii: boolean) => {
               if (!containsPii) {
                 console.log('[MSAL]', message);
@@ -174,6 +174,24 @@ class AuthService {
   getAccountById(accountId: string): AccountInfo | null {
     const accounts = this.getAllAccounts();
     return accounts.find(acc => acc.homeAccountId === accountId) || null;
+  }
+
+  /**
+   * Attempt silent SSO recovery when MSAL cache was cleared but session cookies
+   * may still be valid (common on mobile PWA relaunch).
+   */
+  async trySsoSilent(loginHint: string): Promise<AuthenticationResult | null> {
+    if (!this.msalInstance) return null;
+
+    try {
+      const response = await this.msalInstance.ssoSilent({
+        scopes: appConfig.microsoft.scopes,
+        loginHint,
+      });
+      return response;
+    } catch {
+      return null;
+    }
   }
 
   private createAuthAccount(response: AuthenticationResult): AuthAccount {

@@ -35,9 +35,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const refreshed: AuthAccount[] = [];
 
     for (const stored of validAccounts) {
-      const msalAccount = authService.getAccountById(stored.homeAccountId);
+      let msalAccount = authService.getAccountById(stored.homeAccountId);
+
+      // MSAL cache was cleared (common on mobile PWAs) — try ssoSilent to recover
       if (!msalAccount) {
-        // MSAL no longer knows this account — skip it
+        console.warn(`[Auth] MSAL cache missing for ${stored.username}, attempting ssoSilent recovery`);
+        try {
+          const recovered = await authService.trySsoSilent(stored.email);
+          if (recovered) {
+            refreshed.push({
+              ...stored,
+              accessToken: recovered.accessToken,
+              expiresOn: recovered.expiresOn?.getTime() || Date.now() + 3600000,
+            });
+            continue;
+          }
+        } catch {
+          console.warn(`[Auth] ssoSilent recovery failed for ${stored.username}`);
+        }
+        // Keep account with stale token — lazy refresh on next API call can retry
+        refreshed.push(stored);
         continue;
       }
 
@@ -70,23 +87,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Load accounts from storage
       const storedAccounts = authService.loadAccounts();
 
-      // Validate stored accounts against MSAL's cache
-      const msalAccounts = authService.getAllAccounts();
-      const validAccounts = storedAccounts.filter((stored) =>
-        msalAccounts.some((msal) => msal.homeAccountId === stored.homeAccountId)
-      );
-
-      if (validAccounts.length > 0) {
+      if (storedAccounts.length > 0) {
         // Show accounts immediately so the user sees the authenticated UI
-        setAccounts(validAccounts);
+        setAccounts(storedAccounts);
 
-        // Silently refresh tokens in background
-        const refreshedAccounts = await refreshAccountTokens(validAccounts);
+        // Silently refresh tokens in background (handles MSAL cache misses too)
+        const refreshedAccounts = await refreshAccountTokens(storedAccounts);
         setAccounts(refreshedAccounts);
         StorageService.setAuthAccounts(refreshedAccounts);
-      } else if (storedAccounts.length > 0) {
-        // All stored accounts were invalid — clear storage
-        StorageService.setAuthAccounts([]);
       }
 
     } catch (err) {
@@ -152,9 +160,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshToken = async (accountId: string): Promise<string> => {
-    const msalAccount = authService.getAccountById(accountId);
+    let msalAccount = authService.getAccountById(accountId);
+
+    // MSAL cache missing — try ssoSilent recovery using stored email
     if (!msalAccount) {
-      throw new Error('Account not found');
+      const stored = accounts.find(acc => acc.homeAccountId === accountId);
+      if (stored) {
+        console.warn(`[Auth] MSAL cache miss during refresh for ${stored.username}, trying ssoSilent`);
+        const recovered = await authService.trySsoSilent(stored.email);
+        if (recovered?.accessToken) {
+          const updatedAccounts = accounts.map(acc =>
+            acc.homeAccountId === accountId
+              ? { ...acc, accessToken: recovered.accessToken, expiresOn: recovered.expiresOn?.getTime() || Date.now() + 3600000 }
+              : acc
+          );
+          setAccounts(updatedAccounts);
+          StorageService.setAuthAccounts(updatedAccounts);
+          return recovered.accessToken;
+        }
+      }
+      throw new Error('Account not found and recovery failed');
     }
 
     try {
