@@ -7,8 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#3b82f6" />
     <script>
-      // Apply saved theme color BEFORE React hydrates to avoid status bar flash on Android
-      (function(){try{var c=localStorage.getItem('nestly_theme_color');if(c){document.querySelector('meta[name="theme-color"]').content=c;}}catch(e){}})();
+      // Apply saved theme color BEFORE React hydrates to prevent Android status bar flash.
+      // Reads theme name from planner_settings and maps to pre-computed hex primary color.
+      (function(){try{
+        var m={light:'#3c83f6',dark:'#3c83f6',blue:'#0da2e7',purple:'#a855f7',green:'#10b77f',rose:'#e21d4b',amber:'#fbbd23',slate:'#1f2937',nord:'#5d81ac',catppuccin:'#caa6f7',dracula:'#bf95f9',sunset:'#e85e30',midnight:'#3c71dd',sandstone:'#ab7249',lavender:'#8866cc'};
+        var s=JSON.parse(localStorage.getItem('planner_settings')||'{}');
+        var c=m[s.theme]||localStorage.getItem('nestly_theme_color');
+        if(c)document.querySelector('meta[name="theme-color"]').content=c;
+      }catch(e){}})();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
