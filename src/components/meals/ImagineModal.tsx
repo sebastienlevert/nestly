@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, ChefHat, RefreshCw, Check, Settings2 } from 'lucide-react';
-import { openaiService, loadOpenAIConfig, saveOpenAIConfig } from '../../services/openai.service';
-import type { OpenAIConfig } from '../../services/openai.service';
+import { openaiService } from '../../services/openai.service';
 import type { Recipe } from '../../types/meal.types';
 import { useCalendar } from '../../contexts/CalendarContext';
 import { useLocale } from '../../contexts/LocaleContext';
@@ -15,7 +14,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePickerField } from '@/components/ui/date-picker-field';
 
@@ -64,9 +62,6 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
   const [date, setDate] = useState(formatDateStr(new Date()));
   const [isAdding, setIsAdding] = useState(false);
 
-  // Config step
-  const [aiConfig, setAiConfig] = useState<OpenAIConfig>({ endpoint: '', apiKey: '', deployment: '' });
-
   // Reset on open
   useEffect(() => {
     if (isOpen) {
@@ -78,15 +73,8 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
       setIsGenerating(false);
       setDate(formatDateStr(new Date()));
       setIsAdding(false);
-      setAiConfig(loadOpenAIConfig());
     }
   }, [isOpen]);
-
-  const handleSaveConfig = useCallback(() => {
-    if (!aiConfig.endpoint || !aiConfig.apiKey || !aiConfig.deployment) return;
-    saveOpenAIConfig(aiConfig);
-    setStep('input');
-  }, [aiConfig]);
 
   const handleGenerate = useCallback(async () => {
     if (!fridgeText.trim()) return;
@@ -153,51 +141,27 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
     onClose();
   };
 
-  // --- Config step ---
+  // --- Config step — redirect to settings ---
   if (step === 'config') {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.mealPlanner?.configureAI || 'Configure AI'}</DialogTitle>
-            <DialogDescription>{t.mealPlanner?.configureAIDesc || 'Enter your Azure OpenAI credentials.'}</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings2 size={20} className="text-muted-foreground" />
+              {t.mealPlanner?.configureAI || 'Configure AI'}
+            </DialogTitle>
+            <DialogDescription>{t.mealPlanner?.configureAIDesc || 'Enter your Azure OpenAI credentials to enable AI features.'}</DialogDescription>
           </DialogHeader>
-          <DialogBody className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t.mealPlanner?.aiEndpoint || 'Endpoint'}</Label>
-              <Input
-                value={aiConfig.endpoint}
-                onChange={e => setAiConfig(c => ({ ...c, endpoint: e.target.value }))}
-                placeholder={t.mealPlanner?.aiEndpointPlaceholder || 'https://your-resource.openai.azure.com'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t.mealPlanner?.aiKey || 'API Key'}</Label>
-              <Input
-                type="password"
-                value={aiConfig.apiKey}
-                onChange={e => setAiConfig(c => ({ ...c, apiKey: e.target.value }))}
-                placeholder={t.mealPlanner?.aiKeyPlaceholder || 'Your API key'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{t.mealPlanner?.aiDeployment || 'Deployment name'}</Label>
-              <Input
-                value={aiConfig.deployment}
-                onChange={e => setAiConfig(c => ({ ...c, deployment: e.target.value }))}
-                placeholder={t.mealPlanner?.aiDeploymentPlaceholder || 'gpt-4o'}
-              />
-            </div>
+          <DialogBody className="flex flex-col items-center justify-center py-8 gap-4 text-center">
+            <Sparkles size={40} className="text-amber-500/50" />
+            <p className="text-muted-foreground">
+              Go to <strong className="text-foreground">Settings → AI</strong> to configure your Azure OpenAI endpoint, API key, and deployment name.
+            </p>
           </DialogBody>
           <DialogFooter>
             <Button variant="secondary" onClick={handleClose}>
-              {t.actions?.cancel || 'Cancel'}
-            </Button>
-            <Button
-              onClick={handleSaveConfig}
-              disabled={!aiConfig.endpoint || !aiConfig.apiKey || !aiConfig.deployment}
-            >
-              {t.actions?.save || 'Save'}
+              {t.actions?.close || 'Close'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -258,11 +222,8 @@ export const ImagineModal: React.FC<ImagineModalProps> = ({ isOpen, onClose, mea
               />
             </div>
           </DialogBody>
-          <DialogFooter className="flex-row justify-between sm:justify-between">
-            <Button variant="ghost" size="icon" onClick={() => setStep('config')} title={t.mealPlanner?.configureAI || 'Configure AI'}>
-              <Settings2 size={18} />
-            </Button>
-            <div className="flex gap-2">
+          <DialogFooter>
+            <div className="flex gap-2 ml-auto">
               <Button variant="secondary" onClick={handleClose}>
                 {t.actions?.cancel || 'Cancel'}
               </Button>

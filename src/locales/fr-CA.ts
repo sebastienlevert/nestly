@@ -253,6 +253,7 @@ export const frCA: TranslationKeys = {
     calendars: 'Calendriers',
     todos: 'Tâches',
     general: 'Général',
+    ai: 'IA',
   },
 
   // Tasks

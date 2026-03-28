@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check } from 'lucide-react';
+import { Save, Users, Calendar as CalendarIcon, CheckSquare, Sliders, ChevronDown, Check, Sparkles } from 'lucide-react';
 import { AccountManager } from '../components/auth/AccountManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../contexts/CalendarContext';
@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { loadOpenAIConfig, saveOpenAIConfig } from '../services/openai.service';
+import type { OpenAIConfig } from '../services/openai.service';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-type SettingsTab = 'accounts' | 'calendars' | 'todos' | 'general';
+type SettingsTab = 'accounts' | 'calendars' | 'todos' | 'general' | 'ai';
 
 export const SettingsPage: React.FC = () => {
   const { reloadAccounts, accounts } = useAuth();
@@ -41,7 +43,8 @@ export const SettingsPage: React.FC = () => {
   const [popupDirection, setPopupDirection] = useState<'down' | 'up'>('down');
   const [mealCalendarId, setMealCalendarId] = useState<string>('');
   const [weatherLocation, setWeatherLocation] = useState<string>('');
-  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const [aiConfig, setAiConfig] = useState<OpenAIConfig>({ endpoint: '', apiKey: '', deployment: '' });
+  const [aiConfigSaved, setAiConfigSaved] = useState(false);  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
 
   // Close pickers on click outside
@@ -96,6 +99,7 @@ export const SettingsPage: React.FC = () => {
     setSelectedTheme(appSettings.theme || themeName);
     setMealCalendarId(appSettings.mealCalendarId || '');
     setWeatherLocation(appSettings.weatherLocation || '');
+    setAiConfig(loadOpenAIConfig());
   }, [t, appSettings]);
 
   const handleSaveSettings = async () => {
@@ -141,6 +145,7 @@ export const SettingsPage: React.FC = () => {
     { id: 'accounts' as SettingsTab, label: t.tabs.accounts, icon: Users },
     { id: 'calendars' as SettingsTab, label: t.tabs.calendars, icon: CalendarIcon },
     { id: 'todos' as SettingsTab, label: t.tabs.todos, icon: CheckSquare },
+    { id: 'ai' as SettingsTab, label: t.tabs.ai, icon: Sparkles },
     { id: 'general' as SettingsTab, label: t.tabs.general, icon: Sliders },
   ];
 
@@ -449,6 +454,87 @@ export const SettingsPage: React.FC = () => {
                     {t.todos.noLists}
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'ai' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-amber-500" />
+                  {t.mealPlanner?.configureAI || 'AI Configuration'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-sm text-muted-foreground">
+                  {t.mealPlanner?.configureAIDesc || 'Enter your Azure OpenAI credentials to enable AI features like the Imagine meal generator.'}
+                </p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-endpoint">{t.mealPlanner?.aiEndpoint || 'Endpoint'}</Label>
+                  <Input
+                    id="ai-endpoint"
+                    type="url"
+                    value={aiConfig.endpoint}
+                    onChange={e => setAiConfig(c => ({ ...c, endpoint: e.target.value }))}
+                    placeholder={t.mealPlanner?.aiEndpointPlaceholder || 'https://your-resource.openai.azure.com'}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The base URL of your Azure OpenAI resource.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-key">{t.mealPlanner?.aiKey || 'API Key'}</Label>
+                  <Input
+                    id="ai-key"
+                    type="password"
+                    value={aiConfig.apiKey}
+                    onChange={e => setAiConfig(c => ({ ...c, apiKey: e.target.value }))}
+                    placeholder={t.mealPlanner?.aiKeyPlaceholder || 'Your API key'}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your API key is stored locally in your browser only.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-deployment">{t.mealPlanner?.aiDeployment || 'Deployment name'}</Label>
+                  <Input
+                    id="ai-deployment"
+                    value={aiConfig.deployment}
+                    onChange={e => setAiConfig(c => ({ ...c, deployment: e.target.value }))}
+                    placeholder={t.mealPlanner?.aiDeploymentPlaceholder || 'gpt-4o'}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The name of your model deployment (e.g. gpt-4o, gpt-4o-mini).
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={() => {
+                      saveOpenAIConfig(aiConfig);
+                      setAiConfigSaved(true);
+                      setTimeout(() => setAiConfigSaved(false), 2000);
+                    }}
+                    disabled={!aiConfig.endpoint || !aiConfig.apiKey || !aiConfig.deployment}
+                  >
+                    {aiConfigSaved ? (
+                      <><Check size={16} className="mr-2" />{t.mealPlanner?.aiConfigSaved || 'Saved!'}</>
+                    ) : (
+                      <><Save size={16} className="mr-2" />{t.actions?.save || 'Save'}</>
+                    )}
+                  </Button>
+                  {aiConfig.endpoint && aiConfig.apiKey && aiConfig.deployment && !aiConfigSaved && (
+                    <span className="text-xs text-muted-foreground">
+                      {t.mealPlanner?.aiConfigSaved ? '' : ''}
+                    </span>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

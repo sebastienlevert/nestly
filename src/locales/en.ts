@@ -251,6 +251,7 @@ export const en = {
     calendars: 'Calendars',
     todos: 'To Dos',
     general: 'General',
+    ai: 'AI',
   },
 
   // Tasks
