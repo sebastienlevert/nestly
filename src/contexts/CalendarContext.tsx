@@ -6,6 +6,7 @@ import { StorageService } from '../services/storage.service';
 import { appConfig } from '../config/app.config';
 import { cacheService } from '../services/idb-cache.service';
 import { parallelLimit } from '../utils/parallelLimit';
+import { dateHelpers } from '../utils/dateHelpers';
 
 const MAX_CONCURRENT = 4;
 
@@ -51,25 +52,23 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
   const pendingRangeRef = useRef<{ start: Date; end: Date } | null>(null);
   const ensureDateRangeRef = useRef<(start: Date, end: Date) => void>(() => {});
 
-  // Fetch events for a specific date range
+  // Fetch events for a specific date range — one API call per account (fast)
   const fetchEventsForDateRange = async (
     startDate: Date,
     endDate: Date,
-    cals?: Calendar[],
+    _cals?: Calendar[],
     replace?: boolean
   ): Promise<void> => {
-    const calendarsToFetch = cals || calendars;
-    if (calendarsToFetch.length === 0 || accounts.length === 0) return;
+    if (accounts.length === 0) return;
 
     try {
-      // Fetch events from all calendars (max 4 concurrent)
+      // One call per account using the unified calendarView endpoint
       const results = await parallelLimit(
-        calendarsToFetch.map((calendar) => async () => {
-          const accessToken = await getAccessToken(calendar.accountId);
-          return calendarService.getEvents(
-            calendar.id,
+        accounts.map((account) => async () => {
+          const accessToken = await getAccessToken(account.homeAccountId);
+          return calendarService.getAllEvents(
             accessToken,
-            calendar.accountId,
+            account.homeAccountId,
             startDate,
             endDate
           );
@@ -137,20 +136,19 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
         return prev;
       });
 
-      // Fetch events - just this week + next week for fast initial load
+      // Fetch events — cover the full current month grid for instant month view
       const now = new Date();
-      const dayOfWeek = now.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
-      const nextSundayPlus7 = new Date(thisMonday.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const monthGrid = dateHelpers.getMonthCalendarGrid(now);
+      const gridStart = dateHelpers.getDayStart(monthGrid[0][0]);
+      const gridEnd = dateHelpers.getDayEnd(monthGrid[monthGrid.length - 1][6]);
 
       const existingRange = fetchedRangeRef.current;
       const rangeStart = existingRange
-        ? new Date(Math.min(thisMonday.getTime(), existingRange.start.getTime()))
-        : thisMonday;
+        ? new Date(Math.min(gridStart.getTime(), existingRange.start.getTime()))
+        : gridStart;
       const rangeEnd = existingRange
-        ? new Date(Math.max(nextSundayPlus7.getTime(), existingRange.end.getTime()))
-        : nextSundayPlus7;
+        ? new Date(Math.max(gridEnd.getTime(), existingRange.end.getTime()))
+        : gridEnd;
       await fetchEventsForDateRange(rangeStart, rangeEnd, allCalendars, true);
       fetchedRangeRef.current = { start: rangeStart, end: rangeEnd };
 
@@ -208,20 +206,19 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
 
   const refreshCurrentView = useCallback(async () => {
     const range = fetchedRangeRef.current;
-    const cals = calendarsRef.current;
     const accts = accountsRef.current;
-    if (!range || accts.length === 0 || cals.length === 0) return;
+    if (!range || accts.length === 0) return;
 
     try {
       setIsSyncing(true);
 
+      // One call per account using unified calendarView endpoint
       const results = await parallelLimit(
-        cals.map((calendar) => async () => {
-          const accessToken = await getAccessToken(calendar.accountId);
-          return calendarService.getEvents(
-            calendar.id,
+        accts.map((account) => async () => {
+          const accessToken = await getAccessToken(account.homeAccountId);
+          return calendarService.getAllEvents(
             accessToken,
-            calendar.accountId,
+            account.homeAccountId,
             range.start,
             range.end
           );
