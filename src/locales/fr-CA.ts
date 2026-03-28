@@ -363,6 +363,8 @@ export const frCA: TranslationKeys = {
     error: 'Erreur',
     success: 'Succès',
     noResults: 'Aucun résultat trouvé',
+    noEventsNextWeek: 'Aucun événement la semaine prochaine',
+    noMealsNextWeek: 'Aucun repas la semaine prochaine',
     cancel: 'Annuler',
   },
 

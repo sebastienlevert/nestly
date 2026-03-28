@@ -361,6 +361,8 @@ export const en = {
     error: 'Error',
     success: 'Success',
     noResults: 'No results found',
+    noEventsNextWeek: 'No events next week',
+    noMealsNextWeek: 'No meals next week',
     cancel: 'Cancel',
   },
 

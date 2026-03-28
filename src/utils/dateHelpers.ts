@@ -47,11 +47,11 @@ export const dateHelpers = {
 
   // Week operations
   getWeekStart(date: Date = new Date()): Date {
-    return startOfWeek(date, { weekStartsOn: 0 }); // Sunday
+    return startOfWeek(date, { weekStartsOn: 1 }); // Monday (for agenda view)
   },
 
   getWeekEnd(date: Date = new Date()): Date {
-    return endOfWeek(date, { weekStartsOn: 0 });
+    return endOfWeek(date, { weekStartsOn: 1 });
   },
 
   getWeekDays(date: Date = new Date()): Date[] {
@@ -131,22 +131,28 @@ export const dateHelpers = {
     return slots;
   },
 
-  // Calendar grid for month view
+  // Calendar grid for month view (Sunday–Saturday weeks)
   getMonthCalendarGrid(date: Date = new Date()): Date[][] {
     const monthStart = this.getMonthStart(date);
     const monthEnd = this.getMonthEnd(date);
-    const calendarStart = this.getWeekStart(monthStart);
-    const calendarEnd = this.getWeekEnd(monthEnd);
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
     const weeks: Date[][] = [];
-    let currentWeekStart = calendarStart;
+    let current = calendarStart;
 
-    while (currentWeekStart <= calendarEnd) {
-      weeks.push(this.getWeekDays(currentWeekStart));
-      currentWeekStart = this.nextWeek(currentWeekStart);
+    while (current <= calendarEnd) {
+      weeks.push(Array.from({ length: 7 }, (_, i) => addDays(current, i)));
+      current = addDays(current, 7);
     }
 
     return weeks;
+  },
+
+  /** Sunday-based week day headers for month view */
+  getMonthWeekDays(date: Date = new Date()): Date[] {
+    const start = startOfWeek(date, { weekStartsOn: 0 });
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   },
 
   // Convert to ISO string for Graph API

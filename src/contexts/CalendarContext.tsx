@@ -40,7 +40,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
     const settings = StorageService.getSettings();
     return settings.calendarEmojis || {};
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -155,8 +155,13 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
       const rangeEnd = existingRange
         ? new Date(Math.max(nextSundayPlus7.getTime(), existingRange.end.getTime()))
         : nextSundayPlus7;
-      await fetchEventsForDateRange(rangeStart, rangeEnd, allCalendars, true);
-      fetchedRangeRef.current = { start: rangeStart, end: rangeEnd };
+      await fetchEventsForDateRange(rangeStart, rangeEnd, allCalendars, false);
+      // Update the tracked range (merge with any existing from cache)
+      const prev = fetchedRangeRef.current;
+      fetchedRangeRef.current = {
+        start: prev ? new Date(Math.min(rangeStart.getTime(), prev.start.getTime())) : rangeStart,
+        end: prev ? new Date(Math.max(rangeEnd.getTime(), prev.end.getTime())) : rangeEnd,
+      };
 
       setLastSyncTime(Date.now());
       // Cache fresh events (read from state updater to get latest)
@@ -180,9 +185,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
     StorageService.setSettings({ ...settings, selectedCalendars });
   }, [selectedCalendars]);
 
-  // Load from IndexedDB cache on mount for instant UI
+  // Load from IndexedDB cache on mount for instant UI (stale-while-revalidate)
   useEffect(() => {
-    if (accounts.length === 0) return;
+    if (accounts.length === 0) {
+      setIsLoading(false);
+      return;
+    }
     let cancelled = false;
     const accountKey = accounts.map(a => a.homeAccountId).sort().join(',');
 
@@ -196,8 +204,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
         setCalendars(cachedCals.data);
         setSelectedCalendars(prev => prev.length === 0 ? cachedCals.data.map(c => c.id) : prev);
       }
-      if (cachedEvts) setEvents(cachedEvts.data);
-      if (cachedCals || cachedEvts) setIsLoading(false);
+      if (cachedEvts && cachedEvts.data.length > 0) {
+        setEvents(cachedEvts.data);
+        // Don't set fetchedRangeRef from cache — cached data may be incomplete.
+        // Let syncCalendars and ensureDateRange fetch fresh data from Graph API.
+      }
+      setIsLoading(false);
     })();
 
     return () => { cancelled = true; };

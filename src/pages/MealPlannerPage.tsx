@@ -313,7 +313,7 @@ export const MealPlannerPage: React.FC = () => {
             ))
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground text-base">
-              {t.common.noResults}
+              {t.common.noMealsNextWeek}
             </div>
           )}
         </div>
