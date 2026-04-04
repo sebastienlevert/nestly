@@ -223,11 +223,6 @@ export const TaskList: React.FC = () => {
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
         task={selectedTask}
-        allowEdit={
-          selectedTask
-            ? (listSettings[selectedTask.listId] || { allowTopLevelEdit: true }).allowTopLevelEdit
-            : true
-        }
       />
 
       <ConfirmDialog

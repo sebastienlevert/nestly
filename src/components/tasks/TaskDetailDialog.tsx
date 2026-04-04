@@ -24,14 +24,12 @@ interface TaskDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   task: TodoTask | null;
-  allowEdit: boolean;
 }
 
 export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
   isOpen,
   onClose,
   task,
-  allowEdit,
 }) => {
   const { getChecklistItems, createChecklistItem, deleteChecklistItem, toggleChecklistItem, updateChecklistItem, updateTask } = useTask();
   const { locale, t } = useLocale();
@@ -231,17 +229,15 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
           ) : (
             <div className="flex items-center justify-between gap-2">
               <DialogTitle className="text-xl flex-1">{task.title || t.tasks.taskDetails}</DialogTitle>
-              {allowEdit && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleStartEditTask}
-                  aria-label={t.actions.edit}
-                  className="flex-shrink-0"
-                >
-                  <Pencil size={18} />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleStartEditTask}
+                aria-label={t.actions.edit}
+                className="flex-shrink-0"
+              >
+                <Pencil size={18} />
+              </Button>
             </div>
           )}
         </DialogHeader>
@@ -380,11 +376,11 @@ export const TaskDetailDialog: React.FC<TaskDetailDialogProps> = ({
                         ) : (
                           <span
                             className={`flex-1 text-sm cursor-pointer ${item.isChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}
-                            onClick={() => allowEdit && handleStartEditItem(item)}
-                            role={allowEdit ? 'button' : undefined}
-                            tabIndex={allowEdit ? 0 : undefined}
-                            onKeyDown={allowEdit ? (e) => { if (e.key === 'Enter') handleStartEditItem(item); } : undefined}
-                            aria-label={allowEdit ? t.tasks.editChecklistItem : undefined}
+                            onClick={() => handleStartEditItem(item)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleStartEditItem(item); }}
+                            aria-label={t.tasks.editChecklistItem}
                           >
                             {item.displayName}
                           </span>
