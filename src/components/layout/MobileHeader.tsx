@@ -89,10 +89,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuToggle }) => {
           </button>
 
           {/* Mobile: page title */}
-          <span className="lg:hidden text-sm font-medium text-foreground truncate">{pageTitle}</span>
+          <span className="lg:hidden text-sm font-medium text-foreground truncate cursor-pointer" onClick={onMenuToggle}>{pageTitle}</span>
 
           {/* Desktop: page title */}
-          <span className="hidden lg:block text-lg text-muted-foreground truncate">{pageTitle}</span>
+          <span className="hidden lg:block text-lg text-muted-foreground truncate cursor-pointer" onClick={onMenuToggle}>{pageTitle}</span>
         </div>
 
         {/* Center: clock (desktop only, absolutely centered) */}
