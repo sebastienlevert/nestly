@@ -241,6 +241,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     return todoService.toggleChecklistItem(task.listId, task.id, item, accessToken);
   };
 
+  const updateChecklistItem = async (task: TodoTask, item: ChecklistItem, updates: { displayName: string }): Promise<ChecklistItem> => {
+    const accessToken = await getAccessToken(task.accountId);
+    return todoService.updateChecklistItem(task.listId, task.id, item, updates, accessToken);
+  };
+
   const value: TaskContextType = {
     lists,
     tasks: tasks.filter(t => selectedLists.includes(t.listId)),
@@ -261,6 +266,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     createChecklistItem,
     deleteChecklistItem,
     toggleChecklistItem,
+    updateChecklistItem,
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

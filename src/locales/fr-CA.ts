@@ -293,6 +293,8 @@ export const frCA: TranslationKeys = {
     deleteChecklistItemConfirm: 'Êtes-vous sûr de vouloir supprimer cet élément?',
     deleteTask: 'Supprimer la tâche',
     taskDetails: 'Détails de la tâche',
+    editTask: 'Modifier la tâche',
+    editChecklistItem: 'Modifier l\'élément',
     due: 'Échéance',
   },
 

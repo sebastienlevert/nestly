@@ -291,6 +291,8 @@ export const en = {
     deleteChecklistItemConfirm: 'Are you sure you want to delete this checklist item?',
     deleteTask: 'Delete Task',
     taskDetails: 'Task Details',
+    editTask: 'Edit Task',
+    editChecklistItem: 'Edit item',
     due: 'Due',
   },
 

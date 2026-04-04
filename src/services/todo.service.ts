@@ -243,6 +243,27 @@ export class TodoService {
     }
   }
 
+  async updateChecklistItem(
+    listId: string,
+    taskId: string,
+    item: ChecklistItem,
+    updates: { displayName: string },
+    accessToken: string
+  ): Promise<ChecklistItem> {
+    try {
+      const response: any = await graphService.patch(
+        `/me/todo/lists/${listId}/tasks/${taskId}/checklistItems/${item.id}`,
+        accessToken,
+        updates
+      );
+
+      return this.mapChecklistItem(response, taskId, listId, item.accountId);
+    } catch (error) {
+      console.error('Failed to update checklist item:', error);
+      throw error;
+    }
+  }
+
   // Helper: Map Graph API checklist item
   private mapChecklistItem(item: any, taskId: string, listId: string, accountId: string): ChecklistItem {
     return {

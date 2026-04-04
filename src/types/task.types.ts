@@ -81,4 +81,5 @@ export interface TaskContextType extends TaskState {
   createChecklistItem: (task: TodoTask, displayName: string) => Promise<ChecklistItem>;
   deleteChecklistItem: (task: TodoTask, itemId: string) => Promise<void>;
   toggleChecklistItem: (task: TodoTask, item: ChecklistItem) => Promise<ChecklistItem>;
+  updateChecklistItem: (task: TodoTask, item: ChecklistItem, updates: { displayName: string }) => Promise<ChecklistItem>;
 }
