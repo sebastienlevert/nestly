@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchWeatherForecast, clearWeatherCache, type DayForecast, getWeatherInfo } from '../services/weather.service';
+import { fetchWeatherForecast, clearWeatherCache, type DayForecast, getWeatherInfo, isForecastCoverageSufficient } from '../services/weather.service';
 import { cacheService } from '../services/idb-cache.service';
 
 const WEATHER_CACHE_KEY = 'weather:forecast:v2';
@@ -12,22 +12,22 @@ export function useWeather() {
   const loadWeather = useCallback(async () => {
     setLoading(true);
 
-    // 1. Load from IndexedDB cache first
+    // 1. Load from IndexedDB cache first (only if it covers the required date range)
     const cached = await cacheService.get<DayForecast[]>(WEATHER_CACHE_KEY);
-    if (cached) {
+    const cacheValid = cached && isForecastCoverageSufficient(cached.data);
+    if (cacheValid) {
       setForecasts(cached.data);
       setLoading(false);
     }
 
-    // 2. Fetch fresh data in background
+    // 2. Fetch fresh data (may hit service-level LS cache or make an API call)
     try {
       const fresh = await fetchWeatherForecast();
-      const { changed } = await cacheService.setIfChanged(WEATHER_CACHE_KEY, fresh, WEATHER_TTL);
-      if (changed || !cached) {
-        setForecasts(fresh);
-      }
+      await cacheService.setIfChanged(WEATHER_CACHE_KEY, fresh, WEATHER_TTL);
+      // Always update state with the latest data from the service
+      setForecasts(fresh);
     } catch (err) {
-      if (!cached) console.warn('Weather fetch failed:', err);
+      if (!cacheValid) console.warn('Weather fetch failed:', err);
     } finally {
       setLoading(false);
     }

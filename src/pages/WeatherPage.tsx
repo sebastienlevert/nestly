@@ -146,6 +146,9 @@ export const WeatherPage: React.FC = () => {
   const topRow = days.slice(0, 4);
   const bottomRow = days.slice(4, 8);
 
+  // Show month labels on desktop when the 8-day range spans two months
+  const spansMultipleMonths = days[0].getMonth() !== days[days.length - 1].getMonth();
+
   if (!loading && forecasts.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -187,6 +190,11 @@ export const WeatherPage: React.FC = () => {
               {capitalize(dateHelpers.formatDate(day, 'EEE', locale))}
             </span>
             {isMobile && (
+              <span className={`text-base ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
+                {dateHelpers.formatDate(day, 'MMM', locale)}
+              </span>
+            )}
+            {!isMobile && spansMultipleMonths && (
               <span className={`text-base ${isToday ? 'text-primary/70' : 'text-muted-foreground/70'}`}>
                 {dateHelpers.formatDate(day, 'MMM', locale)}
               </span>

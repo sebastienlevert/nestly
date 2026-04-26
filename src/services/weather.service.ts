@@ -73,11 +73,39 @@ export function getWeatherInfo(code: number): { icon: string; key: string } {
   return weatherCodeMap[code] ?? { icon: '❓', key: 'unknown' };
 }
 
+/** Today's date as YYYY-MM-DD in the local timezone */
+function todayDateStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Validate that a forecast array covers the required date range.
+ * Returns false if forecasts are missing today or the next 7 days.
+ */
+export function isForecastCoverageSufficient(forecasts: DayForecast[], requiredDays = 8): boolean {
+  if (forecasts.length < requiredDays) return false;
+  const today = todayDateStr();
+  const hasToday = forecasts.some(f => f.date === today);
+  if (!hasToday) return false;
+  // Verify we have at least `requiredDays` consecutive dates starting from today
+  const dateSet = new Set(forecasts.map(f => f.date));
+  const d = new Date();
+  for (let i = 0; i < requiredDays; i++) {
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!dateSet.has(key)) return false;
+    d.setDate(d.getDate() + 1);
+  }
+  return true;
+}
+
 function getCache(locationKey: string): WeatherCache | null {
   const cached = StorageService.get<WeatherCache | null>(CACHE_KEY, null);
   if (!cached) return null;
   if (cached.locationKey !== locationKey) return null; // location changed
   if (Date.now() - cached.timestamp > CACHE_TTL) return null;
+  // Bust cache if it doesn't cover today's 8-day window
+  if (!isForecastCoverageSufficient(cached.forecasts)) return null;
   return cached;
 }
 
