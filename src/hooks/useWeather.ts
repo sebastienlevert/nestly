@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchWeatherForecast, clearWeatherCache, type DayForecast, getWeatherInfo, isForecastCoverageSufficient } from '../services/weather.service';
 import { cacheService } from '../services/idb-cache.service';
 
-const WEATHER_CACHE_KEY = 'weather:forecast:v2';
+const WEATHER_CACHE_KEY = 'weather:forecast:v3';
 const WEATHER_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
 export function useWeather() {
