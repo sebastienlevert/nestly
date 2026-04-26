@@ -33,6 +33,7 @@ jobs:
       - name: Build
         env:
           VITE_MICROSOFT_CLIENT_ID: ${{ vars.VITE_MICROSOFT_CLIENT_ID }}
+          VITE_WEATHERAPI_KEY: ${{ secrets.VITE_WEATHERAPI_KEY }}
         run: npm run build
 
       - name: Upload artifact
